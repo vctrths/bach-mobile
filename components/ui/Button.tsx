@@ -1,7 +1,13 @@
 import { Button as TamaguiButton } from "tamagui";
 
-export default function Button(
-  props: React.ComponentProps<typeof TamaguiButton>,
-) {
-  return <TamaguiButton {...props} />;
+interface ButtonProps extends React.ComponentProps<typeof TamaguiButton> {
+  label: string;
+}
+
+export default function Button({ label, ...props }: ButtonProps) {
+  return (
+    <TamaguiButton {...props}>
+      {label}
+    </TamaguiButton>
+  );
 }
