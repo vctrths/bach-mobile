@@ -46,9 +46,7 @@ const satoshiFont = createFont({
   },
 });
 
-<<<<<<< Updated upstream
 const config = createTamagui(tamaguiConfig);
-=======
 const groeneVingersThema = {
   ...tamaguiConfig.themes.light,
 
@@ -72,12 +70,11 @@ const config = createTamagui({
     groenevingers: groeneVingersThema,
   },
 });
->>>>>>> Stashed changes
 
 type AppConfig = typeof config;
 
 declare module "tamagui" {
-  interface TamaguiCustomConfig extends AppConfig {}
+  interface TamaguiCustomConfig extends AppConfig { }
 }
 
 export default config;
