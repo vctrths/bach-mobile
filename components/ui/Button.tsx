@@ -6,8 +6,8 @@ interface ButtonProps extends React.ComponentProps<typeof TamaguiButton> {
 
 export default function Button({ label, ...props }: ButtonProps) {
   return (
-    <TamaguiButton {...props}>
-      {label}
+    <TamaguiButton {...props} borderRadius={100}>
+      <TamaguiButton.Text color="$white" fontWeight="bold">{label}</TamaguiButton.Text>
     </TamaguiButton>
   );
 }

@@ -2,14 +2,14 @@ import Onboarding from "@/components/ui/Onboarding";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { styled, YStack } from "tamagui";
 
-const ThemeSafeArea = styled(SafeAreaView, {
+const ThemedSafeArea = styled(SafeAreaView, {
   flex: 1,
   backgroundColor: "$canvas",
 });
 
 export default function Landing() {
   return (
-    <ThemeSafeArea>
+    <ThemedSafeArea>
       <YStack
         flex={1}
         paddingHorizontal="$4"
@@ -18,6 +18,6 @@ export default function Landing() {
       >
         <Onboarding />
       </YStack>
-    </ThemeSafeArea>
+    </ThemedSafeArea>
   );
 }

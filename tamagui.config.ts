@@ -4,9 +4,9 @@ import { createTamagui } from "tamagui";
 const groeneVingersThema = {
   ...tamaguiConfig.themes.light,
 
-  background: "#576238",
+  background: "#173300",
   canvas: "#FDFBF7",
-  color: "#FFF",
+  white: "#FFF",
 
   borderColor: "#C5E1A5",
   primary: "#37392B",
@@ -24,7 +24,7 @@ const config = createTamagui({
 type AppConfig = typeof config;
 
 declare module "tamagui" {
-  interface TamaguiCustomConfig extends AppConfig {}
+  interface TamaguiCustomConfig extends AppConfig { }
 }
 
 export default config;
