@@ -1,8 +1,8 @@
 import { config as tamaguiConfig } from "@tamagui/config/v3";
-import { createTamagui, createFont } from "tamagui";
+import { createFont, createTamagui } from "tamagui";
 
 const satoshiFont = createFont({
-  family: 'Satoshi, Helvetica, Arial, sans-serif',
+  family: "Satoshi, Helvetica, Arial, sans-serif",
   size: {
     1: 12,
     2: 14,
@@ -27,26 +27,25 @@ const satoshiFont = createFont({
     9: 72,
   },
   weight: {
-    1: '300',
-    3: '400',
-    5: '500',
-    7: '700',
-    9: '900',
+    1: "300",
+    3: "400",
+    5: "500",
+    7: "700",
+    9: "900",
   },
   letterSpacing: {
     1: 0,
     2: -0.5,
   },
   face: {
-    300: { normal: 'SatoshiLight' },
-    400: { normal: 'Satoshi' },
-    500: { normal: 'SatoshiMedium' },
-    700: { normal: 'SatoshiBold' },
-    900: { normal: 'SatoshiBlack' },
+    300: { normal: "SatoshiLight" },
+    400: { normal: "Satoshi" },
+    500: { normal: "SatoshiMedium" },
+    700: { normal: "SatoshiBold" },
+    900: { normal: "SatoshiBlack" },
   },
 });
 
-const config = createTamagui(tamaguiConfig);
 const groeneVingersThema = {
   ...tamaguiConfig.themes.light,
 
@@ -74,7 +73,7 @@ const config = createTamagui({
 type AppConfig = typeof config;
 
 declare module "tamagui" {
-  interface TamaguiCustomConfig extends AppConfig { }
+  interface TamaguiCustomConfig extends AppConfig {}
 }
 
 export default config;

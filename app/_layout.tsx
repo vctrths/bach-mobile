@@ -1,16 +1,9 @@
-import { Stack } from 'expo-router';
-import { TamaguiProvider } from 'tamagui';
-
-import tamaConfig from '@/tamagui.config';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
-
-SplashScreen.preventAutoHideAsync();
 import tamaConfig from "@/tamagui.config";
-import { Stack } from "expo-router";
+import { useFonts } from "expo-font";
+import { SplashScreen, Stack } from "expo-router";
+import { useEffect } from "react";
 import { TamaguiProvider } from "tamagui";
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loaded] = useFonts({
