@@ -12,8 +12,7 @@ export default function Landing() {
     <ThemedSafeArea>
       <YStack
         flex={1}
-        paddingHorizontal="$4"
-        backgroundColor="$canvas"
+        paddingHorizontal="$6"
         justifyContent="center"
       >
         <Onboarding />

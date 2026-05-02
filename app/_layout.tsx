@@ -24,7 +24,7 @@ export default function RootLayout() {
 
   return (
     <TamaguiProvider config={tamaConfig} defaultTheme="groenevingers">
-      <Stack screenOptions={{ headerShown: false }} />
+      <Stack screenOptions={{ headerShown: false, animation: "none" }} />
     </TamaguiProvider>
   );
 }

@@ -1,13 +1,14 @@
 import { useState } from "react";
 import Button from "./Button";
 
-import { Text, YStack } from "tamagui";
+import { YStack } from "tamagui";
 
 import Info from "./Info";
 
 import JournalImage from "@/assets/images/info/journal.svg";
 import LocationImage from "@/assets/images/info/location.svg";
 import TrustImage from "@/assets/images/info/trust.svg";
+import { router } from "expo-router";
 
 const onboardingSteps = [
   {
@@ -33,24 +34,26 @@ const onboardingSteps = [
 export default function Onboarding() {
   const [step, setStep] = useState(0);
   function handleStep() {
-    if (step <= 2) {
+    if (step <= 1) {
       setStep((step) => step + 1);
     } else {
-      console.log("oopsie");
+      router.push("/onboarding/accountSelect");
     }
   }
   return (
-    <YStack gap="$12">
-      {step <= 2 ? (
+    <YStack flex={1} justifyContent="space-between" paddingVertical="$12">
+      <YStack marginTop="$4">
         <Info
           image={onboardingSteps[step].image}
           title={onboardingSteps[step].title}
           description={onboardingSteps[step].description}
         />
-      ) : (
-        <Text color="$primary">tuinzoeker | tuineigenaar</Text>
-      )}
-      <Button label="Volgende" onPress={() => handleStep()} />
+      </YStack>
+
+      <Button
+        label="Volgende"
+        onPress={() => handleStep()}
+      />
     </YStack>
   );
 }
