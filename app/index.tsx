@@ -130,7 +130,13 @@ export default function Dashboard() {
                   />
                 </XStack>
               </YStack>
-              <Ionicons name="person-circle" size={50} color="$borderColor" />
+              <Ionicons
+                name="person-circle"
+                size={50}
+                color="$borderColor"
+                onPress={() => router.push("/profile")}
+                suppressHighlighting
+              />
             </XStack>
 
             {/* Search Bar */}
@@ -288,7 +294,7 @@ export default function Dashboard() {
       <BottomNav
         activeTab="home"
         onHomePress={() => router.push("/")}
-        onProfilePress={() => router.push("/onboarding/photo")}
+        onProfilePress={() => router.push("/profile")}
       />
     </ThemedSafeArea>
   );

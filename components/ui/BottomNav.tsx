@@ -55,6 +55,7 @@ export default function BottomNav({
           intensity={55}
           tint="light"
           experimentalBlurMethod="dimezisBlurView"
+          style={{ flex: 1 }}
         />
       </XStack>
 
@@ -69,11 +70,7 @@ export default function BottomNav({
           <Circle
             key={item.key}
             size={46}
-            backgroundColor={
-              activeTab === item.key
-                ? "rgba(255, 255, 255, 0.92)"
-                : "rgba(255, 255, 255, 0.62)"
-            }
+            backgroundColor="rgba(255, 255, 255, 0.92)"
             borderWidth={1}
             borderColor="rgba(255, 255, 255, 0.6)"
             justifyContent="center"
@@ -84,7 +81,7 @@ export default function BottomNav({
             <MaterialCommunityIcons
               name={item.icon as any}
               size={24}
-              color="$primary"
+              color={activeTab === item.key ? "$primary" : "rgba(23, 51, 0, 0.45)"}
             />
           </Circle>
         ))}
