@@ -1,11 +1,11 @@
 import Button from "@/components/ui/Button";
-import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import ProgressDots from "@/components/ui/ProgressDots";
-import { router } from "expo-router";
-import { H1, YStack, Circle, Image } from "tamagui";
+import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
 import * as ImagePicker from "expo-image-picker";
+import { router } from "expo-router";
+import { useState } from "react";
+import { Circle, H1, Image, YStack } from "tamagui";
 
 export default function Photo() {
     const [image, setImage] = useState<string | null>(null);
