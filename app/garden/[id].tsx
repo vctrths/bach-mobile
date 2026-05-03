@@ -93,7 +93,7 @@ export default function GardenDetailsScreen() {
 
           {/* Image Frame */}
           <Card
-            elevate
+            elevation={2}
             backgroundColor="$canvas"
             borderColor="$borderColor"
             borderWidth={1}
@@ -121,7 +121,7 @@ export default function GardenDetailsScreen() {
 
           {/* CTA Banner */}
           <Card
-            elevate
+            elevation={2}
             backgroundColor="$background_secondary"
             borderColor="$borderColor"
             borderWidth={1}

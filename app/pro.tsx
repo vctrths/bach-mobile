@@ -82,7 +82,7 @@ export default function ProScreen() {
 
           {/* Price Card */}
           <Card
-            elevate
+            elevation={2}
             backgroundColor="$background_secondary"
             borderColor="$borderColor"
             borderWidth={1}

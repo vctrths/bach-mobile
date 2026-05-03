@@ -13,7 +13,7 @@ export default function SettingsScreen() {
     {
       id: "persoonlijk",
       label: "Persoonlijke gegevens",
-      onPress: () => router.push("/personal-details"),
+      onPress: () => router.push("/personal_details"),
     },
     {
       id: "abonnement",
@@ -112,8 +112,9 @@ export default function SettingsScreen() {
               Account
             </Text>
             {accountItems.map((item) => (
-              <XStack
+              <Card
                 key={item.id}
+                flexDirection="row"
                 backgroundColor="white"
                 borderColor="$borderColor"
                 borderWidth={1}
@@ -129,7 +130,7 @@ export default function SettingsScreen() {
                   {item.label}
                 </Text>
                 <Ionicons name="chevron-forward" size={18} color="#57594D" />
-              </XStack>
+              </Card>
             ))}
           </YStack>
 
@@ -139,8 +140,9 @@ export default function SettingsScreen() {
               Meer
             </Text>
             {meerItems.map((item) => (
-              <XStack
+              <Card
                 key={item.id}
+                flexDirection="row"
                 backgroundColor="white"
                 borderColor="$borderColor"
                 borderWidth={1}
@@ -156,7 +158,7 @@ export default function SettingsScreen() {
                   {item.label}
                 </Text>
                 {item.icon}
-              </XStack>
+              </Card>
             ))}
           </YStack>
         </YStack>
