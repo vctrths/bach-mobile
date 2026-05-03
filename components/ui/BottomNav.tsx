@@ -50,13 +50,7 @@ export default function BottomNav({
       elevation={12}
       alignItems="center"
     >
-      <XStack
-        position="absolute"
-        top={0}
-        right={0}
-        bottom={0}
-        left={0}
-      >
+      <XStack position="absolute" top={0} right={0} bottom={0} left={0}>
         <BlurView
           intensity={55}
           tint="light"
