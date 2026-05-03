@@ -12,7 +12,6 @@ export default function ProfileScreen() {
     <ThemedSafeArea>
       <ScrollView showsVerticalScrollIndicator={false}>
         <YStack flex={1} paddingBottom={120}>
-          
           {/* Header Section with Hero Image */}
           <YStack position="relative" height={190} overflow="hidden">
             <Image
@@ -21,7 +20,7 @@ export default function ProfileScreen() {
               height="100%"
               resizeMode="cover"
             />
-            
+
             {/* Glassmorphic "Account" container overlay */}
             <XStack
               position="absolute"
@@ -42,12 +41,23 @@ export default function ProfileScreen() {
                 intensity={45}
                 tint="light"
                 experimentalBlurMethod="dimezisBlurView"
-                style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                }}
               />
               <Text color="$text_dark" fontSize="$5" fontWeight="bold">
                 Account
               </Text>
-              <Ionicons name="settings-outline" size={24} color="#172211" onPress={() => alert("Instellingen")} />
+              <Ionicons
+                name="settings-outline"
+                size={24}
+                color="#172211"
+                onPress={() => alert("Instellingen")}
+              />
             </XStack>
           </YStack>
 
@@ -86,14 +96,22 @@ export default function ProfileScreen() {
             </YStack>
 
             {/* Profile Identity */}
-            <XStack justifyContent="space-between" alignItems="flex-end" width="100%">
+            <XStack
+              justifyContent="space-between"
+              alignItems="flex-end"
+              width="100%"
+            >
               {/* Left Column */}
               <YStack gap="$1">
                 <XStack alignItems="center" gap="$2">
                   <H1 color="$text_dark" fontSize="$6" fontWeight="bold">
                     Victor Thys
                   </H1>
-                  <Ionicons name="shield-checkmark-outline" size={24} color="#172211" />
+                  <Ionicons
+                    name="shield-checkmark-outline"
+                    size={24}
+                    color="#172211"
+                  />
                 </XStack>
                 <Text color="$secondary" fontSize="$3" fontWeight="500">
                   Tuinzoeker
@@ -119,8 +137,18 @@ export default function ProfileScreen() {
             </XStack>
 
             {/* Bio text from Figma */}
-            <Text color="$text_dark" fontSize="$3" lineHeight="$4" opacity={0.9} marginTop="$1">
-              Ik woon in hartje Leuven en heb altijd gedroomd van een eigen tuin. Helaas heb ik zelf geen groene vingers of buitenruimte. Daarom ben ik op zoek naar een plek waar ik mijn passie voor planten en bloemen kan uitleven. Ik ben enthousiast, betrouwbaar en leergierig. Samen maken we er een bloeiend paradijs van!
+            <Text
+              color="$text_dark"
+              fontSize="$3"
+              lineHeight="$4"
+              opacity={0.9}
+              marginTop="$1"
+            >
+              Ik woon in hartje Leuven en heb altijd gedroomd van een eigen
+              tuin. Helaas heb ik zelf geen groene vingers of buitenruimte.
+              Daarom ben ik op zoek naar een plek waar ik mijn passie voor
+              planten en bloemen kan uitleven. Ik ben enthousiast, betrouwbaar
+              en leergierig. Samen maken we er een bloeiend paradijs van!
             </Text>
 
             {/* Saved Plots Section ("Jouw opgeslagen percelen") */}
@@ -128,8 +156,12 @@ export default function ProfileScreen() {
               <H1 color="$text_dark" fontSize="$5" fontWeight="bold">
                 Jouw opgeslagen percelen
               </H1>
-              
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} scrollEventThrottle={16}>
+
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                scrollEventThrottle={16}
+              >
                 <XStack gap="$3">
                   {/* Plot Card 1 */}
                   <Card
@@ -150,13 +182,24 @@ export default function ProfileScreen() {
                       resizeMode="cover"
                     />
                     <YStack gap="$0.5">
-                      <XStack justifyContent="space-between" alignItems="center">
-                        <Text color="$text_dark" fontSize="$3" fontWeight="bold">
+                      <XStack
+                        justifyContent="space-between"
+                        alignItems="center"
+                      >
+                        <Text
+                          color="$text_dark"
+                          fontSize="$3"
+                          fontWeight="bold"
+                        >
                           {"Arno's tuin"}
                         </Text>
                         <XStack gap="$1" alignItems="center">
                           <Ionicons name="star" size={14} color="#FFB800" />
-                          <Text color="$text_dark" fontSize="$2" fontWeight="600">
+                          <Text
+                            color="$text_dark"
+                            fontSize="$2"
+                            fontWeight="600"
+                          >
                             4.8
                           </Text>
                         </XStack>
@@ -186,13 +229,24 @@ export default function ProfileScreen() {
                       resizeMode="cover"
                     />
                     <YStack gap="$0.5">
-                      <XStack justifyContent="space-between" alignItems="center">
-                        <Text color="$text_dark" fontSize="$3" fontWeight="bold">
+                      <XStack
+                        justifyContent="space-between"
+                        alignItems="center"
+                      >
+                        <Text
+                          color="$text_dark"
+                          fontSize="$3"
+                          fontWeight="bold"
+                        >
                           {"Arthur's tuin"}
                         </Text>
                         <XStack gap="$1" alignItems="center">
                           <Ionicons name="star" size={14} color="#FFB800" />
-                          <Text color="$text_dark" fontSize="$2" fontWeight="600">
+                          <Text
+                            color="$text_dark"
+                            fontSize="$2"
+                            fontWeight="600"
+                          >
                             4.7
                           </Text>
                         </XStack>
