@@ -3,6 +3,8 @@ import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
 import { useEffect } from "react";
 import { TamaguiProvider } from "tamagui";
+import { OnboardingProvider } from "@/context/OnboardingContext";
+
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -24,7 +26,9 @@ export default function RootLayout() {
 
   return (
     <TamaguiProvider config={tamaConfig} defaultTheme="groenevingers">
-      <Stack screenOptions={{ headerShown: false, animation: "none" }} />
+      <OnboardingProvider>
+        <Stack screenOptions={{ headerShown: false, animation: "none" }} />
+      </OnboardingProvider>
     </TamaguiProvider>
   );
 }

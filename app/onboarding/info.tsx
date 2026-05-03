@@ -2,9 +2,10 @@ import Button from "@/components/ui/Button";
 import ProgressDots from "@/components/ui/ProgressDots";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { H1, Input, Text, TextArea, XStack, YStack } from "tamagui";
 import { z } from "zod";
+import { OnboardingContext } from "@/context/OnboardingContext";
 
 const infoSchema = z.object({
     firstName: z.string().min(1, { message: "error" }),
@@ -15,16 +16,18 @@ const infoSchema = z.object({
 });
 
 export default function InfoSelection() {
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
-    const [email, setEmail] = useState("");
-    const [description, setDescription] = useState("");
+    const { data, updateData } = useContext(OnboardingContext);
+    const [firstName, setFirstName] = useState(data.firstName);
+    const [lastName, setLastName] = useState(data.lastName);
+    const [email, setEmail] = useState(data.email);
+    const [description, setDescription] = useState(data.description);
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     const handleNext = () => {
         const result = infoSchema.safeParse({ firstName, lastName, email, description });
         if (result.success) {
             setErrors({});
+            updateData({ firstName, lastName, email, description });
             router.push("/onboarding/security");
         } else {
             const formattedErrors: Record<string, string> = {};

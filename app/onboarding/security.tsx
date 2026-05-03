@@ -2,9 +2,10 @@ import Button from "@/components/ui/Button";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import ProgressDots from "@/components/ui/ProgressDots";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { H1, Input, Text, YStack } from "tamagui";
 import { z } from "zod";
+import { OnboardingContext } from "@/context/OnboardingContext";
 
 const securitySchema = z.object({
     password: z.string()
@@ -17,6 +18,7 @@ const securitySchema = z.object({
 });
 
 export default function Security() {
+    const { updateData } = useContext(OnboardingContext);
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -25,6 +27,7 @@ export default function Security() {
         const result = securitySchema.safeParse({ password, confirmPassword });
         if (result.success) {
             setErrors({});
+            updateData({ password });
             router.push("/onboarding/photo");
         } else {
             const formattedErrors: Record<string, string> = {};

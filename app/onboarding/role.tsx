@@ -1,10 +1,11 @@
 import Button from "@/components/ui/Button";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { H1, styled, Text, XStack, YStack } from "tamagui";
 import Divider from "@/components/ui/Divider";
 import ProgressDots from "@/components/ui/ProgressDots";
+import { OnboardingContext } from "@/context/OnboardingContext";
 
 const RoleCard = styled(YStack, {
     backgroundColor: "$white",
@@ -23,9 +24,11 @@ const RoleCard = styled(YStack, {
 
 export default function RoleSelection() {
     const [selectedRole, setSelectedRole] = useState<"tuineigenaar" | "tuinzoeker" | null>(null);
+    const { updateData } = useContext(OnboardingContext);
 
     const handleNext = () => {
         if (selectedRole) {
+            updateData({ role: selectedRole });
             router.push("/onboarding/info");
         }
     };
