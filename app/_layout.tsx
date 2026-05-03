@@ -1,9 +1,9 @@
+import { OnboardingProvider } from "@/context/OnboardingContext";
 import tamaConfig from "@/tamagui.config";
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
 import { useEffect } from "react";
 import { TamaguiProvider } from "tamagui";
-import { OnboardingProvider } from "@/context/OnboardingContext";
 
 SplashScreen.preventAutoHideAsync();
 
