@@ -1,4 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
 import React from "react";
 import { Circle, XStack } from "tamagui";
 
@@ -37,32 +38,63 @@ export default function BottomNav({
       bottom={20}
       left={20}
       right={20}
-      backgroundColor="rgba(255, 255, 255, 0.2)"
-      borderRadius="$6"
-      borderWidth={2}
-      borderColor="rgba(217, 217, 217, 0.4)"
-      paddingHorizontal="$6"
-      paddingVertical="$3"
-      justifyContent="space-around"
+      backgroundColor="rgba(255, 255, 255, 0.12)"
+      borderRadius="$12"
+      borderWidth={1}
+      borderColor="rgba(255, 255, 255, 0.34)"
+      overflow="hidden"
+      shadowColor="#0f1a0f"
+      shadowOpacity={0.18}
+      shadowRadius={22}
+      shadowOffset={{ width: 0, height: 12 }}
+      elevation={12}
       alignItems="center"
     >
-      {navItems.map((item) => (
-        <Circle
-          key={item.key}
-          size={40}
-          backgroundColor="white"
-          justifyContent="center"
-          alignItems="center"
-          onPress={item.onPress || (() => {})}
-          pressStyle={{ scale: 0.95, opacity: 0.8 }}
-        >
-          <MaterialCommunityIcons
-            name={item.icon as any}
-            size={24}
-            color="$primary"
-          />
-        </Circle>
-      ))}
+      <XStack
+        position="absolute"
+        top={0}
+        right={0}
+        bottom={0}
+        left={0}
+      >
+        <BlurView
+          intensity={55}
+          tint="light"
+          experimentalBlurMethod="dimezisBlurView"
+        />
+      </XStack>
+
+      <XStack
+        flex={1}
+        paddingHorizontal="$3"
+        paddingVertical="$3"
+        justifyContent="space-around"
+        alignItems="center"
+      >
+        {navItems.map((item) => (
+          <Circle
+            key={item.key}
+            size={46}
+            backgroundColor={
+              activeTab === item.key
+                ? "rgba(255, 255, 255, 0.92)"
+                : "rgba(255, 255, 255, 0.62)"
+            }
+            borderWidth={1}
+            borderColor="rgba(255, 255, 255, 0.6)"
+            justifyContent="center"
+            alignItems="center"
+            onPress={item.onPress || (() => {})}
+            pressStyle={{ scale: 0.94, opacity: 0.85 }}
+          >
+            <MaterialCommunityIcons
+              name={item.icon as any}
+              size={24}
+              color="$primary"
+            />
+          </Circle>
+        ))}
+      </XStack>
     </XStack>
   );
 }

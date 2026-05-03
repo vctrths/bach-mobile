@@ -5,6 +5,7 @@ import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
 import { ScrollView } from "react-native";
+import { router } from "expo-router";
 import { Card, Circle, H2, Image, Text, XStack, YStack } from "tamagui";
 
 // Sample data for recommended gardens
@@ -170,7 +171,7 @@ export default function Dashboard() {
               label="Probeer pro | €7 /maand"
               backgroundColor="$background"
               color="$white"
-              onPress={() => {}}
+              onPress={() => router.push("/pro")}
             />
           </Card>
 
@@ -185,6 +186,7 @@ export default function Dashboard() {
                 fontWeight="600"
                 color="$text_dark"
                 textDecorationLine="underline"
+                onPress={() => router.push("/explore")}
               >
                 meer info →
               </Text>
@@ -203,6 +205,7 @@ export default function Dashboard() {
                     rating={garden.rating}
                     location={garden.location}
                     image={garden.image}
+                    onDetailsPress={() => router.push(("/garden/" + garden.id) as any)}
                   />
                 ))}
               </XStack>
@@ -219,8 +222,10 @@ export default function Dashboard() {
               backgroundColor="$canvas"
               borderColor="$borderColor"
               borderWidth={1}
+              borderRadius="$6"
               overflow="hidden"
               height={200}
+              position="relative"
             >
               <Image
                 source={require("@/assets/images/hero.png")}
@@ -228,10 +233,27 @@ export default function Dashboard() {
                 height="100%"
                 resizeMode="cover"
               />
+              <YStack
+                position="absolute"
+                bottom={0}
+                left={0}
+                right={0}
+                backgroundColor="rgba(23, 51, 0, 0.75)"
+                paddingHorizontal="$4"
+                paddingVertical="$3"
+              >
+                <Text color="white" fontWeight="bold" fontSize="$4">
+                  Tuinen in jouw buurt
+                </Text>
+                <Text color="rgba(255, 255, 255, 0.8)" fontSize="$2">
+                  Ontdek dichtstbijzijnde groene oases
+                </Text>
+              </YStack>
             </Card>
           </YStack>
 
-          <YStack gap="$3" paddingBottom="$4">
+          {/* Tuinlogboek Section */}
+          <YStack gap="$3" paddingBottom="$20">
             <XStack justifyContent="space-between" alignItems="center">
               <H2 color="$text_dark" fontWeight="bold">
                 Tuinlogboek
@@ -241,6 +263,7 @@ export default function Dashboard() {
                 fontWeight="600"
                 color="$text_dark"
                 textDecorationLine="underline"
+                onPress={() => router.push("/logbook")}
               >
                 meer info →
               </Text>
@@ -262,7 +285,11 @@ export default function Dashboard() {
       </ScrollView>
 
       {/* Bottom Navigation */}
-      <BottomNav />
+      <BottomNav
+        activeTab="home"
+        onHomePress={() => router.push("/")}
+        onProfilePress={() => router.push("/onboarding/photo")}
+      />
     </ThemedSafeArea>
   );
 }
