@@ -1,5 +1,6 @@
 import Button from "@/components/ui/Button";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
+import TopNavPill from "@/components/ui/TopNavPill";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { router, useLocalSearchParams } from "expo-router";
@@ -45,12 +46,7 @@ export default function GardenDetailsScreen() {
         <YStack flex={1} paddingHorizontal="$4" paddingVertical="$6" gap="$6">
           
           {/* Back Button */}
-          <XStack alignItems="center" gap="$2" onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="#172211" />
-            <Text color="$text_dark" fontSize="$4" fontWeight="600">
-              Terug naar overzicht
-            </Text>
-          </XStack>
+          <TopNavPill title="Terug naar overzicht" />
 
           {/* Glassmorphic Header Card */}
           <YStack
