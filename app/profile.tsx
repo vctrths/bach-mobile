@@ -3,11 +3,21 @@ import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { router } from "expo-router";
-import React from "react";
+import React, { useContext } from "react";
 import { ScrollView } from "react-native";
 import { Card, Circle, H1, Image, Text, XStack, YStack } from "tamagui";
+import { OnboardingContext } from "@/context/OnboardingContext";
 
 export default function ProfileScreen() {
+  const { data } = useContext(OnboardingContext);
+  const displayName =
+    (data.firstName || data.lastName)
+      ? `${data.firstName} ${data.lastName}`.trim()
+      : "Victor Thys";
+  const bioText =
+    data.description ||
+    "Ik woon in hartje Leuven en heb altijd gedroomd van een eigen tuin. Helaas heb ik zelf geen groene vingers of buitenruimte. Daarom ben ik op zoek naar een plek waar ik mijn passie voor planten en bloemen kan uitleven. Ik ben enthousiast, betrouwbaar en leergierig. Samen maken we er een bloeiend paradijs van!";
+
   return (
     <ThemedSafeArea>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -56,7 +66,7 @@ export default function ProfileScreen() {
                 name="settings-outline"
                 size={24}
                 color="#172211"
-                onPress={() => alert("Instellingen")}
+                onPress={() => router.push("/settings")}
               />
             </XStack>
           </YStack>
@@ -105,7 +115,7 @@ export default function ProfileScreen() {
               <YStack gap="$1">
                 <XStack alignItems="center" gap="$2">
                   <H1 color="$text_dark" fontSize="$6" fontWeight="bold">
-                    Victor Thys
+                    {displayName}
                   </H1>
                   <Ionicons
                     name="shield-checkmark-outline"
@@ -144,11 +154,7 @@ export default function ProfileScreen() {
               opacity={0.9}
               marginTop="$1"
             >
-              Ik woon in hartje Leuven en heb altijd gedroomd van een eigen
-              tuin. Helaas heb ik zelf geen groene vingers of buitenruimte.
-              Daarom ben ik op zoek naar een plek waar ik mijn passie voor
-              planten en bloemen kan uitleven. Ik ben enthousiast, betrouwbaar
-              en leergierig. Samen maken we er een bloeiend paradijs van!
+              {bioText}
             </Text>
 
             {/* Saved Plots Section ("Jouw opgeslagen percelen") */}
