@@ -1,5 +1,6 @@
 import BottomNav from "@/components/ui/BottomNav";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
+import TopNavPill from "@/components/ui/TopNavPill";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { router } from "expo-router";
@@ -32,43 +33,25 @@ export default function ProfileScreen() {
             />
 
             {/* Glassmorphic "Account" container overlay */}
-            <XStack
+            <YStack
               position="absolute"
               top={20}
               left={20}
               right={20}
-              backgroundColor="rgba(255, 255, 255, 0.45)"
-              borderRadius="$10"
-              borderWidth={1}
-              borderColor="rgba(255, 255, 255, 0.55)"
-              paddingHorizontal="$5"
-              paddingVertical="$3.5"
-              justifyContent="space-between"
-              alignItems="center"
-              overflow="hidden"
             >
-              <BlurView
-                intensity={45}
-                tint="light"
-                experimentalBlurMethod="dimezisBlurView"
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                }}
+              <TopNavPill
+                title="Account"
+                hideBack
+                rightElement={
+                  <Ionicons
+                    name="settings-outline"
+                    size={24}
+                    color="#172211"
+                    onPress={() => router.push("/settings")}
+                  />
+                }
               />
-              <Text color="$text_dark" fontSize="$5" fontWeight="bold">
-                Account
-              </Text>
-              <Ionicons
-                name="settings-outline"
-                size={24}
-                color="#172211"
-                onPress={() => router.push("/settings")}
-              />
-            </XStack>
+            </YStack>
           </YStack>
 
           {/* Profile Details (overlapped) */}

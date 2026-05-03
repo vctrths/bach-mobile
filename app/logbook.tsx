@@ -1,4 +1,5 @@
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
+import TopNavPill from "@/components/ui/TopNavPill";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { router } from "expo-router";
@@ -171,12 +172,7 @@ export default function LogbookScreen() {
         <ScrollView showsVerticalScrollIndicator={false}>
           <YStack flex={1} paddingHorizontal="$4" paddingVertical="$6" gap="$6">
             {/* Back Button */}
-            <XStack alignItems="center" gap="$2" onPress={() => router.back()}>
-              <Ionicons name="arrow-back" size={24} color="#172211" />
-              <Text color="$text_dark" fontSize="$4" fontWeight="600">
-                Terug naar dashboard
-              </Text>
-            </XStack>
+            <TopNavPill title="Terug naar dashboard" />
 
             {/* Glassmorphic Header */}
             <YStack

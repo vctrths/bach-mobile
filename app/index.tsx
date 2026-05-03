@@ -2,6 +2,7 @@ import BottomNav from "@/components/ui/BottomNav";
 import Button from "@/components/ui/Button";
 import GardenCard from "@/components/ui/GardenCard";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
+import TopNavPill from "@/components/ui/TopNavPill";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
 import { ScrollView } from "react-native";
@@ -108,8 +109,9 @@ export default function Dashboard() {
       >
         <YStack flex={1} paddingHorizontal="$4" paddingVertical="$4" gap="$6">
           {/* Top Navigation */}
-          <YStack gap="$4">
-            <XStack justifyContent="space-between" alignItems="center">
+          <TopNavPill
+            hideBack
+            title={
               <YStack gap="$2">
                 <Text fontSize="$3" fontWeight="600" color="$text_dark">
                   Locatie
@@ -130,6 +132,8 @@ export default function Dashboard() {
                   />
                 </XStack>
               </YStack>
+            }
+            rightElement={
               <Ionicons
                 name="person-circle"
                 size={50}
@@ -137,9 +141,9 @@ export default function Dashboard() {
                 onPress={() => router.push("/profile")}
                 suppressHighlighting
               />
-            </XStack>
-
-            {/* Search Bar */}
+            }
+          >
+            {/* Search Bar as Child */}
             <XStack
               backgroundColor="white"
               borderRadius="$8"
@@ -159,7 +163,7 @@ export default function Dashboard() {
                 Zoeken naar een tuin
               </Text>
             </XStack>
-          </YStack>
+          </TopNavPill>
 
           {/* Pro Upgrade Banner */}
           <Card
