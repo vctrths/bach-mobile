@@ -4,9 +4,9 @@ import GardenCard from "@/components/ui/GardenCard";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React from "react";
 import { ScrollView } from "react-native";
-import { router } from "expo-router";
 import { Card, Circle, H2, Image, Text, XStack, YStack } from "tamagui";
 
 // Sample data for recommended gardens
@@ -215,7 +215,9 @@ export default function Dashboard() {
                     rating={garden.rating}
                     location={garden.location}
                     image={garden.image}
-                    onDetailsPress={() => router.push(("/garden/" + garden.id) as any)}
+                    onDetailsPress={() =>
+                      router.push(("/garden/" + garden.id) as any)
+                    }
                   />
                 ))}
               </XStack>
