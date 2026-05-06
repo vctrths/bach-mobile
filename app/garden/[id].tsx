@@ -65,14 +65,10 @@ export default function GardenDetailsScreen() {
             elevation={4}
           >
             <BlurView
-              position="absolute"
-              top={0}
-              right={0}
-              bottom={0}
-              left={0}
               intensity={45}
               tint="light"
               experimentalBlurMethod="dimezisBlurView"
+              style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
             />
             
             <H1 color="$text_dark" fontWeight="bold">
@@ -97,7 +93,7 @@ export default function GardenDetailsScreen() {
 
           {/* Image Frame */}
           <Card
-            elevate
+            elevation={2}
             backgroundColor="$canvas"
             borderColor="$borderColor"
             borderWidth={1}
@@ -125,7 +121,7 @@ export default function GardenDetailsScreen() {
 
           {/* CTA Banner */}
           <Card
-            elevate
+            elevation={2}
             backgroundColor="$background_secondary"
             borderColor="$borderColor"
             borderWidth={1}

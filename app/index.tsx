@@ -56,7 +56,7 @@ const gardenLogs = [
 function LogCard({ log }: { log: (typeof gardenLogs)[0] }) {
   return (
     <Card
-      elevate
+      elevation={2}
       margin="$2"
       overflow="hidden"
       width={220}
@@ -167,7 +167,7 @@ export default function Dashboard() {
 
           {/* Pro Upgrade Banner */}
           <Card
-            elevate
+            elevation={2}
             backgroundColor="#f0f3ec"
             borderColor="#e3ecd7"
             borderWidth={1}
@@ -230,7 +230,7 @@ export default function Dashboard() {
               op basis van locatie:
             </H2>
             <Card
-              elevate
+              elevation={2}
               backgroundColor="$canvas"
               borderColor="$borderColor"
               borderWidth={1}

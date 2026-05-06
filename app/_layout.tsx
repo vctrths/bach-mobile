@@ -27,7 +27,17 @@ export default function RootLayout() {
   return (
     <TamaguiProvider config={tamaConfig} defaultTheme="groenevingers">
       <OnboardingProvider>
-        <Stack screenOptions={{ headerShown: false, animation: "none" }} />
+        <Stack screenOptions={{ headerShown: false, animation: "none" }}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="explore" />
+          <Stack.Screen name="pro" />
+          <Stack.Screen name="profile" />
+          <Stack.Screen name="settings" />
+          <Stack.Screen name="personal-details" />
+          <Stack.Screen name="personal_details" />
+          <Stack.Screen name="logbook" />
+          <Stack.Screen name="login" />
+        </Stack>
       </OnboardingProvider>
     </TamaguiProvider>
   );

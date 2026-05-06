@@ -94,7 +94,7 @@ function SwipeableLogCard({
       <GestureDetector gesture={panGesture}>
         <Animated.View style={rStyle}>
           <Card
-            elevate
+            elevation={2}
             backgroundColor={log.completed ? "rgba(240, 243, 236, 0.5)" : "$background_secondary"}
             borderColor="$borderColor"
             borderWidth={1}

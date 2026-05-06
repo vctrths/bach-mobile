@@ -43,12 +43,26 @@ export default function ProfileScreen() {
                 title="Account"
                 hideBack
                 rightElement={
-                  <Ionicons
-                    name="settings-outline"
-                    size={24}
-                    color="#172211"
+                  <Circle
+                    size={42}
+                    backgroundColor="white"
+                    borderWidth={1}
+                    borderColor="rgba(0, 0, 0, 0.05)"
+                    justifyContent="center"
+                    alignItems="center"
                     onPress={() => router.push("/settings")}
-                  />
+                    pressStyle={{ scale: 0.94, opacity: 0.85 }}
+                    shadowColor="#000"
+                    shadowOpacity={0.04}
+                    shadowRadius={4}
+                    shadowOffset={{ width: 0, height: 2 }}
+                  >
+                    <Ionicons
+                      name="settings-outline"
+                      size={22}
+                      color="#172211"
+                    />
+                  </Circle>
                 }
               />
             </YStack>
@@ -154,7 +168,7 @@ export default function ProfileScreen() {
                 <XStack gap="$3">
                   {/* Plot Card 1 */}
                   <Card
-                    elevate
+                    elevation={2}
                     backgroundColor="$background_secondary"
                     borderColor="$borderColor"
                     borderWidth={1}
@@ -201,7 +215,7 @@ export default function ProfileScreen() {
 
                   {/* Plot Card 2 */}
                   <Card
-                    elevate
+                    elevation={2}
                     backgroundColor="$background_secondary"
                     borderColor="$borderColor"
                     borderWidth={1}

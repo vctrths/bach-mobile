@@ -35,14 +35,10 @@ export default function ProScreen() {
             alignItems="center"
           >
             <BlurView
-              position="absolute"
-              top={0}
-              right={0}
-              bottom={0}
-              left={0}
               intensity={45}
               tint="light"
               experimentalBlurMethod="dimezisBlurView"
+              style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
             />
             
             <H1 color="$text_dark" fontWeight="bold" textAlign="center">
@@ -86,7 +82,7 @@ export default function ProScreen() {
 
           {/* Price Card */}
           <Card
-            elevate
+            elevation={2}
             backgroundColor="$background_secondary"
             borderColor="$borderColor"
             borderWidth={1}

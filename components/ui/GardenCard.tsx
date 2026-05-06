@@ -22,7 +22,7 @@ export default function GardenCard({
 }: GardenCardProps) {
   return (
     <Card
-      elevate
+      elevation={2}
       margin="$2"
       overflow="hidden"
       width={260}
