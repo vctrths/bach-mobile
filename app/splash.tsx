@@ -13,7 +13,7 @@ export default function SplashScreen() {
       if (session) {
         router.replace("/dashboard");
       } else {
-        router.replace("/index");
+        router.replace("/");
       }
     }
   }, [loading, session]);
