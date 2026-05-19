@@ -1,49 +1,35 @@
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
+import { supabase } from "@/utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { router } from "expo-router";
-import React, { useState } from "react";
-import { ScrollView } from "react-native";
+import React, { useEffect, useState } from "react";
+import { ScrollView, RefreshControl } from "react-native";
 import { GestureHandlerRootView, GestureDetector, Gesture } from "react-native-gesture-handler";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, runOnJS } from "react-native-reanimated";
-import { Card, Circle, H1, H2, Text, XStack, YStack } from "tamagui";
+import { Card, Circle, H1, H2, Spinner, Text, XStack, YStack } from "tamagui";
 
-const initialGardenLogs = [
-  {
-    id: 1,
-    title: "Planten water geven",
-    description: "Geef alle struiken en bloemen water op woensdagavond.",
-    status: ["completed", "pending"],
-    date: "Woensdag 3 Mei",
-    completed: false,
-  },
-  {
-    id: 2,
-    title: "Snoeien en opruimen",
-    description: "Snoei de grote appelboom en veeg het terras.",
-    status: ["completed", "completed"],
-    date: "Zaterdag 6 Mei",
-    completed: false,
-  },
-  {
-    id: 3,
-    title: "Onkruid wieden",
-    description: "Wieden van het onkruid tussen de kasseien en in het moestuintje.",
-    status: ["completed", "completed"],
-    date: "Zondag 7 Mei",
-    completed: false,
-  },
-];
+type GardenLog = {
+  id: string;
+  title: string;
+  description?: string;
+  date?: string;
+  status: string[];
+  created_at: string;
+  completed?: boolean;
+};
+
+const initialGardenLogs: GardenLog[] = [];
 
 function SwipeableLogCard({
   log,
   onComplete,
   onDelete,
 }: {
-  log: (typeof initialGardenLogs)[0];
-  onComplete: (id: number) => void;
-  onDelete: (id: number) => void;
+  log: GardenLog;
+  onComplete: (id: string) => void;
+  onDelete: (id: string) => void;
 }) {
   const translateX = useSharedValue(0);
 
@@ -70,6 +56,8 @@ function SwipeableLogCard({
     transform: [{ translateX: translateX.value }],
   }));
 
+  const isCompleted = log.completed || log.status?.every((s: string) => s === "completed");
+
   return (
     <YStack position="relative" marginVertical="$1" overflow="hidden" borderRadius="$6">
       {/* Background Behind Card */}
@@ -95,7 +83,7 @@ function SwipeableLogCard({
         <Animated.View style={rStyle}>
           <Card
             elevation={2}
-            backgroundColor={log.completed ? "rgba(240, 243, 236, 0.5)" : "$background_secondary"}
+            backgroundColor={isCompleted ? "rgba(240, 243, 236, 0.5)" : "$background_secondary"}
             borderColor="$borderColor"
             borderWidth={1}
             borderRadius="$6"
@@ -152,9 +140,41 @@ function SwipeableLogCard({
 }
 
 export default function LogbookScreen() {
-  const [logs, setLogs] = useState(initialGardenLogs);
+  const [logs, setLogs] = useState<GardenLog[]>(initialGardenLogs);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const handleComplete = (id: number) => {
+  const fetchLogs = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("garden_logs")
+        .select("id, title, status, created_at")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching logs:", error);
+        return;
+      }
+
+      setLogs((data || []) as GardenLog[]);
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLogs();
+  }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchLogs();
+  };
+
+  const handleComplete = (id: string) => {
     setLogs((currentLogs) =>
       currentLogs.map((log) =>
         log.id === id ? { ...log, completed: !log.completed } : log
@@ -162,17 +182,32 @@ export default function LogbookScreen() {
     );
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     setLogs((currentLogs) => currentLogs.filter((log) => log.id !== id));
   };
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemedSafeArea>
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
           <YStack flex={1} paddingHorizontal="$4" paddingVertical="$6" gap="$6">
             {/* Back Button */}
-            <TopNavPill title="Terug naar dashboard" />
+            <TopNavPill
+              title="Terug naar dashboard"
+              rightElement={
+                <Ionicons
+                  name="calendar-outline"
+                  size={24}
+                  color="#173300"
+                  onPress={() => router.push("/logbook/calendar")}
+                />
+              }
+            />
 
             {/* Glassmorphic Header */}
             <YStack
@@ -205,27 +240,58 @@ export default function LogbookScreen() {
               </Text>
             </YStack>
 
-            {/* Logs List */}
-            <YStack gap="$4">
-              {logs.map((log) => (
-                <SwipeableLogCard
-                  key={log.id}
-                  log={log}
-                  onComplete={handleComplete}
-                  onDelete={handleDelete}
-                />
-              ))}
-              {logs.length === 0 && (
-                <YStack paddingVertical="$10" alignItems="center" gap="$2">
-                  <Ionicons name="leaf-outline" size={48} color="$gray8" />
-                  <Text color="$gray10" fontSize="$4" textAlign="center">
-                    Geen taken meer! Goed gedaan.
-                  </Text>
-                </YStack>
-              )}
-            </YStack>
+            {loading ? (
+              <YStack padding="$10" justifyContent="center" alignItems="center">
+                <Spinner size="large" color="$primary" />
+              </YStack>
+            ) : (
+              <YStack gap="$4">
+                {logs.map((log) => (
+                  <SwipeableLogCard
+                    key={log.id}
+                    log={log}
+                    onComplete={handleComplete}
+                    onDelete={handleDelete}
+                  />
+                ))}
+                {logs.length === 0 && (
+                  <YStack paddingVertical="$10" alignItems="center" gap="$2">
+                    <Ionicons name="leaf-outline" size={48} color="$gray8" />
+                    <Text color="$gray10" fontSize="$4" textAlign="center">
+                      Geen taken meer! Goed gedaan.
+                    </Text>
+                  </YStack>
+                )}
+              </YStack>
+            )}
           </YStack>
         </ScrollView>
+
+        {/* FAB for new log */}
+        <XStack
+          position="absolute"
+          bottom={100}
+          right={20}
+          zIndex={10}
+        >
+          <XStack
+            backgroundColor="$background"
+            width={56}
+            height={56}
+            borderRadius="$10"
+            justifyContent="center"
+            alignItems="center"
+            shadowColor="#000"
+            shadowOpacity={0.2}
+            shadowRadius={8}
+            shadowOffset={{ width: 0, height: 4 }}
+            elevation={8}
+            onPress={() => router.push("/logbook/new" as any)}
+            pressStyle={{ scale: 0.95 }}
+          >
+            <Ionicons name="add" size={28} color="white" />
+          </XStack>
+        </XStack>
       </ThemedSafeArea>
     </GestureHandlerRootView>
   );
