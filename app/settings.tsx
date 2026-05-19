@@ -13,7 +13,7 @@ export default function SettingsScreen() {
     {
       id: "persoonlijk",
       label: "Persoonlijke gegevens",
-      onPress: () => router.push("/personal_details"),
+      onPress: () => router.push("/personal-details"),
     },
     {
       id: "abonnement",
@@ -167,7 +167,8 @@ export default function SettingsScreen() {
       {/* Floating Bottom Navigation */}
       <BottomNav
         activeTab="profile"
-        onHomePress={() => router.push("/")}
+        onHomePress={() => router.push("/dashboard")}
+        onMessagePress={() => router.push("/messages" as any)}
         onProfilePress={() => router.push("/profile")}
       />
     </ThemedSafeArea>

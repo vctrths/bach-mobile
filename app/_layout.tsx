@@ -36,7 +36,30 @@ export default function RootLayout() {
           <Stack.Screen name="personal-details" />
           <Stack.Screen name="personal_details" />
           <Stack.Screen name="logbook" />
+          <Stack.Screen name="splash" />
           <Stack.Screen name="login" />
+          <Stack.Screen name="login-succes" />
+          <Stack.Screen name="search" />
+          <Stack.Screen name="mail" />
+          <Stack.Screen name="owner/request-accepted" />
+          <Stack.Screen name="owner/request-rejected" />
+          <Stack.Screen name="logbook/calendar/day/[id]" />
+          <Stack.Screen name="messages" />
+          <Stack.Screen name="messages/[id]" />
+          <Stack.Screen name="problock" />
+          <Stack.Screen name="succesverzoek" />
+          <Stack.Screen name="succesabo" />
+          <Stack.Screen name="saved" />
+          <Stack.Screen name="owner/dashboard" />
+          <Stack.Screen name="pro/payment" />
+          <Stack.Screen name="garden/create" />
+          <Stack.Screen name="garden/[id]/request" />
+          <Stack.Screen name="logbook/new" />
+          <Stack.Screen name="logbook/calendar" />
+          <Stack.Screen name="logbook/[id]" />
+          <Stack.Screen name="logbook/opvolgingen" />
+          <Stack.Screen name="notifications" />
+          <Stack.Screen name="map" />
         </Stack>
       </OnboardingProvider>
     </TamaguiProvider>

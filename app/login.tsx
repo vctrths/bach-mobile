@@ -12,7 +12,7 @@ export default function Login() {
 
     const handleLogin = () => {
         // Handle login logic here
-        router.push("/"); // Navigate home or dashboard upon success
+        router.push("/dashboard"); // Navigate home or dashboard upon success
     };
 
     return (

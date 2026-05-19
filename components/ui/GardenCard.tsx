@@ -1,6 +1,7 @@
+import { Image as ExpoImage } from "expo-image";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
-import { Card, Image, Text, XStack, YStack } from "tamagui";
+import { Card, Text, XStack, YStack } from "tamagui";
 import Button from "./Button";
 
 interface GardenCardProps {
@@ -32,12 +33,10 @@ export default function GardenCard({
       padding="$2"
     >
       <Card.Header>
-        <Image
+        <ExpoImage
           source={image}
-          width="100%"
-          height={150}
-          borderRadius="$2"
-          resizeMode="cover"
+          style={{ width: "100%", height: 150, borderRadius: 8 }}
+          contentFit="cover"
         />
       </Card.Header>
 

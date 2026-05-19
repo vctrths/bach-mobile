@@ -104,7 +104,7 @@ export default function ProScreen() {
               label="Probeer 7 dagen gratis"
               backgroundColor="$background"
               color="$white"
-              onPress={() => alert("Bedankt! Je pro-proefperiode is gestart.")}
+              onPress={() => router.push("/pro/payment")}
             />
           </Card>
 
