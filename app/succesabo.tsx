@@ -37,7 +37,6 @@ export default function SuccesaboScreen() {
           <Button
             size="$5"
             backgroundColor="rgba(23, 51, 0, 0.1)"
-            color="#173300"
             onPress={() => router.push("/dashboard")}
           >
             <Text color="#173300" fontWeight="600">Ontdek tuinen</Text>

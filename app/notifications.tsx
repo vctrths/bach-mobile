@@ -5,35 +5,10 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
 import { ScrollView } from "react-native";
-import { Card, H1, H2, Text, XStack, YStack } from "tamagui";
+import { Card, Text, XStack, YStack } from "tamagui";
 
 export default function NotificationsScreen() {
-  const notifications = [
-    {
-      id: "1",
-      title: "Nieuwe aanvraag ontvangen",
-      message: "Je hebt een nieuwe aanvraag ontvangen voor je tuin 'Bloementuin'.",
-      time: "2 min geleden",
-      read: false,
-      icon: "leaf",
-    },
-    {
-      id: "2",
-      title: "Aanvraag goedgekeurd",
-      message: "Je aanvraag voor 'Moestuin Noord' is goedgekeurd!",
-      time: "1 uur geleden",
-      read: false,
-      icon: "check-circle",
-    },
-    {
-      id: "3",
-      title: "Nieuw bericht",
-      message: "Anna heeft je een bericht gestuurd.",
-      time: "3 uur geleden",
-      read: true,
-      icon: "message-circle",
-    },
-  ];
+  const notifications: any[] = [];
 
   return (
     <ThemedSafeArea>
@@ -44,6 +19,21 @@ export default function NotificationsScreen() {
             onBackPress={() => router.back()}
           />
 
+          {notifications.length === 0 ? (
+            <YStack
+              padding="$10"
+              alignItems="center"
+              gap="$3"
+            >
+              <MaterialCommunityIcons name="bell-off-outline" size={48} color="#57594D" />
+              <Text fontSize="$5" fontWeight="bold" color="$text_dark" textAlign="center">
+                Geen meldingen
+              </Text>
+              <Text fontSize="$4" color="$secondary" textAlign="center">
+                Je hebt momenteel geen meldingen.
+              </Text>
+            </YStack>
+          ) : (
           <YStack gap="$4">
             {notifications.map((notif) => (
               <Card
@@ -98,6 +88,7 @@ export default function NotificationsScreen() {
               </Card>
             ))}
           </YStack>
+          )}
         </YStack>
       </ScrollView>
 

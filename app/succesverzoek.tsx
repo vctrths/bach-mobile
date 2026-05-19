@@ -37,7 +37,6 @@ export default function SuccesverzoekScreen() {
           <Button
             size="$5"
             backgroundColor="rgba(23, 51, 0, 0.1)"
-            color="#173300"
             onPress={() => router.push("/messages")}
           >
             <Text color="#173300" fontWeight="600">Bekijk berichten</Text>

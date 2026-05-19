@@ -36,8 +36,14 @@ export default function RootLayout() {
           <Stack.Screen name="personal-details" />
           <Stack.Screen name="personal_details" />
           <Stack.Screen name="logbook" />
+          <Stack.Screen name="splash" />
           <Stack.Screen name="login" />
+          <Stack.Screen name="login-succes" />
           <Stack.Screen name="search" />
+          <Stack.Screen name="mail" />
+          <Stack.Screen name="owner/request-accepted" />
+          <Stack.Screen name="owner/request-rejected" />
+          <Stack.Screen name="logbook/calendar/day/[id]" />
           <Stack.Screen name="messages" />
           <Stack.Screen name="messages/[id]" />
           <Stack.Screen name="problock" />

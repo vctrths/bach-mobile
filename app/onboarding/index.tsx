@@ -1,21 +1,11 @@
-import { router } from "expo-router";
-import { useEffect } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { styled, YStack } from "tamagui";
-
-const ThemedSafeArea = styled(SafeAreaView, {
-  flex: 1,
-  backgroundColor: "$canvas",
-});
+import Onboarding from "@/components/ui/Onboarding";
+import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
+import React from "react";
 
 export default function Landing() {
-  useEffect(() => {
-    router.replace("/");
-  }, []);
-
   return (
     <ThemedSafeArea>
-      <YStack flex={1} paddingHorizontal="$6" justifyContent="center"></YStack>
+      <Onboarding />
     </ThemedSafeArea>
   );
 }

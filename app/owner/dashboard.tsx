@@ -223,9 +223,9 @@ export default function OwnerDashboard() {
           {/* My Gardens Section */}
           <YStack gap="$3">
             <XStack justifyContent="space-between" alignItems="center">
-              <H2 color="$text_dark" fontWeight="bold">
+              <Text fontSize="$5" fontWeight="bold" color="$text_dark">
                 Mijn tuinen
-              </H2>
+              </Text>
             </XStack>
 
             {loading ? (
@@ -286,9 +286,9 @@ export default function OwnerDashboard() {
           {/* Incoming Requests Section */}
           <YStack gap="$3" paddingBottom="$20">
             <XStack justifyContent="space-between" alignItems="center">
-              <H2 color="$text_dark" fontWeight="bold">
+              <Text fontSize="$5" fontWeight="bold" color="$text_dark">
                 Aanvragen
-              </H2>
+              </Text>
             </XStack>
 
             {loading ? (

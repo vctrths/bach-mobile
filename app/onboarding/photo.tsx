@@ -5,9 +5,10 @@ import { OnboardingContext } from "@/context/OnboardingContext";
 import { supabase } from "@/utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import { Image as ExpoImage } from "expo-image";
 import { router } from "expo-router";
 import { useContext, useState } from "react";
-import { Circle, H1, Image, Text, YStack } from "tamagui";
+import { Circle, H1, Text, YStack } from "tamagui";
 
 export default function Photo() {
   const { data, reset } = useContext(OnboardingContext);
@@ -112,7 +113,7 @@ export default function Photo() {
 
       // 4. Clear onboarding context and navigate to dashboard
       reset();
-      router.replace("/");
+      router.replace("/dashboard");
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "An unexpected error occurred",
@@ -143,11 +144,10 @@ export default function Photo() {
               overflow="hidden"
             >
               {image ? (
-                <Image
+                <ExpoImage
                   source={{ uri: image }}
-                  width="100%"
-                  height="100%"
-                  objectFit="cover"
+                  style={{ width: "100%", height: "100%" }}
+                  contentFit="cover"
                 />
               ) : (
                 <Ionicons name="camera" size={60} color="#37392B" />
