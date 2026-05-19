@@ -3,42 +3,112 @@ import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
+import { Image as ExpoImage } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
-import React from "react";
-import { ScrollView } from "react-native";
-import { Card, H1, H2, Image, Text, XStack, YStack } from "tamagui";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, ScrollView } from "react-native";
+import { Card, H1, H2, Spinner, Text, XStack, YStack } from "tamagui";
+import { supabase } from "@/utils/supabase";
 
-const gardensList = [
-  {
+interface Garden {
+  id: string;
+  name: string;
+  rating: number;
+  location: string;
+  description: string;
+  image_url: string;
+}
+
+const fallbackGardens: Record<string, Garden> = {
+  "1": {
     id: "1",
     name: "Victor's tuin",
     rating: 4.8,
     location: "Heverlee, België",
     description: "Een heerlijk ruime tuin met een overvloed aan bloemen, fruitbomen en een gezellige zithoek. Perfect om rustig te tuinieren en te genieten van het groen.",
-    image: require("@/assets/images/hero.png"),
+    image_url: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64",
   },
-  {
+  "2": {
     id: "2",
     name: "Griet's bloemenweide",
     rating: 4.7,
     location: "Leuven, België",
     description: "Een kleurrijke en open bloemenweide. Ideaal voor natuurliefhebbers en rustzoekers.",
-    image: require("@/assets/images/hero.png"),
+    image_url: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae",
   },
-  {
+  "3": {
     id: "3",
     name: "Groen Domein",
     rating: 4.9,
     location: "Kessel-Lo, België",
     description: "Groot groen domein met een prachtige vijver, moestuin en een serre.",
-    image: require("@/assets/images/hero.png"),
+    image_url: "https://images.unsplash.com/photo-1584479898061-15742e14f50d",
   },
-];
+};
 
 export default function GardenDetailsScreen() {
   const { id } = useLocalSearchParams();
+  const [garden, setGarden] = useState<Garden | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const garden = gardensList.find((g) => g.id === id) || gardensList[0];
+  useEffect(() => {
+    async function fetchGarden() {
+      try {
+        const { data, error } = await supabase
+          .from("gardens")
+          .select("*")
+          .eq("id", id)
+          .single();
+
+        if (data && !error) {
+          setGarden({
+            id: data.id,
+            name: data.name,
+            rating: data.rating ?? 0,
+            location: data.location ?? "Onbekende locatie",
+            description: data.description ?? "",
+            image_url: data.image_url ?? "",
+          });
+        } else {
+          const fallback = fallbackGardens[id as string];
+          if (fallback) setGarden(fallback);
+        }
+      } catch {
+        const fallback = fallbackGardens[id as string];
+        if (fallback) setGarden(fallback);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (id) fetchGarden();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <ThemedSafeArea>
+        <YStack flex={1} justifyContent="center" alignItems="center">
+          <Spinner size="large" color="$primary" />
+        </YStack>
+      </ThemedSafeArea>
+    );
+  }
+
+  if (!garden) {
+    return (
+      <ThemedSafeArea>
+        <YStack flex={1} justifyContent="center" alignItems="center" gap="$4">
+          <Text fontSize="$5" color="$text_dark">Tuin niet gevonden</Text>
+          <Button
+            label="Terug"
+            backgroundColor="$background"
+            color="$white"
+            onPress={() => router.back()}
+          />
+        </YStack>
+      </ThemedSafeArea>
+    );
+  }
 
   return (
     <ThemedSafeArea>
@@ -101,12 +171,17 @@ export default function GardenDetailsScreen() {
             overflow="hidden"
             height={250}
           >
-            <Image
-              source={garden.image}
-              width="100%"
-              height="100%"
-              resizeMode="cover"
-            />
+            {garden.image_url ? (
+              <ExpoImage
+                source={{ uri: garden.image_url }}
+                style={{ width: "100%", height: "100%" }}
+                contentFit="cover"
+              />
+            ) : (
+              <YStack flex={1} justifyContent="center" alignItems="center" backgroundColor="$background_secondary">
+                <Ionicons name="image-outline" size={48} color="$text_light" />
+              </YStack>
+            )}
           </Card>
 
           {/* About section */}
@@ -139,7 +214,7 @@ export default function GardenDetailsScreen() {
               label="Verstuur aanvraag"
               backgroundColor="$background"
               color="$white"
-              onPress={() => alert("Aanvraag succesvol verstuurd!")}
+              onPress={() => router.push(`/garden/${id}/request` as any)}
             />
           </Card>
 
