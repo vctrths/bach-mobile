@@ -1,7 +1,8 @@
+import Button from "@/components/ui/Button";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import { router } from "expo-router";
 import React from "react";
-import { Button, H1, Text, YStack } from "tamagui";
+import { H1, Text, YStack } from "tamagui";
 
 /**
  * DEBUG GATE
@@ -23,24 +24,23 @@ export default function DebugGate() {
         </Text>
 
         <Button
+          label="Start Onboarding Flow"
           size="$6"
           backgroundColor="$primary"
           onPress={() => router.push("/onboarding")}
           pressStyle={{ scale: 0.98, opacity: 0.9 }}
-        >
-          <Text color="white">Start Onboarding Flow</Text>
-        </Button>
+        />
 
         <Button
+          label="Skip to Dashboard"
           size="$6"
           backgroundColor="transparent"
           borderWidth={1}
           borderColor="$primary"
           onPress={() => router.push("/dashboard")}
           pressStyle={{ scale: 0.98, opacity: 0.8 }}
-        >
-          <Text color="$primary">Skip to Dashboard</Text>
-        </Button>
+          color="$primary"
+        />
 
         <YStack marginTop="$10" padding="$4" backgroundColor="$borderColor" borderRadius="$4">
           <Text fontSize="$2" color="$text_dark" textAlign="center">

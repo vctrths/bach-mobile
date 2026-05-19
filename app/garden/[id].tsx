@@ -6,7 +6,7 @@ import { BlurView } from "expo-blur";
 import { Image as ExpoImage } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, ScrollView } from "react-native";
+import { ScrollView } from "react-native";
 import { Card, H1, H2, Spinner, Text, XStack, YStack } from "tamagui";
 import { supabase } from "@/utils/supabase";
 
