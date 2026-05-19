@@ -1,3 +1,4 @@
+import { AuthProvider } from "@/context/AuthContext";
 import { OnboardingProvider } from "@/context/OnboardingContext";
 import tamaConfig from "@/tamagui.config";
 import { useFonts } from "expo-font";
@@ -26,8 +27,9 @@ export default function RootLayout() {
 
   return (
     <TamaguiProvider config={tamaConfig} defaultTheme="groenevingers">
-      <OnboardingProvider>
-        <Stack screenOptions={{ headerShown: false, animation: "none" }}>
+      <AuthProvider>
+        <OnboardingProvider>
+          <Stack screenOptions={{ headerShown: false, animation: "none" }}>
           <Stack.Screen name="index" />
           <Stack.Screen name="explore" />
           <Stack.Screen name="pro" />
@@ -62,6 +64,7 @@ export default function RootLayout() {
           <Stack.Screen name="map" />
         </Stack>
       </OnboardingProvider>
+      </AuthProvider>
     </TamaguiProvider>
   );
 }

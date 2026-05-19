@@ -1,14 +1,15 @@
 import BottomNav from "@/components/ui/BottomNav";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
+import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
-import { BlurView } from "expo-blur";
 import { router } from "expo-router";
 import React from "react";
 import { Alert, ScrollView } from "react-native";
 import { Card, Circle, Text, XStack, YStack } from "tamagui";
 
 export default function SettingsScreen() {
+  const { signOut } = useAuth();
   const accountItems = [
     {
       id: "persoonlijk",
@@ -76,7 +77,14 @@ export default function SettingsScreen() {
       onPress: () =>
         Alert.alert("Uitloggen", "Weet je zeker dat je wilt uitloggen?", [
           { text: "Annuleren", style: "cancel" },
-          { text: "Uitloggen", style: "destructive", onPress: () => router.replace("/login") },
+          {
+            text: "Uitloggen",
+            style: "destructive",
+            onPress: async () => {
+              await signOut();
+              router.replace("/login");
+            },
+          },
         ]),
     },
   ];

@@ -1,18 +1,34 @@
 import Button from "@/components/ui/Button";
 import Divider from "@/components/ui/Divider";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
+import { supabase } from "@/utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
-import { H1, Input, Text, YStack } from "tamagui";
+import { H1, Input, Spinner, Text, YStack } from "tamagui";
 
 export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleLogin = () => {
-        // Handle login logic here
-        router.push("/dashboard"); // Navigate home or dashboard upon success
+    const handleLogin = async () => {
+        setLoading(true);
+        setError(null);
+
+        const { error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        });
+
+        if (error) {
+            setError(error.message);
+            setLoading(false);
+            return;
+        }
+
+        router.replace("/login-succes");
     };
 
     return (
@@ -50,11 +66,18 @@ export default function Login() {
                         </YStack>
 
                         <YStack marginTop="$4">
+                            {error && (
+                                <Text color="red" fontSize="$2" textAlign="center" marginBottom="$2">
+                                    {error}
+                                </Text>
+                            )}
                             <Button
-                                label="Login"
+                                label={loading ? "Bezig met inloggen..." : "Login"}
                                 backgroundColor="$background"
                                 color="$white"
                                 onPress={handleLogin}
+                                disabled={loading}
+                                opacity={loading ? 0.6 : 1}
                             />
                         </YStack>
                     </YStack>
