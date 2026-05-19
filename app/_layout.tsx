@@ -50,6 +50,8 @@ export default function RootLayout() {
           <Stack.Screen name="garden/[id]/request" />
           <Stack.Screen name="logbook/new" />
           <Stack.Screen name="logbook/calendar" />
+          <Stack.Screen name="logbook/[id]" />
+          <Stack.Screen name="logbook/opvolgingen" />
           <Stack.Screen name="notifications" />
           <Stack.Screen name="map" />
         </Stack>
