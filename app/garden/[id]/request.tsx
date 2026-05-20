@@ -7,8 +7,8 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
-import { Alert, ScrollView } from "react-native";
-import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
+import { Alert, Platform, ScrollView } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { Circle, H1, Text, TextArea, Input, XStack, YStack } from "tamagui";
 import { z } from "zod";
 
@@ -42,6 +42,7 @@ export default function GardenRequestScreen() {
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
 
   const toggleDay = (dayKey: string) => {
     setSelectedDays((prev) =>
@@ -52,18 +53,12 @@ export default function GardenRequestScreen() {
     setErrors((e) => ({ ...e, days: "" }));
   };
 
-  const showDatePicker = () => {
-    DateTimePickerAndroid.open({
-      value: startDate || new Date(),
-      onChange: (event, selectedDate) => {
-        if (event.type === "set" && selectedDate) {
-          setStartDate(selectedDate);
-          setErrors((e) => ({ ...e, startDate: "" }));
-        }
-      },
-      mode: "date",
-      minimumDate: new Date(),
-    });
+  const handleDateChange = (_: any, selectedDate?: Date) => {
+    setShowPicker(Platform.OS === "ios");
+    if (selectedDate) {
+      setStartDate(selectedDate);
+      setErrors((e) => ({ ...e, startDate: "" }));
+    }
   };
 
   const handleSubmit = async () => {
@@ -293,7 +288,7 @@ export default function GardenRequestScreen() {
                   alignItems="center"
                   justifyContent="center"
                   gap="$2"
-                  onPress={showDatePicker}
+                  onPress={() => setShowPicker(true)}
                   pressStyle={{
                     scale: 0.98,
                     opacity: 0.9,
@@ -324,7 +319,7 @@ export default function GardenRequestScreen() {
                   alignItems="center"
                   justifyContent="center"
                   gap="$2"
-                  onPress={showDatePicker}
+                  onPress={() => setShowPicker(true)}
                   pressStyle={{
                     scale: 0.98,
                     opacity: 0.9,
@@ -355,7 +350,7 @@ export default function GardenRequestScreen() {
                   alignItems="center"
                   justifyContent="center"
                   gap="$2"
-                  onPress={showDatePicker}
+                  onPress={() => setShowPicker(true)}
                   pressStyle={{
                     scale: 0.98,
                     opacity: 0.9,
@@ -382,6 +377,16 @@ export default function GardenRequestScreen() {
               )}
             </YStack>
           </YStack>
+
+          {showPicker && (
+            <DateTimePicker
+              value={startDate || new Date()}
+              mode="date"
+              display={Platform.OS === "ios" ? "spinner" : "default"}
+              minimumDate={new Date()}
+              onChange={handleDateChange}
+            />
+          )}
 
           {/* Submit Button */}
           <Button
