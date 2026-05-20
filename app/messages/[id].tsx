@@ -140,7 +140,7 @@ export default function ChatDetail() {
               contentContainerStyle={{
                 padding: 16,
                 gap: 12,
-                paddingBottom: 20,
+                paddingBottom: 100,
               }}
               style={{ flex: 1 }}
             />

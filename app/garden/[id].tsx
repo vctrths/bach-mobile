@@ -1,6 +1,7 @@
 import Button from "@/components/ui/Button";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
+import ScreenContent from "@/components/ui/ScreenContent";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { Image as ExpoImage } from "expo-image";
@@ -113,7 +114,7 @@ export default function GardenDetailsScreen() {
   return (
     <ThemedSafeArea>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <YStack flex={1} paddingHorizontal="$4" paddingVertical="$6" gap="$6">
+        <ScreenContent>
           
           {/* Back Button */}
           <TopNavPill title="Terug naar overzicht" />
@@ -218,7 +219,7 @@ export default function GardenDetailsScreen() {
             />
           </Card>
 
-        </YStack>
+        </ScreenContent>
       </ScrollView>
     </ThemedSafeArea>
   );

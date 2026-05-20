@@ -1,6 +1,7 @@
 import BottomNav from "@/components/ui/BottomNav";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
+import ScreenContent from "@/components/ui/ScreenContent";
 import { supabase } from "@/utils/supabase";
 import { Image as ExpoImage } from "expo-image";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -98,7 +99,7 @@ export default function LogbookScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        <YStack flex={1} paddingHorizontal="$4" paddingVertical="$6" gap="$6">
+        <ScreenContent>
           <TopNavPill
             hideBack
             title="Victor Thys"
@@ -401,7 +402,7 @@ export default function LogbookScreen() {
               </YStack>
             )}
           </YStack>
-        </YStack>
+        </ScreenContent>
       </ScrollView>
 
       <BottomNav

@@ -1,6 +1,7 @@
 import Button from "@/components/ui/Button";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
+import ScreenContent from "@/components/ui/ScreenContent";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
@@ -11,7 +12,7 @@ export default function ProBlockScreen() {
   return (
     <ThemedSafeArea>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <YStack flex={1} paddingHorizontal="$4" paddingVertical="$6" gap="$6">
+        <ScreenContent>
           <TopNavPill
             title="Terug"
             onBackPress={() => router.back()}
@@ -124,7 +125,7 @@ export default function ProBlockScreen() {
               onPress={() => router.back()}
             />
           </YStack>
-        </YStack>
+        </ScreenContent>
       </ScrollView>
     </ThemedSafeArea>
   );

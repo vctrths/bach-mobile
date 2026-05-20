@@ -2,6 +2,7 @@ import BottomNav from "@/components/ui/BottomNav";
 import Button from "@/components/ui/Button";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
+import ScreenContent from "@/components/ui/ScreenContent";
 import { supabase } from "@/utils/supabase";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
@@ -113,7 +114,7 @@ export default function GardenRequestScreen() {
   return (
     <ThemedSafeArea>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <YStack flex={1} paddingHorizontal="$4" paddingVertical="$6" gap="$6">
+        <ScreenContent>
           {/* Top Navigation */}
           <TopNavPill
             title="Aanvraag"
@@ -397,7 +398,7 @@ export default function GardenRequestScreen() {
             disabled={loading}
             opacity={loading ? 0.7 : 1}
           />
-        </YStack>
+        </ScreenContent>
       </ScrollView>
 
       {/* Bottom Navigation */}

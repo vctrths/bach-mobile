@@ -111,7 +111,7 @@ export default function OwnerDashboard() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        <YStack flex={1} paddingHorizontal="$4" paddingVertical="$4" gap="$6">
+        <YStack flex={1} paddingHorizontal="$4" paddingVertical="$4" gap="$6" paddingBottom="$25">
           {/* Top Navigation */}
           <TopNavPill
             hideBack

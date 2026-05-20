@@ -1,9 +1,11 @@
 import BottomNav from "@/components/ui/BottomNav";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
+import ScreenContent from "@/components/ui/ScreenContent";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Card, Text, XStack, YStack } from "tamagui";
+import { ScrollView } from "react-native";
 
 const MOCK_EMAILS = [
   {
@@ -35,7 +37,8 @@ const MOCK_EMAILS = [
 export default function MailScreen() {
   return (
     <ThemedSafeArea>
-      <YStack flex={1}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <ScreenContent>
         <YStack paddingHorizontal="$4" paddingTop="$4">
           <TopNavPill title="Mail" onBackPress={() => router.back()} />
         </YStack>
@@ -80,8 +83,8 @@ export default function MailScreen() {
             </Card>
           ))}
         </YStack>
-      </YStack>
-
+      </ScreenContent>
+      </ScrollView>
       <BottomNav
         activeTab="profile"
         onHomePress={() => router.push("/dashboard")}

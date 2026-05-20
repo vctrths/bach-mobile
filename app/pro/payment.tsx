@@ -1,6 +1,7 @@
 import Button from "@/components/ui/Button";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
+import ScreenContent from "@/components/ui/ScreenContent";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -57,7 +58,7 @@ export default function PaymentScreen() {
   return (
     <ThemedSafeArea>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <YStack flex={1} paddingHorizontal="$4" paddingVertical="$6" gap="$6">
+        <ScreenContent>
           <TopNavPill
             title="Betaalgegevens"
             onBackPress={() => router.back()}
@@ -208,7 +209,7 @@ export default function PaymentScreen() {
             disabled={loading}
             opacity={loading ? 0.7 : 1}
           />
-        </YStack>
+        </ScreenContent>
       </ScrollView>
     </ThemedSafeArea>
   );

@@ -2,6 +2,7 @@ import BottomNav from "@/components/ui/BottomNav";
 import Button from "@/components/ui/Button";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
+import ScreenContent from "@/components/ui/ScreenContent";
 import { supabase } from "@/utils/supabase";
 import { Image as ExpoImage } from "expo-image";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -89,7 +90,7 @@ export default function SearchScreen() {
   return (
     <ThemedSafeArea>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <YStack flex={1} paddingHorizontal="$4" paddingVertical="$4" gap="$6">
+        <ScreenContent>
           {/* Top Navigation */}
           <TopNavPill
             hideBack
@@ -294,7 +295,7 @@ export default function SearchScreen() {
               ))
             )}
           </YStack>
-        </YStack>
+        </ScreenContent>
       </ScrollView>
 
       {/* Bottom Navigation */}

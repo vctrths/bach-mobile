@@ -1,6 +1,7 @@
 import Button from "@/components/ui/Button";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
+import ScreenContent from "@/components/ui/ScreenContent";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { router } from "expo-router";
@@ -12,7 +13,7 @@ export default function ProScreen() {
   return (
     <ThemedSafeArea>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <YStack flex={1} paddingHorizontal="$4" paddingVertical="$6" gap="$6">
+        <ScreenContent>
           
           {/* Back Button */}
           <TopNavPill title="Terug naar dashboard" />
@@ -108,7 +109,7 @@ export default function ProScreen() {
             />
           </Card>
 
-        </YStack>
+        </ScreenContent>
       </ScrollView>
     </ThemedSafeArea>
   );

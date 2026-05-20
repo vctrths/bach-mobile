@@ -1,6 +1,7 @@
 import BottomNav from "@/components/ui/BottomNav";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
+import ScreenContent from "@/components/ui/ScreenContent";
 import { supabase } from "@/utils/supabase";
 import { Image as ExpoImage } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
@@ -94,7 +95,7 @@ export default function LogDetailScreen() {
   return (
     <ThemedSafeArea>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <YStack flex={1} paddingHorizontal="$4" paddingVertical="$6" gap="$6">
+        <ScreenContent>
           <TopNavPill
             title={pageTitle}
             onBackPress={() => router.back()}
@@ -239,7 +240,7 @@ export default function LogDetailScreen() {
               </YStack>
             </>
           )}
-        </YStack>
+        </ScreenContent>
       </ScrollView>
 
       <BottomNav

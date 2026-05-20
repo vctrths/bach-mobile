@@ -1,6 +1,7 @@
 import BottomNav from "@/components/ui/BottomNav";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
+import ScreenContent from "@/components/ui/ScreenContent";
 import { supabase } from "@/utils/supabase";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -56,7 +57,7 @@ export default function NotificationsScreen() {
   return (
     <ThemedSafeArea>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <YStack flex={1} paddingHorizontal="$4" paddingVertical="$6" gap="$6">
+        <ScreenContent>
           <TopNavPill
             title="Meldingen"
             onBackPress={() => router.back()}
@@ -136,7 +137,7 @@ export default function NotificationsScreen() {
             ))}
           </YStack>
           )}
-        </YStack>
+        </ScreenContent>
       </ScrollView>
 
       <BottomNav

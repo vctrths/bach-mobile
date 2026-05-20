@@ -2,6 +2,7 @@ import BottomNav from "@/components/ui/BottomNav";
 import Button from "@/components/ui/Button";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
+import ScreenContent from "@/components/ui/ScreenContent";
 import { supabase } from "@/utils/supabase";
 import { Image as ExpoImage } from "expo-image";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -55,7 +56,7 @@ export default function SavedGardensScreen() {
   return (
     <ThemedSafeArea>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <YStack flex={1} paddingHorizontal="$4" paddingVertical="$6" gap="$6">
+        <ScreenContent>
           <TopNavPill
             title="Opgeslagen tuinen"
             onBackPress={() => router.back()}
@@ -150,7 +151,7 @@ export default function SavedGardensScreen() {
               ))}
             </YStack>
           )}
-        </YStack>
+        </ScreenContent>
       </ScrollView>
 
       <BottomNav

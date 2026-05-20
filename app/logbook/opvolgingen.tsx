@@ -1,6 +1,7 @@
 import BottomNav from "@/components/ui/BottomNav";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
+import ScreenContent from "@/components/ui/ScreenContent";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -97,7 +98,7 @@ export default function OpvolgingenScreen() {
   return (
     <ThemedSafeArea>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <YStack flex={1} paddingHorizontal="$4" paddingVertical="$6" gap="$6">
+        <ScreenContent>
           <TopNavPill
             title="Takenlijst"
             onBackPress={() => router.back()}
@@ -154,7 +155,7 @@ export default function OpvolgingenScreen() {
               )}
             </YStack>
           </YStack>
-        </YStack>
+        </ScreenContent>
       </ScrollView>
 
       <BottomNav
