@@ -74,6 +74,11 @@ export default function LogbookCalendarScreen() {
 
   const followUpDays: number[] = [];
 
+  const loggedDays = logs.map((log) => {
+    const [d, m, y] = log.date.split("/").map(Number);
+    return m === currentMonth + 1 ? d : -1;
+  }).filter((d) => d > 0);
+
   const handleDayPress = (day: number) => {
     setSelectedDate(day);
     router.push(`/logbook/${day}` as any);
