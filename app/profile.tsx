@@ -1,21 +1,57 @@
 import BottomNav from "@/components/ui/BottomNav";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
+import { supabase } from "@/utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
-import { BlurView } from "expo-blur";
 import { router } from "expo-router";
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { ScrollView } from "react-native";
-import { Card, Circle, H1, Image, Text, XStack, YStack } from "tamagui";
+import { Card, Circle, H1, Image, Spinner, Text, XStack, YStack } from "tamagui";
 import { OnboardingContext } from "@/context/OnboardingContext";
 
 export default function ProfileScreen() {
   const { data } = useContext(OnboardingContext);
-  const displayName =
-    (data.firstName || data.lastName)
-      ? `${data.firstName} ${data.lastName}`.trim()
-      : "Victor Thys";
+  const [profile, setProfile] = useState<{
+    first_name: string;
+    last_name: string;
+    description: string;
+    role: string;
+    profile_image: string | null;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("first_name, last_name, description, role, profile_image")
+        .eq("id", user.id)
+        .single();
+
+      setProfile(profileData);
+      setLoading(false);
+    };
+
+    fetchProfile();
+  }, []);
+
+  const ctxName = `${data.firstName} ${data.lastName}`.trim();
+  const displayName = profile
+    ? `${profile.first_name} ${profile.last_name}`.trim() || ctxName
+    : ctxName || "Victor Thys";
+
+  const displayRole = profile?.role || "Tuinzoeker";
+
   const bioText =
+    profile?.description ||
     data.description ||
     "Ik woon in hartje Leuven en heb altijd gedroomd van een eigen tuin. Helaas heb ik zelf geen groene vingers of buitenruimte. Daarom ben ik op zoek naar een plek waar ik mijn passie voor planten en bloemen kan uitleven. Ik ben enthousiast, betrouwbaar en leergierig. Samen maken we er een bloeiend paradijs van!";
 
@@ -121,7 +157,7 @@ export default function ProfileScreen() {
                   />
                 </XStack>
                 <Text color="$secondary" fontSize="$3" fontWeight="500">
-                  Tuinzoeker
+                  {displayRole}
                 </Text>
               </YStack>
 

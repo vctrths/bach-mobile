@@ -2,11 +2,12 @@ import BottomNav from "@/components/ui/BottomNav";
 import Button from "@/components/ui/Button";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
+import { supabase } from "@/utils/supabase";
 import { OnboardingContext } from "@/context/OnboardingContext";
 import { router } from "expo-router";
 import React, { useContext, useState } from "react";
 import { Alert, ScrollView } from "react-native";
-import { Input, Text, TextArea, YStack } from "tamagui";
+import { Input, Spinner, Text, TextArea, XStack, YStack } from "tamagui";
 
 export default function PersonalDetailsScreen() {
   const { data, updateData } = useContext(OnboardingContext);
@@ -18,16 +19,48 @@ export default function PersonalDetailsScreen() {
     data.description ||
       "Ik woon in hartje Leuven en heb altijd gedroomd van een eigen tuin. Helaas heb ik zelf geen groene vingers of buitenruimte. Daarom ben ik op zoek naar een plek waar ik mijn passie voor planten en bloemen kan uitleven.",
   );
+  const [saving, setSaving] = useState(false);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!firstName.trim() || !lastName.trim()) {
       Alert.alert("Fout", "Vul je voornaam en achternaam in.");
       return;
     }
-    updateData({ firstName, lastName, email, description });
-    Alert.alert("Succes", "Je persoonlijke gegevens zijn bijgewerkt!", [
-      { text: "OK", onPress: () => router.back() },
-    ]);
+
+    setSaving(true);
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        Alert.alert("Fout", "Log eerst in om wijzigingen op te slaan");
+        return;
+      }
+
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+          email: email.trim(),
+          description: description.trim(),
+        })
+        .eq("id", user.id);
+
+      if (error) {
+        Alert.alert("Fout", error.message);
+        return;
+      }
+
+      updateData({ firstName, lastName, email, description });
+      Alert.alert("Succes", "Je persoonlijke gegevens zijn bijgewerkt!", [
+        { text: "OK", onPress: () => router.back() },
+      ]);
+    } catch {
+      Alert.alert("Fout", "Er is iets misgegaan. Probeer het opnieuw.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -143,13 +176,19 @@ export default function PersonalDetailsScreen() {
           </YStack>
 
           {/* Save Button */}
-          <Button
-            backgroundColor="$background"
-            color="white"
-            label="Opslaan"
-            onPress={handleSave}
-            marginTop="$2"
-          />
+          <XStack gap="$2" alignItems="center" justifyContent="center">
+            {saving && <Spinner size="small" color="$primary" />}
+            <Button
+              backgroundColor="$background"
+              color="white"
+              label={saving ? "Bezig..." : "Opslaan"}
+              onPress={handleSave}
+              disabled={saving}
+              opacity={saving ? 0.7 : 1}
+              marginTop="$2"
+              flex={1}
+            />
+          </XStack>
         </YStack>
       </ScrollView>
 
