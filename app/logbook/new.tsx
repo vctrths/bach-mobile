@@ -1,11 +1,12 @@
 import BottomNav from "@/components/ui/BottomNav";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
+import { supabase } from "@/utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { Alert, ScrollView } from "react-native";
-import { Card, Input, Text, TextArea, XStack, YStack } from "tamagui";
+import { Card, Input, Spinner, Text, TextArea, XStack, YStack } from "tamagui";
 
 export default function NewLogScreen() {
   const [tasks, setTasks] = useState("");
@@ -14,15 +15,56 @@ export default function NewLogScreen() {
   const [day, setDay] = useState(new Date().getDate().toString());
   const [month, setMonth] = useState((new Date().getMonth() + 1).toString());
   const [year, setYear] = useState(new Date().getFullYear().toString());
+  const [saving, setSaving] = useState(false);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!tasks.trim()) {
       Alert.alert("Fout", "Vul ten minste één uitgevoerde taak in.");
       return;
     }
-    Alert.alert("Succes", "Log opgeslagen!", [
-      { text: "OK", onPress: () => router.back() },
-    ]);
+
+    setSaving(true);
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        Alert.alert("Fout", "Log eerst in om een log op te slaan");
+        return;
+      }
+
+      const dateStr = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+      const taskList = tasks
+        .split("\n")
+        .map((t) => t.trim())
+        .filter(Boolean);
+
+      const { error } = await supabase.from("garden_logs").insert({
+        user_id: user.id,
+        title: taskList[0] || "Log",
+        status: {
+          tasks: taskList,
+          observations: observations.trim(),
+          followUps: followUps
+            .split("\n")
+            .map((f) => f.trim())
+            .filter(Boolean),
+        },
+        created_at: new Date(dateStr).toISOString(),
+      });
+
+      if (error) {
+        Alert.alert("Fout", error.message);
+      } else {
+        Alert.alert("Succes", "Log opgeslagen!", [
+          { text: "OK", onPress: () => router.back() },
+        ]);
+      }
+    } catch {
+      Alert.alert("Fout", "Er is iets misgegaan. Probeer het opnieuw.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -228,11 +270,14 @@ export default function NewLogScreen() {
               justifyContent="center"
               alignItems="center"
               marginTop="$2"
-              onPress={handleSave}
+              gap="$2"
+              opacity={saving ? 0.7 : 1}
+              onPress={saving ? undefined : handleSave}
               pressStyle={{ scale: 0.96, opacity: 0.9 }}
             >
+              {saving && <Spinner size="small" color="white" />}
               <Text fontSize="$4" fontWeight="700" color="white">
-                Log opslaan
+                {saving ? "Bezig..." : "Log opslaan"}
               </Text>
             </XStack>
           </YStack>

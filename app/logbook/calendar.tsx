@@ -40,16 +40,13 @@ export default function LogbookCalendarScreen() {
 
   const daysInMonth = getDaysInMonth(currentMonth, currentYear);
   const firstDay = getFirstDayOfMonth(currentMonth, currentYear);
-  const loggedDays = [3, 5, 8, 12, 15, 18, 20, 22, 25, 28];
-  const followUpDays = [12, 20];
 
   const fetchLogs = async () => {
     try {
       const { data, error } = await supabase
         .from("garden_logs")
-        .select("id, title, created_at")
-        .order("created_at", { ascending: false })
-        .limit(10);
+        .select("id, title, status, created_at")
+        .order("created_at", { ascending: false });
 
       if (error) {
         console.error("Error fetching logs:", error);
@@ -74,6 +71,8 @@ export default function LogbookCalendarScreen() {
   useEffect(() => {
     fetchLogs();
   }, []);
+
+  const followUpDays: number[] = [];
 
   const handleDayPress = (day: number) => {
     setSelectedDate(day);
