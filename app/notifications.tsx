@@ -1,14 +1,57 @@
 import BottomNav from "@/components/ui/BottomNav";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
+import { supabase } from "@/utils/supabase";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ScrollView } from "react-native";
-import { Card, Text, XStack, YStack } from "tamagui";
+import { Card, Spinner, Text, XStack, YStack } from "tamagui";
+
+const NOTIF_ICONS: Record<string, string> = {
+  request_accepted: "check-circle-outline",
+  request_rejected: "close-circle-outline",
+  message: "message-text-outline",
+  reminder: "calendar-clock-outline",
+  system: "information-outline",
+};
+
+function formatTime(dateStr: string) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins}m geleden`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}u geleden`;
+  const days = Math.floor(hours / 24);
+  return `${days}d geleden`;
+}
 
 export default function NotificationsScreen() {
-  const notifications: any[] = [];
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      const { data } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      setNotifications(data || []);
+      setLoading(false);
+    };
+
+    fetchNotifications();
+  }, []);
 
   return (
     <ThemedSafeArea>
@@ -19,7 +62,11 @@ export default function NotificationsScreen() {
             onBackPress={() => router.back()}
           />
 
-          {notifications.length === 0 ? (
+          {loading ? (
+            <YStack padding="$10" alignItems="center">
+              <Spinner size="large" color="$primary" />
+            </YStack>
+          ) : notifications.length === 0 ? (
             <YStack
               padding="$10"
               alignItems="center"
@@ -58,7 +105,7 @@ export default function NotificationsScreen() {
                     alignItems="center"
                   >
                     <MaterialCommunityIcons
-                      name={notif.icon as any}
+                      name={(NOTIF_ICONS[notif.type] || "bell-outline") as any}
                       size={22}
                       color="#173300"
                     />
@@ -78,10 +125,10 @@ export default function NotificationsScreen() {
                       )}
                     </XStack>
                     <Text fontSize="$3" color="$text_dark">
-                      {notif.message}
+                      {notif.body}
                     </Text>
                     <Text fontSize="$2" color="$secondary">
-                      {notif.time}
+                      {formatTime(notif.created_at)}
                     </Text>
                   </YStack>
                 </XStack>
