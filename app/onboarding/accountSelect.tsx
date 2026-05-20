@@ -1,15 +1,47 @@
 import Button from "@/components/ui/Button";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
-import { H1, YStack } from "tamagui";
+import { supabase } from "@/utils/supabase";
+import { Ionicons } from "@expo/vector-icons";
+import * as Linking from "expo-linking";
+import { router } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
+import { useState } from "react";
+import { H1, Spinner, Text, YStack } from "tamagui";
 import Divider from "@/components/ui/Divider";
 
 import Logo from "@/assets/images/logo.svg";
 
-import { Ionicons } from "@expo/vector-icons";
-
-import { router } from "expo-router";
-
 export default function AccountSelect() {
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const handleOAuth = async (provider: "google" | "facebook") => {
+        setLoading(true);
+        setError(null);
+
+        const redirectTo = Linking.createURL("auth/callback");
+
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider,
+            options: { redirectTo, skipBrowserRedirect: true },
+        });
+
+        if (error) {
+            setError(error.message);
+            setLoading(false);
+            return;
+        }
+
+        if (data?.url) {
+            const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+
+            if (result.type === "success") {
+                router.replace("/auth/callback");
+            }
+        }
+
+        setLoading(false);
+    };
     return (
         <ThemedSafeArea>
             <YStack gap="$6" paddingHorizontal="$6">
@@ -20,8 +52,8 @@ export default function AccountSelect() {
                 </YStack>
                 <YStack gap="$6">
                     <YStack gap="$2">
-                        <Button label="Login" onPress={() => router.push("/login")} />
-                        <Button label="Account aanmaken" onPress={() => router.push("/onboarding/role")} />
+                        <Button label="Login" onPress={() => router.push("/login")} disabled={loading} opacity={loading ? 0.5 : 1} />
+                        <Button label="Account aanmaken" onPress={() => router.push("/onboarding/role")} disabled={loading} opacity={loading ? 0.5 : 1} />
                     </YStack>
                     <Divider hasLabel />
                     <YStack gap="$2">
@@ -30,14 +62,28 @@ export default function AccountSelect() {
                             color="$text_dark"
                             label="Ga door met Google"
                             icon={<Ionicons name="logo-google" size={20} />}
+                            onPress={() => handleOAuth("google")}
+                            disabled={loading}
                         />
                         <Button
                             backgroundColor="$background_secondary"
                             color="$text_dark"
                             label="Ga door met Facebook"
                             icon={<Ionicons name="logo-facebook" size={20} />}
+                            onPress={() => handleOAuth("facebook")}
+                            disabled={loading}
                         />
                     </YStack>
+                    {error && (
+                        <Text color="red" fontSize="$2" textAlign="center">
+                            {error}
+                        </Text>
+                    )}
+                    {loading && (
+                        <YStack alignItems="center">
+                            <Spinner size="small" color="$primary" />
+                        </YStack>
+                    )}
                 </YStack>
             </YStack>
         </ThemedSafeArea >
