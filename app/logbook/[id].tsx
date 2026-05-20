@@ -9,29 +9,35 @@ import React, { useEffect, useState } from "react";
 import { ScrollView } from "react-native";
 import { Card, H2, Spinner, Text, XStack, YStack } from "tamagui";
 
-const MOCK_TASKS = [
-  "Onkruid verwijderd rond tomaten en sla",
-  "Tomatenplanten opgebonden en onderste bladeren gesnoeid",
-  "Compost toegevoegd aan kruidenbed",
-  "Sla geoogst (± 6 kroppen)",
-  "Bedden licht losgemaakt en bewaterd",
-];
-
-const MOCK_OBSERVATIONS =
-  "De tomatenplanten groeien voorspoedig en beginnen de eerste vruchten te vormen. " +
-  "De sla heeft goed aangeslagen en kan binnenkort opnieuw geoogst worden. " +
-  "Wel opgemerkt dat er wat slakkenactiviteit is rond de jonge planten. " +
-  "De grondvochtigheid lijkt optimaal na de regen van gisteren.";
-
-const MOCK_FOLLOW_UPS = [
-  "Slakkenval plaatsen bij volgende bezoek",
-  "Sla bladeren inspecteren op ziekte",
-  "Grond opnieuw laten testen",
-];
+const DEFAULT_FALLBACK = {
+  tasks: [
+    "Onkruid verwijderd rond tomaten en sla",
+    "Tomatenplanten opgebonden en onderste bladeren gesnoeid",
+    "Compost toegevoegd aan kruidenbed",
+    "Sla geoogst (± 6 kroppen)",
+    "Bedden licht losgemaakt en bewaterd",
+  ],
+  observations:
+    "De tomatenplanten groeien voorspoedig en beginnen de eerste vruchten te vormen. " +
+    "De sla heeft goed aangeslagen en kan binnenkort opnieuw geoogst worden. " +
+    "Wel opgemerkt dat er wat slakkenactiviteit is rond de jonge planten. " +
+    "De grondvochtigheid lijkt optimaal na de regen van gisteren.",
+  followUps: [
+    "Slakkenval plaatsen bij volgende bezoek",
+    "Sla bladeren inspecteren op ziekte",
+    "Grond opnieuw laten testen",
+  ],
+};
 
 export default function LogDetailScreen() {
   const { id } = useLocalSearchParams();
-  const [log, setLog] = useState<{ date: string; title: string } | null>(null);
+  const [log, setLog] = useState<{
+    date: string;
+    title: string;
+    tasks: string[];
+    observations: string;
+    followUps: string[];
+  } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,7 +45,7 @@ export default function LogDetailScreen() {
       try {
         const { data, error } = await supabase
           .from("garden_logs")
-          .select("id, title, created_at")
+          .select("id, title, status, created_at")
           .eq("id", id)
           .single();
 
@@ -48,9 +54,13 @@ export default function LogDetailScreen() {
           return;
         }
 
+        const status = (data.status as any) || {};
         setLog({
           title: data.title,
           date: new Date(data.created_at).toLocaleDateString("nl-BE"),
+          tasks: status.tasks || DEFAULT_FALLBACK.tasks,
+          observations: status.observations || DEFAULT_FALLBACK.observations,
+          followUps: status.followUps || DEFAULT_FALLBACK.followUps,
         });
       } catch (error) {
         console.error("Error:", error);
@@ -62,12 +72,16 @@ export default function LogDetailScreen() {
     if (typeof id === "string" && id.length > 5) {
       fetchLog();
     } else {
-      setLog({ title: `Log van dag ${id}`, date: `${id}/01/2025` });
+      setLog({
+        title: `Log van dag ${id}`,
+        date: `${id}/01/2025`,
+        ...DEFAULT_FALLBACK,
+      });
       setLoading(false);
     }
   }, [id]);
 
-  const title = log?.date
+  const pageTitle = log?.date
     ? new Date(
         log.date.split("/").reverse().join("-")
       ).toLocaleDateString("nl-BE", {
@@ -82,7 +96,7 @@ export default function LogDetailScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         <YStack flex={1} paddingHorizontal="$4" paddingVertical="$6" gap="$6">
           <TopNavPill
-            title={title}
+            title={pageTitle}
             onBackPress={() => router.back()}
           />
 
@@ -128,7 +142,7 @@ export default function LogDetailScreen() {
                   gap="$3"
                 >
                   <YStack gap="$3">
-                    {MOCK_TASKS.map((task, index) => (
+                    {(log?.tasks || []).map((task, index) => (
                       <XStack key={index} gap="$3" alignItems="flex-start">
                         <XStack
                           width={20}
@@ -173,7 +187,7 @@ export default function LogDetailScreen() {
                   padding="$4"
                 >
                   <Text fontSize="$4" color="$text_dark" lineHeight={22}>
-                    {MOCK_OBSERVATIONS}
+                    {log?.observations || ""}
                   </Text>
                 </Card>
               </YStack>
@@ -184,7 +198,7 @@ export default function LogDetailScreen() {
                   Opvolgingen
                 </H2>
                 <YStack gap="$2">
-                  {MOCK_FOLLOW_UPS.map((item, index) => (
+                  {(log?.followUps || []).map((item, index) => (
                     <Card
                       key={index}
                       elevation={2}
