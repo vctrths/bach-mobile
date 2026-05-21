@@ -2,7 +2,7 @@ import BottomNav from "@/components/ui/BottomNav";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
 import ScreenContent from "@/components/ui/ScreenContent";
-import { Image as ExpoImage } from "expo-image";
+import { Image as ExpoImage } from "@/lib/image";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import React from "react";

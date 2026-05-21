@@ -1,4 +1,4 @@
-import { Image as ExpoImage } from "expo-image";
+import { Image as ExpoImage } from "@/lib/image";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
 import { Card, Text, XStack, YStack } from "tamagui";

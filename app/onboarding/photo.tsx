@@ -5,7 +5,7 @@ import { OnboardingContext } from "@/context/OnboardingContext";
 import { supabase } from "@/utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { Image as ExpoImage } from "expo-image";
+import { Image as ExpoImage } from "@/lib/image";
 import { router } from "expo-router";
 import { useContext, useState } from "react";
 import { Circle, H1, Text, YStack } from "tamagui";

@@ -5,7 +5,7 @@ import { LogCard, type GardenLog } from "@/components/ui/LogCard";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
 import { supabase } from "@/utils/supabase";
-import { Image as ExpoImage } from "expo-image";
+import { Image as ExpoImage } from "@/lib/image";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
