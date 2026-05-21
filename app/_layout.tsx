@@ -1,3 +1,4 @@
+import "@/lib/font-face-polyfill";
 import { AuthProvider } from "@/context/AuthContext";
 import { OnboardingProvider } from "@/context/OnboardingContext";
 import tamaConfig from "@/tamagui.config";
