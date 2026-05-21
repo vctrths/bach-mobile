@@ -32,6 +32,8 @@ bash scripts/download-fonts.sh && npx expo export --platform web
 - **`.env.local`**: Contains `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_KEY`. Must be present on the build server (not committed to git). These are inlined at build time by Expo.
 - **Tamagui babel plugin**: `@tamagui/babel-plugin` is configured in `babel.config.js` and must be installed. Without it, Tamagui CSS extraction fails on static web export.
 - **Web output**: Configured as `"output": "static"` in `app.json`. The export outputs to `dist/` by default.
+- **Start command (production)**: Coolify defaults to `npm run start` which runs `expo start` (dev server). For production, set the Coolify start command to: `npx serve dist --single --listen $PORT`
+- **Supabase client is lazy**: `utils/supabase.ts` exports a Proxy that lazily initializes the client on first use. This prevents `Metro error: supabaseUrl is required.` during static export if env vars are not inlined at module evaluation time.
 
 ### CRITICAL: Must-have checklist before export
 
@@ -39,10 +41,11 @@ bash scripts/download-fonts.sh && npx expo export --platform web
 |---|---|---|
 | `@tamagui/babel-plugin` in deps + babel config | Required | CSS extraction for web |
 | Fonts downloaded to `assets/fonts/` | Required | Run `scripts/download-fonts.sh` first |
-| `.env.local` with Supabase creds | Required | `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_KEY` |
+| Coolify env vars: `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_KEY` | Required | Set in Coolify dashboard → Service → Environment Variables |
 | Node.js >=22 | Required | No version file exists, must match VPS |
 | All registered `<Stack.Screen>` routes have matching files | Required | Missing files = unresolved module errors |
 | `react-native-maps` stubbed for web in metro config | Done | Already configured in `metro.config.js` |
+| Coolify start command set to `npx serve dist --single --listen $PORT` | Required | Default `npm run start` runs dev server |
 
 ### Known web platform limitations
 
@@ -70,7 +73,7 @@ Metro is configured with `react-native-svg-transformer` in `metro.config.js`. Th
 - **Path alias**: `@/*` maps to project root (e.g. `@/tamagui.config`, `@/context/OnboardingContext`).
 - **UI components**: `components/ui/` — shared Tamagui-based components (BottomNav, Button, GardenCard, LogCard, Onboarding, etc.).
 - **State**: `context/OnboardingContext.tsx` — React context for the onboarding wizard (role, name, email, description, password, profileImage).
-- **Backend**: `utils/supabase.ts` — Supabase client with cross-platform storage (localStorage on web, AsyncStorage on native, in-memory fallback).
+- **Backend**: `utils/supabase.ts` — Supabase client with cross-platform storage (localStorage on web, AsyncStorage on native, in-memory fallback). Uses a Proxy for lazy initialization (prevents Metro crash at build time if `EXPO_PUBLIC_*` env vars aren't inlined).
 - **Validation**: Zod schemas defined inline in route files (`app/onboarding/info.tsx`, `app/onboarding/security.tsx`, `app/garden/[id]/request.tsx`).
 
 ## Route structure
