@@ -66,16 +66,35 @@ const safeStorage = {
   }
 }
 
-export const supabase = createClient(
-  process.env.EXPO_PUBLIC_SUPABASE_URL!,
-  process.env.EXPO_PUBLIC_SUPABASE_KEY!,
-  {
+let _client: ReturnType<typeof createClient> | null = null
+
+function getSupabase() {
+  if (_client) return _client
+
+  const url = process.env.EXPO_PUBLIC_SUPABASE_URL
+  const key = process.env.EXPO_PUBLIC_SUPABASE_KEY
+
+  if (!url || !key) {
+    throw new Error(
+      "Supabase credentials not found. Ensure EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_KEY are set."
+    )
+  }
+
+  _client = createClient(url, key, {
     auth: {
       storage: safeStorage,
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: false,
     },
-  }
-)
+  })
+
+  return _client
+}
+
+export const supabase = new Proxy({} as ReturnType<typeof createClient>, {
+  get(_target, prop) {
+    return (getSupabase() as Record<string | symbol, unknown>)[prop]
+  },
+})
 
