@@ -14,8 +14,53 @@ Expo 54 React Native app (iOS, Android, web) using expo-router file-based routin
 | Run on web | `npm run web` |
 | Lint | `npm run lint` (runs `expo lint`) |
 | Reset project scaffold | `npm run reset-project` |
+| Web static export | `bash scripts/download-fonts.sh && npx expo export --platform web` |
 
 There is no dedicated test or typecheck script. TypeScript is enforced via `tsconfig.json` (`strict: true`). Run `npx tsc --noEmit` to typecheck manually.
+
+## Build & Deployment (Coolify)
+
+### Build command
+```bash
+bash scripts/download-fonts.sh && npx expo export --platform web
+```
+
+### Prerequisites
+
+- **Node.js**: >=22. No `.nvmrc` or `engines` field — the VPS must run a compatible Node version.
+- **Fonts**: `assets/fonts/` is **gitignored**. The build script downloads Satoshi fonts from a Supabase storage bucket. If that bucket is unavailable or the network fails, the build WILL fail. Consider committing fonts to the repo or using a CDN fallback.
+- **`.env.local`**: Contains `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_KEY`. Must be present on the build server (not committed to git). These are inlined at build time by Expo.
+- **Tamagui babel plugin**: `@tamagui/babel-plugin` is configured in `babel.config.js` and must be installed. Without it, Tamagui CSS extraction fails on static web export.
+- **Web output**: Configured as `"output": "static"` in `app.json`. The export outputs to `dist/` by default.
+
+### CRITICAL: Must-have checklist before export
+
+| Requirement | Status | Notes |
+|---|---|---|
+| `@tamagui/babel-plugin` in deps + babel config | Required | CSS extraction for web |
+| Fonts downloaded to `assets/fonts/` | Required | Run `scripts/download-fonts.sh` first |
+| `.env.local` with Supabase creds | Required | `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_KEY` |
+| Node.js >=22 | Required | No version file exists, must match VPS |
+| All registered `<Stack.Screen>` routes have matching files | Required | Missing files = unresolved module errors |
+| `react-native-maps` stubbed for web in metro config | Done | Already configured in `metro.config.js` |
+
+### Known web platform limitations
+
+These don't fail the build but cause missing functionality on web:
+
+- **`@react-native-community/datetimepicker`** (`app/garden/[id]/request.tsx:12`): iOS/Android only. Renders nothing on web. Date selection non-functional on web.
+- **`expo-image-picker`** (`app/onboarding/photo.tsx:7`): Limited web support. `allowsEditing` and `aspect` not supported. `requestMediaLibraryPermissionsAsync` is a no-op.
+- **`experimentalBlurMethod="dimezisBlurView"`**: Used in 5 files (TopNavPill, BottomNav, pro, garden/[id], garden/[id]/request). iOS-only API. Works on web via CSS fallback but logs warnings.
+- **`react-native-calendars`** (`package.json`): Dependency exists but web compatibility unverified.
+- **`suppressHighlighting` prop**: React Native Web-specific prop on `Ionicons`. May cause TypeScript errors in `npx tsc --noEmit`. Used in `dashboard.tsx:131`, `owner/dashboard.tsx:147`, `search.tsx:134`.
+
+### SVG rules (CRITICAL)
+
+Metro is configured with `react-native-svg-transformer` in `metro.config.js`. This means:
+- **ALL `.svg` imports return React components** (not image URIs)
+- Use SVGs as `<MySvg width={100} height={100} />` — NEVER as `<Image source={require("./icon.svg")} />`
+- SVGs are removed from `assetExts` and added to `sourceExts`
+- This applies to all platforms (iOS, Android, web)
 
 ## Architecture
 
@@ -31,7 +76,7 @@ There is no dedicated test or typecheck script. TypeScript is enforced via `tsco
 ## Route structure
 
 Root layout:
-- `app/_layout.tsx` — Root layout with TamaguiProvider, OnboardingProvider, font loading. Registers both `personal-details` and `personal_details` screens (see quirk below).
+- `app/_layout.tsx` — Root layout with TamaguiProvider, OnboardingProvider, font loading. All stack screens have `headerShown: false`.
 
 Flat screens:
 - `app/index.tsx` — **Debug gate / temporary entry point**. Offers "Start Onboarding Flow" or "Skip to Dashboard" buttons. TODO: remove and rename `dashboard.tsx` to `index.tsx` when development is complete.
@@ -44,7 +89,6 @@ Flat screens:
 - `app/settings.tsx` — Settings screen (Account + Meer sections). Links to `/personal_details`, `/pro`.
 - `app/search.tsx` — Live search with debounced (300ms) Supabase `gardens` table query using `.or()` filtering on name/location/description. Displays full-width result cards.
 - `app/personal-details.tsx` — Personal details edit form (first name, last name, email, bio). Reads/writes `OnboardingContext`. **Active version** (navigated to from settings).
-- `app/personal_details.tsx` — **DUPLICATE** of `personal-details.tsx` (underscore variant). Registered in `_layout.tsx` but never navigated to. Dead code.
 
 Dynamic routes:
 - `app/garden/[id].tsx` — Garden detail screen. Fetches from Supabase by ID, falls back to hardcoded data for IDs "1", "2", "3". Shows image, name, rating, location, description, "Verstuur aanvraag" CTA.
@@ -172,10 +216,27 @@ Used in: `app/messages.tsx` (SELECT last message), `app/messages/[id].tsx` (SELE
 ### Storage bucket
 - `profile-images` — user profile photos (`{userId}_profile_{timestamp}.jpg`)
 
+### `notifications` table
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid | PK |
+| `user_id` | uuid | FK to `profiles` |
+| `type` | text | e.g. `'request_status_change'`, `'new_message'` |
+| `title` | text | |
+| `body` | text | |
+| `read` | boolean | default false |
+| `created_at` | timestamp | |
+
+RLS: SELECT own user_id; UPDATE own user_id (for marking read).
+Schema file: `supabase_notifications.sql`.
+Used in: `app/notifications.tsx` (SELECT).
+
 ### Schema files
 - `supabase_schema.sql` — full schema DDL with RLS policies
 - `supabase_seeder.sql` — sample seed data for profiles, gardens, garden_logs
 - `supabase_chat.sql` — conversations and messages tables with RLS policies, trigger for auto-updating `updated_at`
+- `supabase_notifications.sql` — notifications table with RLS policies
 
 ## Environment variables (`.env.local`)
 
@@ -189,12 +250,17 @@ Used in: `app/messages.tsx` (SELECT last message), `app/messages/[id].tsx` (SELE
 - **Tamagui theme**: Uses a custom theme `groenevingers` with green/earth-tone palette. Set as `defaultTheme` in the root provider.
 - **Native directories**: `/android` and `/ios` are generated by Expo and gitignored. Do not manually edit them; use `npx expo prebuild` to regenerate.
 - **`.env.local`**: Contains real Supabase credentials (`EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_KEY`). Do not commit.
-- **Duplicate route files**: Both `app/personal-details.tsx` (hyphen) and `app/personal_details.tsx` (underscore) exist. Both registered in `_layout.tsx`, but only the hyphen version is navigated to (from `settings.tsx`). The underscore version is dead code.
 - **Duplicate Garden types**: `Garden` type is defined inline in 3 files (`dashboard.tsx`, `search.tsx`, `garden/[id].tsx`) with slightly different nullability. No shared database types or Supabase-generated types file exists.
 - **newArchEnabled**: true in `app.json` — the app uses React Native's new architecture.
+- **React Compiler**: Enabled via `"reactCompiler": true` in `app.json`. Works with Tamagui babel plugin.
+- **Route registration**: All `<Stack.Screen name="...">` entries in `_layout.tsx` MUST have a corresponding file in `app/`. Missing files cause unresolved module errors.
 - **No UPDATE/DELETE operations**: Only INSERT and SELECT operations are implemented in the codebase.
 - **Hardcoded fallback data**: `app/garden/[id].tsx` has 3 hardcoded gardens as Supabase fallback. `app/logbook.tsx` uses hardcoded mock logs.
 - **Schema mismatch**: `app/garden/[id].tsx` reads `city` and `country` fields from the DB response, but the actual column is `location` (text).
+- **Component naming**: `app/splash.tsx` exports a component named `SplashScreen`, which shadows the `SplashScreen` import from `expo-router` in `_layout.tsx`. Not a build error but confusing.
+- **Zod v4**: Uses `"zod": "^4.4.2"` (major version 4). Breaking changes from v3 exist in `z.custom` and `z.object().refine()` APIs. Verify compatibility if upgrading/downgrading.
+- **No Node version constraint**: No `.nvmrc` or `engines` field in `package.json`. Requires Node >=22.
+- **`react-native-web@~0.21.0`**: Must be compatible with `react-native@0.81.5`. Managed by Expo, do not manually bump without Expo upgrade.
 
 ## Git Workflow
 
