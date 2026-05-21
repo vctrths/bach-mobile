@@ -1,18 +1,10 @@
+import { useFonts } from "@/lib/font-hooks";
 import { AuthProvider } from "@/context/AuthContext";
 import { OnboardingProvider } from "@/context/OnboardingContext";
 import tamaConfig from "@/tamagui.config";
 import { SplashScreen, Stack } from "expo-router";
 import { useEffect } from "react";
 import { TamaguiProvider } from "tamagui";
-
-// Polyfill FontFace for Node.js SSR (static rendering) before expo-font loads.
-// expo-font's web implementation (ExpoFontUtils.web.js) extends FontFace
-// which is a browser API not available in Node.js during `expo export --platform web`.
-if (typeof FontFace === "undefined") {
-  (globalThis as any).FontFace = class FontFace {};
-}
-
-const { useFonts } = require("expo-font");
 
 SplashScreen.preventAutoHideAsync();
 
