@@ -6,6 +6,7 @@ export type GardenLog = {
   id: string;
   title: string;
   status: string[];
+  created_at?: string;
 };
 
 interface LogCardProps {

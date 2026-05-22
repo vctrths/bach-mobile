@@ -20,24 +20,60 @@ type Garden = {
   image_url: string | null;
 };
 
-type GardenRequest = {
-  id: string;
-  garden_id: string;
-  status: "pending" | "approved" | "rejected";
-  created_at: string;
-};
-
 type UserProfile = {
   first_name: string;
   profile_image: string | null;
 };
 
+type NotificationItem = {
+  id: string;
+  title: string;
+  body: string;
+  type: string;
+  read: boolean;
+  created_at: string;
+};
+
+function getWeekProgress(logs: GardenLog[]) {
+  const now = new Date();
+  const weekStart = new Date(now);
+  weekStart.setDate(now.getDate() - now.getDay() + 1);
+  weekStart.setHours(0, 0, 0, 0);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+  weekEnd.setHours(23, 59, 59, 999);
+
+  const weekLogs = logs.filter((log) => {
+    const logDate = new Date(log.created_at || Date.now());
+    return logDate >= weekStart && logDate <= weekEnd;
+  });
+
+  return Math.min(weekLogs.length, 4);
+}
+
+function getWeekDays() {
+  const days = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
+  const now = new Date();
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+
+  return days.map((label, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return {
+      label,
+      date: d.getDate(),
+      isToday: d.toDateString() === now.toDateString(),
+    };
+  });
+}
+
 export default function GardenerDashboard() {
   const [myGardens, setMyGardens] = useState<Garden[]>([]);
   const [recommended, setRecommended] = useState<Garden[]>([]);
   const [logs, setLogs] = useState<GardenLog[]>([]);
-  const [requests, setRequests] = useState<GardenRequest[]>([]);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -47,7 +83,7 @@ export default function GardenerDashboard() {
         data: { user },
       } = await supabase.auth.getUser();
 
-      const [myGardensRes, recRes, logsRes, requestsRes, profileRes] =
+      const [myGardensRes, recRes, logsRes, profileRes, notifRes] =
         await Promise.all([
           user
             ? supabase
@@ -55,34 +91,34 @@ export default function GardenerDashboard() {
                 .select("id, name, rating, location, image_url")
                 .eq("owner_id", user.id)
                 .limit(10)
-            : Promise.resolve({ data: null }),
+            : Promise.resolve({ data: null }) as any,
           supabase
             .from("gardens")
             .select("id, name, rating, location, image_url")
             .limit(5),
-          supabase.from("garden_logs").select("id, title, status").limit(5),
-          user
-            ? supabase
-                .from("garden_requests")
-                .select("id, garden_id, status, created_at")
-                .eq("user_id", user.id)
-                .order("created_at", { ascending: false })
-                .limit(10)
-            : Promise.resolve({ data: null }),
+          supabase.from("garden_logs").select("id, title, status, created_at").limit(5),
           user
             ? supabase
                 .from("profiles")
                 .select("first_name, profile_image")
                 .eq("id", user.id)
                 .single()
-            : Promise.resolve({ data: null }),
+            : Promise.resolve({ data: null }) as any,
+          user
+            ? supabase
+                .from("notifications")
+                .select("id, title, body, type, read, created_at")
+                .eq("user_id", user.id)
+                .order("created_at", { ascending: false })
+                .limit(5)
+            : Promise.resolve({ data: null }) as any,
         ]);
 
       if (myGardensRes.data) setMyGardens(myGardensRes.data as Garden[]);
       if (recRes.data) setRecommended(recRes.data as Garden[]);
       if (logsRes.data) setLogs(logsRes.data as GardenLog[]);
-      if (requestsRes.data) setRequests(requestsRes.data as GardenRequest[]);
       if (profileRes.data) setProfile(profileRes.data as UserProfile);
+      if (notifRes.data) setNotifications(notifRes.data as NotificationItem[]);
     } catch (error) {
       console.error("Error fetching gardener dashboard data:", error);
     } finally {
@@ -99,6 +135,9 @@ export default function GardenerDashboard() {
     setRefreshing(true);
     fetchData();
   };
+
+  const weekProgress = getWeekProgress(logs);
+  const weekDays = getWeekDays();
 
   return (
     <ThemedSafeArea>
@@ -124,27 +163,58 @@ export default function GardenerDashboard() {
               </YStack>
             }
             rightElement={
-              profile?.profile_image ? (
-                <Circle
-                  size={50}
-                  onPress={() => router.push("/profile")}
-                  overflow="hidden"
+              <XStack gap="$2" alignItems="center">
+                <XStack
+                  backgroundColor="rgba(23, 51, 0, 0.08)"
+                  width={40}
+                  height={40}
+                  borderRadius={20}
+                  justifyContent="center"
+                  alignItems="center"
+                  onPress={() => router.push("/notifications")}
+                  pressStyle={{ scale: 0.95, opacity: 0.8 }}
                 >
-                  <ExpoImage
-                    source={{ uri: profile.profile_image }}
-                    style={{ width: "100%", height: "100%" }}
-                    contentFit="cover"
+                  <MaterialCommunityIcons name="bell-outline" size={20} color="#173300" />
+                  {notifications.filter((n) => !n.read).length > 0 && (
+                    <YStack
+                      position="absolute"
+                      top={-2}
+                      right={-2}
+                      width={16}
+                      height={16}
+                      borderRadius={8}
+                      backgroundColor="#ef4444"
+                      justifyContent="center"
+                      alignItems="center"
+                    >
+                      <Text color="white" fontSize={10} fontWeight="bold">
+                        {notifications.filter((n) => !n.read).length}
+                      </Text>
+                    </YStack>
+                  )}
+                </XStack>
+                {profile?.profile_image ? (
+                  <Circle
+                    size={50}
+                    onPress={() => router.push("/profile")}
+                    overflow="hidden"
+                  >
+                    <ExpoImage
+                      source={{ uri: profile.profile_image }}
+                      style={{ width: "100%", height: "100%" }}
+                      contentFit="cover"
+                    />
+                  </Circle>
+                ) : (
+                  <Ionicons
+                    name="person-circle"
+                    size={50}
+                    color="$borderColor"
+                    onPress={() => router.push("/profile")}
+                    suppressHighlighting
                   />
-                </Circle>
-              ) : (
-                <Ionicons
-                  name="person-circle"
-                  size={50}
-                  color="$borderColor"
-                  onPress={() => router.push("/profile")}
-                  suppressHighlighting
-                />
-              )
+                )}
+              </XStack>
             }
           >
             {/* Search Bar as Child */}
@@ -170,75 +240,119 @@ export default function GardenerDashboard() {
             </XStack>
           </TopNavPill>
 
-          {/* Quick Stats */}
+          {/* Weekly Progress Card */}
+          <Card
+            elevation={2}
+            backgroundColor="#f0f3ec"
+            borderColor="#e3ecd7"
+            borderWidth={1}
+            borderRadius="$6"
+            padding="$4"
+            gap="$3"
+          >
+            <XStack justifyContent="space-between" alignItems="center">
+              <YStack flex={1} gap="$1">
+                <Text fontSize="$4" fontWeight="bold" color="$text_dark">
+                  Jouw wekelijkse progressie
+                </Text>
+                <Text fontSize="$3" color="$secondary">
+                  probeer wekelijks 4 dagen voor je planten te zorgen
+                </Text>
+              </YStack>
+              <YStack
+                width={80}
+                height={80}
+                justifyContent="center"
+                alignItems="center"
+              >
+                <Circle
+                  size={70}
+                  backgroundColor="transparent"
+                  borderWidth={6}
+                  borderColor="rgba(23, 51, 0, 0.1)"
+                />
+                <YStack
+                  position="absolute"
+                  width={70}
+                  height={70}
+                  justifyContent="center"
+                  alignItems="center"
+                >
+                  <Text fontSize="$5" fontWeight="bold" color="$text_dark">
+                    {weekProgress}/4
+                  </Text>
+                </YStack>
+              </YStack>
+            </XStack>
+          </Card>
+
+          {/* Quick Action Buttons */}
           <XStack gap="$3">
             <Card
               flex={1}
               elevation={2}
-              backgroundColor="#f0f3ec"
-              borderColor="#e3ecd7"
+              backgroundColor="white"
+              borderColor="rgba(23, 51, 0, 0.1)"
               borderWidth={1}
+              borderRadius="$6"
               padding="$4"
-              gap="$1"
+              justifyContent="center"
+              alignItems="center"
+              onPress={() => router.push("/logbook")}
+              pressStyle={{ scale: 0.98, opacity: 0.9 }}
             >
-              <Text fontSize="$3" color="$secondary" fontWeight="500">
-                Mijn tuinen
-              </Text>
-              <Text fontSize="$7" color="$text_dark" fontWeight="bold">
-                {myGardens.length}
+              <Text fontSize="$4" fontWeight="600" color="$text_dark">
+                Logboek
               </Text>
             </Card>
             <Card
               flex={1}
               elevation={2}
-              backgroundColor="#f0f3ec"
-              borderColor="#e3ecd7"
+              backgroundColor="white"
+              borderColor="rgba(23, 51, 0, 0.1)"
               borderWidth={1}
+              borderRadius="$6"
               padding="$4"
-              gap="$1"
+              justifyContent="center"
+              alignItems="center"
+              onPress={() => router.push("/logbook/new")}
+              pressStyle={{ scale: 0.98, opacity: 0.9 }}
             >
-              <Text fontSize="$3" color="$secondary" fontWeight="500">
-                Open aanvragen
-              </Text>
-              <Text fontSize="$7" color="$text_dark" fontWeight="bold">
-                {requests.length}
+              <Text fontSize="$4" fontWeight="600" color="$text_dark">
+                Nieuwe log
               </Text>
             </Card>
           </XStack>
 
-          {/* Create Garden CTA */}
-          <Card
-            elevation={2}
-            backgroundColor="rgba(23, 51, 0, 0.05)"
-            borderColor="rgba(23, 51, 0, 0.1)"
-            borderWidth={1}
-            padding="$4"
-            gap="$3"
-            onPress={() => router.push("/garden/create")}
-            pressStyle={{ scale: 0.98, opacity: 0.9 }}
-          >
-            <XStack alignItems="center" gap="$3">
-              <XStack
-                backgroundColor="rgba(23, 51, 0, 0.1)"
-                width={48}
-                height={48}
-                borderRadius={24}
-                justifyContent="center"
-                alignItems="center"
-              >
-                <Ionicons name="add" size={24} color="#173300" />
-              </XStack>
-              <YStack flex={1}>
-                <Text fontSize="$4" color="$text_dark" fontWeight="bold">
-                  Nieuwe tuin aanmaken
-                </Text>
-                <Text fontSize="$3" color="$secondary">
-                  Deel je tuin met enthousiaste tuinzoekers
-                </Text>
-              </YStack>
-              <Ionicons name="chevron-forward" size={20} color="#57594D" />
+          {/* Mini Calendar */}
+          <YStack gap="$3">
+            <Text fontSize="$4" fontWeight="bold" color="$text_dark">
+              {new Date().toLocaleString("nl-BE", { month: "long" })}
+            </Text>
+            <XStack justifyContent="space-between">
+              {weekDays.map((day, i) => (
+                <YStack
+                  key={i}
+                  alignItems="center"
+                  gap="$1"
+                  backgroundColor={day.isToday ? "rgba(23, 51, 0, 0.08)" : "transparent"}
+                  padding="$2"
+                  borderRadius="$4"
+                >
+                  <Text fontSize="$2" color="$secondary" fontWeight="500">
+                    {day.label}
+                  </Text>
+                  <Text
+                    fontSize="$3"
+                    fontWeight={day.isToday ? "bold" : "500"}
+                    color={day.isToday ? "$primary" : "$text_dark"}
+                  >
+                    {day.date.toString().padStart(2, "0")}
+                  </Text>
+                </YStack>
+              ))}
             </XStack>
-          </Card>
+          </YStack>
 
           {/* My Gardens Section */}
           <YStack gap="$3">
@@ -359,12 +473,12 @@ export default function GardenerDashboard() {
             </Text>
             <Card
               elevation={2}
-              backgroundColor="$canvas"
-              borderColor="$borderColor"
+              backgroundColor="rgba(23, 51, 0, 0.05)"
+              borderColor="rgba(23, 51, 0, 0.1)"
               borderWidth={1}
               borderRadius="$6"
               overflow="hidden"
-              height={200}
+              height={160}
               position="relative"
               pressStyle={{ opacity: 0.9, scale: 0.98 }}
               onPress={() => router.push("/map")}
@@ -393,11 +507,11 @@ export default function GardenerDashboard() {
             </Card>
           </YStack>
 
-          {/* Tuinlogboek Section */}
-          <YStack gap="$3" paddingBottom="$20">
+          {/* Recent Logs */}
+          <YStack gap="$3">
             <XStack justifyContent="space-between" alignItems="center">
               <Text fontSize="$5" fontWeight="bold" color="$text_dark">
-                Tuinlogboek
+                Recente logs
               </Text>
               <Text
                 fontSize="$3"
@@ -414,6 +528,18 @@ export default function GardenerDashboard() {
               <XStack padding="$10" justifyContent="center">
                 <Spinner size="large" color="$primary" />
               </XStack>
+            ) : logs.length === 0 ? (
+              <YStack
+                padding="$6"
+                alignItems="center"
+                gap="$2"
+                backgroundColor="rgba(23, 51, 0, 0.03)"
+                borderRadius="$6"
+              >
+                <Text color="$secondary" fontSize="$3" textAlign="center">
+                  het is hier nog heel stil...
+                </Text>
+              </YStack>
             ) : (
               <ScrollView
                 horizontal
@@ -428,6 +554,60 @@ export default function GardenerDashboard() {
               </ScrollView>
             )}
           </YStack>
+
+          {/* Recent Notifications */}
+          {notifications.length > 0 && (
+            <YStack gap="$3">
+              <XStack justifyContent="space-between" alignItems="center">
+                <Text fontSize="$5" fontWeight="bold" color="$text_dark">
+                  Recente meldingen
+                </Text>
+                <Text
+                  fontSize="$3"
+                  fontWeight="600"
+                  color="$text_dark"
+                  textDecorationLine="underline"
+                  onPress={() => router.push("/notifications")}
+                >
+                  meer info →
+                </Text>
+              </XStack>
+
+              <YStack gap="$2">
+                {notifications.slice(0, 3).map((notif) => (
+                  <Card
+                    key={notif.id}
+                    elevation={1}
+                    backgroundColor={notif.read ? "white" : "rgba(227, 236, 215, 0.5)"}
+                    borderColor="rgba(23, 51, 0, 0.1)"
+                    borderWidth={1}
+                    borderRadius="$4"
+                    padding="$3"
+                    onPress={() => router.push("/notifications")}
+                    pressStyle={{ scale: 0.98, opacity: 0.9 }}
+                  >
+                    <XStack gap="$2" alignItems="center">
+                      <Circle size={36} backgroundColor="rgba(23, 51, 0, 0.08)">
+                        <MaterialCommunityIcons
+                          name="bell-outline"
+                          size={16}
+                          color="#173300"
+                        />
+                      </Circle>
+                      <YStack flex={1}>
+                        <Text fontSize="$3" fontWeight="600" color="$text_dark" numberOfLines={1}>
+                          {notif.title}
+                        </Text>
+                        <Text fontSize="$2" color="$secondary" numberOfLines={1}>
+                          {notif.body}
+                        </Text>
+                      </YStack>
+                    </XStack>
+                  </Card>
+                ))}
+              </YStack>
+            </YStack>
+          )}
         </YStack>
       </ScrollView>
 
