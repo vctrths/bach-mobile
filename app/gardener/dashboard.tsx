@@ -1,5 +1,6 @@
 import BottomNav from "@/components/ui/BottomNav";
 import Button from "@/components/ui/Button";
+import NotificationBell from "@/components/ui/NotificationBell";
 import GardenCard from "@/components/ui/GardenCard";
 import { LogCard, type GardenLog } from "@/components/ui/LogCard";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
@@ -163,36 +164,8 @@ export default function GardenerDashboard() {
               </YStack>
             }
             rightElement={
-              <XStack gap="$2" alignItems="center">
-                <XStack
-                  backgroundColor="rgba(23, 51, 0, 0.08)"
-                  width={40}
-                  height={40}
-                  borderRadius={20}
-                  justifyContent="center"
-                  alignItems="center"
-                  onPress={() => router.push("/notifications")}
-                  pressStyle={{ scale: 0.95, opacity: 0.8 }}
-                >
-                  <MaterialCommunityIcons name="bell-outline" size={20} color="#173300" />
-                  {notifications.filter((n) => !n.read).length > 0 && (
-                    <YStack
-                      position="absolute"
-                      top={-2}
-                      right={-2}
-                      width={16}
-                      height={16}
-                      borderRadius={8}
-                      backgroundColor="#ef4444"
-                      justifyContent="center"
-                      alignItems="center"
-                    >
-                      <Text color="white" fontSize={10} fontWeight="bold">
-                        {notifications.filter((n) => !n.read).length}
-                      </Text>
-                    </YStack>
-                  )}
-                </XStack>
+              <XStack gap="$3" alignItems="center">
+                <NotificationBell unreadCount={notifications.filter((n) => !n.read).length} />
                 {profile?.profile_image ? (
                   <Circle
                     size={50}
