@@ -12,6 +12,7 @@ import { Card, Circle, Spinner, Text, XStack, YStack } from "tamagui";
 const NOTIF_ICONS: Record<string, string> = {
   request_accepted: "check-circle-outline",
   request_rejected: "close-circle-outline",
+  request_received: "account-plus-outline",
   message: "message-text-outline",
   reminder: "calendar-clock-outline",
   system: "information-outline",
@@ -221,14 +222,64 @@ export default function NotificationsScreen() {
                             />
                           </Card>
                         )}
-                        {notif.type !== "request_accepted" && (
-                          <NotificationRow
-                            notif={notif}
-                            onPress={() =>
-                              router.push("/messages" as any)
-                            }
-                          />
+                        {notif.type === "request_received" && (
+                          <Card
+                            elevation={2}
+                            backgroundColor="white"
+                            borderColor="rgba(23, 51, 0, 0.1)"
+                            borderWidth={1}
+                            borderRadius="$6"
+                            padding="$4"
+                            gap="$3"
+                          >
+                            <NotificationRow
+                              notif={notif}
+                              onPress={() =>
+                                router.push("/owner/dashboard" as any)
+                              }
+                            />
+                            <XStack gap="$2">
+                              <Button
+                                label="Chat openen"
+                                flex={1}
+                                backgroundColor="rgba(23, 51, 0, 0.08)"
+                                color="#173300"
+                                onPress={() =>
+                                  router.push("/messages" as any)
+                                }
+                              />
+                            </XStack>
+                            <XStack gap="$2">
+                              <Button
+                                label="Afwijzen"
+                                flex={1}
+                                backgroundColor="transparent"
+                                color="#ef4444"
+                                onPress={() =>
+                                  router.push("/owner/dashboard" as any)
+                                }
+                              />
+                              <Button
+                                label="Accepteren"
+                                flex={1}
+                                backgroundColor="#22c55e"
+                                color="white"
+                                onPress={() =>
+                                  router.push("/owner/dashboard" as any)
+                                }
+                              />
+                            </XStack>
+                          </Card>
                         )}
+                        {notif.type !== "request_accepted" &&
+                          notif.type !== "request_received" && (
+                            <NotificationRow
+                              notif={notif}
+                              onPress={() =>
+                                router.push("/messages" as any)
+                              }
+                            />
+                          )}
                       </React.Fragment>
                     ))}
                   </YStack>
