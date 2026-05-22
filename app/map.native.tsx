@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import MapView, { Marker, Callout } from "react-native-maps";
 import { router } from "expo-router";
 import { supabase } from "@/utils/supabase";
-import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
 import { YStack, Text, Image, Spinner } from "tamagui";
 import { StyleSheet } from "react-native";
@@ -41,58 +40,56 @@ export default function MapScreen() {
   };
 
   return (
-    <ThemedSafeArea>
+    <YStack flex={1} backgroundColor="$white">
+      <TopNavPill title="Kaart" />
       <YStack flex={1}>
-        <TopNavPill title="Kaart" />
-        <YStack flex={1}>
-          {loading ? (
-            <YStack flex={1} justifyContent="center" alignItems="center">
-              <Spinner size="large" color="$primary" />
-            </YStack>
-          ) : (
-            <MapView style={styles.map} initialRegion={initialRegion}>
-              {gardens.map(
-                (garden) =>
-                  garden.latitude &&
-                  garden.longitude && (
-                    <Marker
-                      key={garden.id}
-                      coordinate={{
-                        latitude: garden.latitude,
-                        longitude: garden.longitude,
-                      }}
-                      title={garden.name}
-                      description={garden.location}
-                      onCalloutPress={() =>
-                        router.push(`/garden/${garden.id}`)
-                      }
-                    >
-                      <Callout>
-                        <YStack padding="$2" maxWidth={180}>
-                          {garden.image_url && (
-                            <Image
-                              source={{ uri: garden.image_url }}
-                              width={160}
-                              height={80}
-                              borderRadius="$2"
-                            />
-                          )}
-                          <Text fontWeight="600" fontSize="$3" marginTop="$1">
-                            {garden.name}
-                          </Text>
-                          <Text color="$secondary" fontSize="$2">
-                            {garden.location} · {"★".repeat(Math.round(garden.rating))}
-                          </Text>
-                        </YStack>
-                      </Callout>
-                    </Marker>
-                  )
-              )}
-            </MapView>
-          )}
-        </YStack>
+        {loading ? (
+          <YStack flex={1} justifyContent="center" alignItems="center">
+            <Spinner size="large" color="$primary" />
+          </YStack>
+        ) : (
+          <MapView style={styles.map} initialRegion={initialRegion}>
+            {gardens.map(
+              (garden) =>
+                garden.latitude &&
+                garden.longitude && (
+                  <Marker
+                    key={garden.id}
+                    coordinate={{
+                      latitude: garden.latitude,
+                      longitude: garden.longitude,
+                    }}
+                    title={garden.name}
+                    description={garden.location}
+                    onCalloutPress={() =>
+                      router.push(`/garden/${garden.id}`)
+                    }
+                  >
+                    <Callout>
+                      <YStack padding="$2" maxWidth={180}>
+                        {garden.image_url && (
+                          <Image
+                            source={{ uri: garden.image_url }}
+                            width={160}
+                            height={80}
+                            borderRadius="$2"
+                          />
+                        )}
+                        <Text fontWeight="600" fontSize="$3" marginTop="$1">
+                          {garden.name}
+                        </Text>
+                        <Text color="$secondary" fontSize="$2">
+                          {garden.location} · {"★".repeat(Math.round(garden.rating))}
+                        </Text>
+                      </YStack>
+                    </Callout>
+                  </Marker>
+                )
+            )}
+          </MapView>
+        )}
       </YStack>
-    </ThemedSafeArea>
+    </YStack>
   );
 }
 
