@@ -1,5 +1,6 @@
 import BottomNav from "@/components/ui/BottomNav";
 import Button from "@/components/ui/Button";
+import NotificationBell from "@/components/ui/NotificationBell";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
 import ScreenContent from "@/components/ui/ScreenContent";
@@ -117,23 +118,26 @@ export default function SearchScreen() {
               </YStack>
             }
             rightElement={
-              profile?.profile_image ? (
-                <Circle size={50} onPress={() => router.push("/profile")} overflow="hidden">
-                  <ExpoImage
-                    source={{ uri: profile.profile_image }}
-                    style={{ width: "100%", height: "100%" }}
-                    contentFit="cover"
+              <XStack gap="$3" alignItems="center">
+                <NotificationBell />
+                {profile?.profile_image ? (
+                  <Circle size={50} onPress={() => router.push("/profile")} overflow="hidden">
+                    <ExpoImage
+                      source={{ uri: profile.profile_image }}
+                      style={{ width: "100%", height: "100%" }}
+                      contentFit="cover"
+                    />
+                  </Circle>
+                ) : (
+                  <Ionicons
+                    name="person-circle"
+                    size={50}
+                    color="$borderColor"
+                    onPress={() => router.push("/profile")}
+                    suppressHighlighting
                   />
-                </Circle>
-              ) : (
-                <Ionicons
-                  name="person-circle"
-                  size={50}
-                  color="$borderColor"
-                  onPress={() => router.push("/profile")}
-                  suppressHighlighting
-                />
-              )
+                )}
+              </XStack>
             }
           >
             {/* Active Search Bar */}
