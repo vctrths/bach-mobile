@@ -9,7 +9,7 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { RefreshControl, ScrollView } from "react-native";
-import { Card, Circle, H2, Spinner, Text, XStack, YStack } from "tamagui";
+import { Card, Circle, Spinner, Text, XStack, YStack } from "tamagui";
 
 type Garden = {
   id: string;
@@ -17,6 +17,16 @@ type Garden = {
   rating: number;
   location: string;
   image_url: string | null;
+};
+
+type ApprovedGardener = {
+  id: string;
+  garden_id: string;
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  profile_image: string | null;
+  days: string[];
 };
 
 type GardenRequest = {
@@ -28,15 +38,25 @@ type GardenRequest = {
   created_at: string;
 };
 
-type UserProfile = {
-  first_name: string;
-  profile_image: string | null;
-};
+const DAY_LABELS = ["M", "D", "W", "D", "V", "Z", "Z"];
+const DAY_NAMES = [
+  "maandag",
+  "dinsdag",
+  "woensdag",
+  "donderdag",
+  "vrijdag",
+  "zaterdag",
+  "zondag",
+];
 
 export default function OwnerDashboard() {
   const [gardens, setGardens] = useState<Garden[]>([]);
+  const [gardeners, setGardeners] = useState<ApprovedGardener[]>([]);
   const [requests, setRequests] = useState<GardenRequest[]>([]);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [profile, setProfile] = useState<{
+    first_name: string;
+    profile_image: string | null;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -48,28 +68,51 @@ export default function OwnerDashboard() {
 
       if (!user) return;
 
-      const [gardensRes, requestsRes, profileRes] = await Promise.all([
-        supabase
-          .from("gardens")
-          .select("id, name, rating, location, image_url")
-          .eq("owner_id", user.id)
-          .limit(10),
-        supabase
-          .from("garden_requests")
-          .select("id, garden_id, user_id, motivation, status, created_at")
-          .eq("status", "pending")
-          .order("created_at", { ascending: false })
-          .limit(10),
-        supabase
-          .from("profiles")
-          .select("first_name, profile_image")
-          .eq("id", user.id)
-          .single(),
-      ]);
+      // Fetch gardens, approved gardeners, pending requests, and profile
+      const [gardensRes, gardenersRes, requestsRes, profileRes] =
+        await Promise.all([
+          supabase
+            .from("gardens")
+            .select("id, name, rating, location, image_url")
+            .eq("owner_id", user.id)
+            .limit(10),
+          supabase
+            .from("garden_requests")
+            .select(
+              `id, garden_id, user_id, days, profiles(first_name, last_name, profile_image)`
+            )
+            .eq("status", "approved")
+            .limit(20),
+          supabase
+            .from("garden_requests")
+            .select("id, garden_id, user_id, motivation, status, created_at")
+            .eq("status", "pending")
+            .order("created_at", { ascending: false })
+            .limit(10),
+          supabase
+            .from("profiles")
+            .select("first_name, profile_image")
+            .eq("id", user.id)
+            .single(),
+        ]);
 
       if (gardensRes.data) setGardens(gardensRes.data as Garden[]);
+
+      if (gardenersRes.data) {
+        const mappedGardeners = (gardenersRes.data as any[]).map((r) => ({
+          id: r.id,
+          garden_id: r.garden_id,
+          user_id: r.user_id,
+          first_name: r.profiles?.first_name ?? "Tuinzoeker",
+          last_name: r.profiles?.last_name ?? "",
+          profile_image: r.profiles?.profile_image ?? null,
+          days: r.days ?? [],
+        }));
+        setGardeners(mappedGardeners);
+      }
+
       if (requestsRes.data) setRequests(requestsRes.data as GardenRequest[]);
-      if (profileRes.data) setProfile(profileRes.data as UserProfile);
+      if (profileRes.data) setProfile(profileRes.data);
     } catch (error) {
       console.error("Error fetching owner dashboard data:", error);
     } finally {
@@ -87,7 +130,10 @@ export default function OwnerDashboard() {
     fetchData();
   };
 
-  const handleRespond = async (requestId: string, status: "approved" | "rejected") => {
+  const handleRespond = async (
+    requestId: string,
+    status: "approved" | "rejected"
+  ) => {
     try {
       const { error } = await supabase
         .from("garden_requests")
@@ -96,6 +142,10 @@ export default function OwnerDashboard() {
 
       if (!error) {
         setRequests((prev) => prev.filter((r) => r.id !== requestId));
+        // Refresh gardeners list if approved
+        if (status === "approved") {
+          fetchData();
+        }
       }
     } catch (error) {
       console.error("Error updating request:", error);
@@ -111,18 +161,36 @@ export default function OwnerDashboard() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        <YStack flex={1} paddingHorizontal="$4" paddingVertical="$4" gap="$6" paddingBottom="$25">
+        <YStack
+          flex={1}
+          paddingHorizontal="$4"
+          paddingVertical="$4"
+          gap="$6"
+          paddingBottom="$25"
+        >
           {/* Top Navigation */}
           <TopNavPill
             hideBack
             title={
               <YStack gap="$2">
                 <Text fontSize="$3" fontWeight="600" color="$text_dark">
-                  Welkom terug
+                  Locatie
                 </Text>
-                <Text fontSize="$5" fontWeight="bold" color="$text_dark">
-                  {profile?.first_name ?? "Tuineigenaar"}
-                </Text>
+                <XStack gap="$2" alignItems="center">
+                  <MaterialCommunityIcons
+                    name="map-marker"
+                    size={18}
+                    color="$primary"
+                  />
+                  <Text fontSize="$5" fontWeight="bold" color="$text_dark">
+                    Leuven, BE
+                  </Text>
+                  <MaterialCommunityIcons
+                    name="chevron-down"
+                    size={18}
+                    color="$text_dark"
+                  />
+                </XStack>
               </YStack>
             }
             rightElement={
@@ -148,7 +216,29 @@ export default function OwnerDashboard() {
                 />
               )
             }
-          />
+          >
+            {/* Search Bar as Child */}
+            <XStack
+              backgroundColor="white"
+              borderRadius="$8"
+              paddingHorizontal="$4"
+              paddingVertical="$3"
+              alignItems="center"
+              gap="$2"
+              borderWidth={1}
+              borderColor="$borderColor"
+              onPress={() => router.push("/search")}
+            >
+              <MaterialCommunityIcons
+                name="magnify"
+                size={20}
+                color="$text_dark"
+              />
+              <Text fontSize="$3" color="$text_dark" flex={1}>
+                Zoeken naar een tuin
+              </Text>
+            </XStack>
+          </TopNavPill>
 
           {/* Quick Stats */}
           <XStack gap="$3">
@@ -186,45 +276,11 @@ export default function OwnerDashboard() {
             </Card>
           </XStack>
 
-          {/* Create Garden CTA */}
-          <Card
-            elevation={2}
-            backgroundColor="rgba(23, 51, 0, 0.05)"
-            borderColor="rgba(23, 51, 0, 0.1)"
-            borderWidth={1}
-            padding="$4"
-            gap="$3"
-            onPress={() => router.push("/garden/create")}
-            pressStyle={{ scale: 0.98, opacity: 0.9 }}
-          >
-            <XStack alignItems="center" gap="$3">
-              <XStack
-                backgroundColor="rgba(23, 51, 0, 0.1)"
-                width={48}
-                height={48}
-                borderRadius={24}
-                justifyContent="center"
-                alignItems="center"
-              >
-                <Ionicons name="add" size={24} color="#173300" />
-              </XStack>
-              <YStack flex={1}>
-                <Text fontSize="$4" color="$text_dark" fontWeight="bold">
-                  Nieuwe tuin aanmaken
-                </Text>
-                <Text fontSize="$3" color="$secondary">
-                  Deel je tuin met enthousiaste tuinzoekers
-                </Text>
-              </YStack>
-              <Ionicons name="chevron-forward" size={20} color="#57594D" />
-            </XStack>
-          </Card>
-
-          {/* My Gardens Section */}
+          {/* Tuinen Section */}
           <YStack gap="$3">
             <XStack justifyContent="space-between" alignItems="center">
               <Text fontSize="$5" fontWeight="bold" color="$text_dark">
-                Mijn tuinen
+                Tuinen
               </Text>
             </XStack>
 
@@ -282,6 +338,137 @@ export default function OwnerDashboard() {
               </ScrollView>
             )}
           </YStack>
+
+          {/* Jouw planning Section */}
+          <YStack gap="$3">
+            <Text fontSize="$5" fontWeight="bold" color="$text_dark">
+              Jouw planning
+            </Text>
+
+            {loading ? (
+              <XStack padding="$10" justifyContent="center">
+                <Spinner size="large" color="$primary" />
+              </XStack>
+            ) : gardeners.length === 0 ? (
+              <YStack
+                padding="$6"
+                alignItems="center"
+                gap="$2"
+                backgroundColor="rgba(23, 51, 0, 0.03)"
+                borderRadius="$6"
+              >
+                <MaterialCommunityIcons
+                  name="calendar-blank"
+                  size={32}
+                  color="#57594D"
+                />
+                <Text color="$secondary" fontSize="$3" textAlign="center">
+                  Nog geen tuinzoekers gepland.
+                </Text>
+              </YStack>
+            ) : (
+              <YStack gap="$4">
+                {/* Day header row */}
+                <XStack
+                  paddingHorizontal="$2"
+                  paddingVertical="$2"
+                  alignItems="center"
+                  gap="$2"
+                >
+                  <Text
+                    fontSize="$3"
+                    color="$secondary"
+                    fontWeight="500"
+                    width={80}
+                  >
+                    Dag
+                  </Text>
+                  <XStack flex={1} justifyContent="space-around">
+                    {DAY_LABELS.map((label, i) => (
+                      <Text
+                        key={i}
+                        fontSize="$3"
+                        color="$secondary"
+                        fontWeight="500"
+                        opacity={0.4}
+                      >
+                        {label}
+                      </Text>
+                    ))}
+                  </XStack>
+                </XStack>
+
+                {/* Gardener rows */}
+                {gardeners.map((gardener) => (
+                  <XStack
+                    key={gardener.id}
+                    paddingHorizontal="$2"
+                    paddingVertical="$2"
+                    alignItems="center"
+                    gap="$2"
+                  >
+                    <Text
+                      fontSize="$3"
+                      color="$text_dark"
+                      fontWeight="500"
+                      width={80}
+                    >
+                      {gardener.first_name}
+                    </Text>
+                    <XStack flex={1} justifyContent="space-around">
+                      {DAY_NAMES.map((dayName, i) => {
+                        const isActive = gardener.days.includes(dayName);
+                        return (
+                          <Circle
+                            key={i}
+                            size={10}
+                            backgroundColor={
+                              isActive ? "$primary" : "$borderColor"
+                            }
+                            opacity={isActive ? 1 : 0.3}
+                          />
+                        );
+                      })}
+                    </XStack>
+                  </XStack>
+                ))}
+              </YStack>
+            )}
+          </YStack>
+
+          {/* Create Garden CTA */}
+          <Card
+            elevation={2}
+            backgroundColor="rgba(23, 51, 0, 0.05)"
+            borderColor="rgba(23, 51, 0, 0.1)"
+            borderWidth={1}
+            padding="$4"
+            gap="$3"
+            onPress={() => router.push("/garden/create")}
+            pressStyle={{ scale: 0.98, opacity: 0.9 }}
+          >
+            <XStack alignItems="center" gap="$3">
+              <XStack
+                backgroundColor="rgba(23, 51, 0, 0.1)"
+                width={48}
+                height={48}
+                borderRadius={24}
+                justifyContent="center"
+                alignItems="center"
+              >
+                <Ionicons name="add" size={24} color="#173300" />
+              </XStack>
+              <YStack flex={1}>
+                <Text fontSize="$4" color="$text_dark" fontWeight="bold">
+                  Nieuwe tuin aanmaken
+                </Text>
+                <Text fontSize="$3" color="$secondary">
+                  Deel je tuin met enthousiaste tuinzoekers
+                </Text>
+              </YStack>
+              <Ionicons name="chevron-forward" size={20} color="#57594D" />
+            </XStack>
+          </Card>
 
           {/* Incoming Requests Section */}
           <YStack gap="$3" paddingBottom="$20">
