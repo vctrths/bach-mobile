@@ -2,7 +2,6 @@ import BottomNav from "@/components/ui/BottomNav";
 import Button from "@/components/ui/Button";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
-import ScreenContent from "@/components/ui/ScreenContent";
 import { supabase } from "@/utils/supabase";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
@@ -10,7 +9,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import { Alert, Platform, ScrollView } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Circle, H1, Text, TextArea, Input, XStack, YStack } from "tamagui";
+import { Circle, Text, TextArea, Input, XStack, YStack } from "tamagui";
 import { z } from "zod";
 
 const DAYS = [
@@ -114,7 +113,7 @@ export default function GardenRequestScreen() {
   return (
     <ThemedSafeArea>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <ScreenContent>
+        <YStack paddingHorizontal="$4" paddingTop="$6" gap="$6" paddingBottom={200}>
           {/* Top Navigation */}
           <TopNavPill
             title="Aanvraag"
@@ -398,7 +397,7 @@ export default function GardenRequestScreen() {
             disabled={loading}
             opacity={loading ? 0.7 : 1}
           />
-        </ScreenContent>
+        </YStack>
       </ScrollView>
 
       {/* Bottom Navigation */}
