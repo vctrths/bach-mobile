@@ -404,7 +404,6 @@ export default function GardenRequestScreen() {
       {/* Bottom Navigation */}
       <BottomNav
         activeTab="home"
-        onHomePress={() => router.push("/dashboard")}
         onMessagePress={() => router.push("/messages" as any)}
         onProfilePress={() => router.push("/profile")}
       />

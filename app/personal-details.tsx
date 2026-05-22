@@ -195,7 +195,6 @@ export default function PersonalDetailsScreen() {
       {/* Floating Bottom Navigation */}
       <BottomNav
         activeTab="profile"
-        onHomePress={() => router.push("/dashboard")}
         onMessagePress={() => router.push("/messages" as any)}
         onProfilePress={() => router.push("/profile")}
       />

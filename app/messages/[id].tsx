@@ -154,7 +154,6 @@ export default function ChatDetail() {
 
       <BottomNav
         activeTab="message"
-        onHomePress={() => router.push("/dashboard")}
         onProfilePress={() => router.push("/profile")}
       />
     </ThemedSafeArea>

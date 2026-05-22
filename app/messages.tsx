@@ -159,7 +159,6 @@ export default function Messages() {
 
       <BottomNav
         activeTab="message"
-        onHomePress={() => router.push("/dashboard")}
         onProfilePress={() => router.push("/profile")}
       />
     </ThemedSafeArea>

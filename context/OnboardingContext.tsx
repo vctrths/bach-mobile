@@ -1,7 +1,7 @@
 import React, { createContext, ReactNode, useState } from "react";
 
 export interface OnboardingData {
-  role: "tuineigenaar" | "tuinzoeker" | null;
+  role: "tuineigenaar" | "tuinzoeker" | "tuinzoeker (met tuin)" | null;
   firstName: string;
   lastName: string;
   email: string;

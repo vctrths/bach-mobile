@@ -56,7 +56,6 @@ export default function SuccesverzoekScreen() {
 
       <BottomNav
         activeTab="message"
-        onHomePress={() => router.push("/dashboard")}
         onMessagePress={() => router.push("/messages" as any)}
         onProfilePress={() => router.push("/profile")}
       />

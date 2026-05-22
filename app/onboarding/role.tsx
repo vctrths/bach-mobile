@@ -22,7 +22,7 @@ const RoleCard = styled(YStack, {
 
 export default function RoleSelection() {
   const [selectedRole, setSelectedRole] = useState<
-    "tuineigenaar" | "tuinzoeker" | null
+    "tuineigenaar" | "tuinzoeker" | "tuinzoeker (met tuin)" | null
   >(null);
   const { updateData } = useContext(OnboardingContext);
 
@@ -77,6 +77,25 @@ export default function RoleSelection() {
                 fontSize="$5"
               >
                 Tuinzoeker
+              </Text>
+            </RoleCard>
+
+            <Divider hasLabel />
+
+            <RoleCard
+              backgroundColor={
+                selectedRole === "tuinzoeker (met tuin)" ? "$background" : "$white"
+              }
+              borderColor={
+                selectedRole === "tuinzoeker (met tuin)" ? "$background" : "$borderColor"
+              }
+              onPress={() => setSelectedRole("tuinzoeker (met tuin)")}
+            >
+              <Text
+                color={selectedRole === "tuinzoeker (met tuin)" ? "$white" : "$text_dark"}
+                fontSize="$5"
+              >
+                Tuinzoeker (met tuin)
               </Text>
             </RoleCard>
           </YStack>

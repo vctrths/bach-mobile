@@ -1,22 +1,23 @@
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import Logo from "@/assets/images/logo.svg";
 import { useAuth } from "@/context/AuthContext";
+import { getHomeRoute } from "@/utils/role-routing";
 import { router } from "expo-router";
 import { useEffect } from "react";
 import { Spinner, YStack } from "tamagui";
 
 export default function SplashScreen() {
-  const { session, loading } = useAuth();
+  const { session, profile, loading } = useAuth();
 
   useEffect(() => {
     if (!loading) {
       if (session) {
-        router.replace("/dashboard");
+        router.replace(getHomeRoute(profile?.role) as any);
       } else {
         router.replace("/");
       }
     }
-  }, [loading, session]);
+  }, [loading, session, profile]);
 
   return (
     <ThemedSafeArea>

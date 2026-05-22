@@ -1,10 +1,18 @@
 import Button from "@/components/ui/Button";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
+import { useAuth } from "@/context/AuthContext";
+import { getHomeRoute } from "@/utils/role-routing";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Text, XStack, YStack } from "tamagui";
 
 export default function LoginSuccessScreen() {
+  const { profile } = useAuth();
+
+  const handleGoToDashboard = () => {
+    router.replace(getHomeRoute(profile?.role) as any);
+  };
+
   return (
     <ThemedSafeArea>
       <YStack flex={1} paddingHorizontal="$6" justifyContent="center" gap="$6">
@@ -31,7 +39,7 @@ export default function LoginSuccessScreen() {
           label="Ga naar dashboard"
           backgroundColor="$background"
           color="$white"
-          onPress={() => router.replace("/dashboard")}
+          onPress={handleGoToDashboard}
         />
       </YStack>
     </ThemedSafeArea>

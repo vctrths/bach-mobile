@@ -1,7 +1,10 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
+import { router } from "expo-router";
 import React from "react";
 import { Circle, XStack } from "tamagui";
+import { useAuth } from "@/context/AuthContext";
+import { getHomeRoute } from "@/utils/role-routing";
 
 interface BottomNavProps {
   activeTab?: "home" | "message" | "profile";
@@ -16,8 +19,18 @@ export default function BottomNav({
   onMessagePress,
   onProfilePress,
 }: BottomNavProps) {
+  const { profile } = useAuth();
+
+  const defaultHomePress = () =>
+    router.push(getHomeRoute(profile?.role) as any);
+
   const navItems = [
-    { key: "home", icon: "home", label: "Home", onPress: onHomePress },
+    {
+      key: "home",
+      icon: "home",
+      label: "Home",
+      onPress: onHomePress || defaultHomePress,
+    },
     {
       key: "message",
       icon: "message",
