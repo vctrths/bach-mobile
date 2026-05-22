@@ -2,13 +2,22 @@ import TopNavPill from "@/components/ui/TopNavPill";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Text, YStack } from "tamagui";
+import { StyleSheet, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function MapScreen() {
-  return (
-    <YStack flex={1} backgroundColor="$white">
-      <TopNavPill title="Kaart" onBackPress={() => router.back()} />
+  const insets = useSafeAreaInsets();
 
-      <YStack flex={1} justifyContent="center" alignItems="center" gap="$4" paddingHorizontal="$4">
+  return (
+    <View style={StyleSheet.absoluteFillObject}>
+      <YStack
+        style={StyleSheet.absoluteFillObject}
+        justifyContent="center"
+        alignItems="center"
+        gap="$4"
+        paddingHorizontal="$4"
+        backgroundColor="$white"
+      >
         <Ionicons name="map-outline" size={64} color="#57594D" />
         <Text fontSize="$5" fontWeight="bold" color="$text_dark" textAlign="center">
           Kaartweergave
@@ -17,6 +26,10 @@ export default function MapScreen() {
           De kaart is beschikbaar in de mobiele app. Open de app op je telefoon om tuinen in de buurt te ontdekken.
         </Text>
       </YStack>
-    </YStack>
+
+      <YStack position="absolute" top={insets.top} left={0} right={0} paddingHorizontal="$4">
+        <TopNavPill title="Kaart" onBackPress={() => router.back()} />
+      </YStack>
+    </View>
   );
 }
