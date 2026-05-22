@@ -1,3 +1,4 @@
+import BottomNav from "@/components/ui/BottomNav";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -52,6 +53,13 @@ export default function SuccesaboScreen() {
           </Button>
         </YStack>
       </YStack>
+
+      <BottomNav
+        activeTab="home"
+        onHomePress={() => router.push("/dashboard")}
+        onMessagePress={() => router.push("/messages" as any)}
+        onProfilePress={() => router.push("/profile")}
+      />
     </ThemedSafeArea>
   );
 }

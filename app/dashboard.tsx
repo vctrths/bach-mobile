@@ -239,6 +239,8 @@ export default function Dashboard() {
               overflow="hidden"
               height={200}
               position="relative"
+              pressStyle={{ opacity: 0.9, scale: 0.98 }}
+              onPress={() => router.push("/map")}
             >
               <ExpoImage
                 source={require("@/assets/images/hero.png")}

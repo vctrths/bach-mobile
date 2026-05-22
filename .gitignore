@@ -42,5 +42,8 @@ app-example
 /ios
 /android
 
+# tamagui compiler output
+.tamagui/
+
 #fonts
 assets/fonts/*

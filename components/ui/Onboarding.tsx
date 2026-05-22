@@ -41,7 +41,7 @@ export default function Onboarding() {
     }
   }
   return (
-    <YStack flex={1} justifyContent="space-between" paddingVertical="$12">
+    <YStack flex={1} justifyContent="space-between" paddingHorizontal="$6">
       <YStack marginTop="$4">
         <Info
           image={onboardingSteps[step].image}
