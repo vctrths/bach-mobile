@@ -1,6 +1,7 @@
 import BottomNav from "@/components/ui/BottomNav";
 import Button from "@/components/ui/Button";
 import NotificationBell from "@/components/ui/NotificationBell";
+import SearchBar from "@/components/ui/SearchBar";
 import GardenCard from "@/components/ui/GardenCard";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
@@ -216,27 +217,7 @@ export default function OwnerDashboard() {
               </XStack>
             }
           >
-            {/* Search Bar as Child */}
-            <XStack
-              backgroundColor="white"
-              borderRadius="$8"
-              paddingHorizontal="$4"
-              paddingVertical="$3"
-              alignItems="center"
-              gap="$2"
-              borderWidth={1}
-              borderColor="$borderColor"
-              onPress={() => router.push("/search")}
-            >
-              <MaterialCommunityIcons
-                name="magnify"
-                size={20}
-                color="$text_dark"
-              />
-              <Text fontSize="$3" color="$text_dark" flex={1}>
-                Zoeken naar een tuin
-              </Text>
-            </XStack>
+            <SearchBar onPress={() => router.push("/search")} />
           </TopNavPill>
 
           {/* Quick Stats */}

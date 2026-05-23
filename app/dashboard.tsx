@@ -1,6 +1,7 @@
 import BottomNav from "@/components/ui/BottomNav";
 import Button from "@/components/ui/Button";
 import NotificationBell from "@/components/ui/NotificationBell";
+import SearchBar from "@/components/ui/SearchBar";
 import GardenCard from "@/components/ui/GardenCard";
 import { LogCard, type GardenLog } from "@/components/ui/LogCard";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
@@ -132,29 +133,7 @@ export default function Dashboard() {
               </XStack>
             }
           >
-            {/* Search Bar inline inside the pill */}
-            <XStack
-              flex={1}
-              backgroundColor="white"
-              borderRadius="$8"
-              paddingHorizontal="$4"
-              paddingVertical="$2"
-              marginHorizontal="$2"
-              alignItems="center"
-              gap="$2"
-              borderWidth={1}
-              borderColor="$borderColor"
-              onPress={() => router.push("/search")}
-            >
-              <MaterialCommunityIcons
-                name="magnify"
-                size={18}
-                color="$text_dark"
-              />
-              <Text fontSize="$3" color="$text_dark" flex={1}>
-                Zoeken naar een tuin
-              </Text>
-            </XStack>
+            <SearchBar onPress={() => router.push("/search")} />
           </TopNavPill>
 
           {/* Pro Upgrade Banner */}

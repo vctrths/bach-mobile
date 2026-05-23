@@ -1,6 +1,7 @@
 import BottomNav from "@/components/ui/BottomNav";
 import Button from "@/components/ui/Button";
 import NotificationBell from "@/components/ui/NotificationBell";
+import SearchBar from "@/components/ui/SearchBar";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
 import { supabase } from "@/utils/supabase";
@@ -8,7 +9,7 @@ import { Image as ExpoImage } from "@/lib/image";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { ScrollView, TextInput } from "react-native";
+import { ScrollView } from "react-native";
 import { Card, Circle, Spinner, Text, XStack, YStack } from "tamagui";
 
 type Garden = {
@@ -134,41 +135,12 @@ export default function SearchScreen() {
               </XStack>
             }
           >
-            {/* Active Search Bar */}
-            <XStack
-              backgroundColor="white"
-              borderRadius="$8"
-              paddingHorizontal="$4"
-              paddingVertical="$3"
-              alignItems="center"
-              gap="$2"
-              borderWidth={1}
-              borderColor="$borderColor"
-            >
-              <MaterialCommunityIcons name="magnify" size={20} color="$text_dark" />
-              <TextInput
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                placeholder="Zoeken naar een tuin"
-                placeholderTextColor="#6b7280"
-                style={{
-                  flex: 1,
-                  fontSize: 16,
-                  color: "#1f2937",
-                  fontFamily: "Satoshi",
-                }}
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-              {searchQuery.length > 0 && (
-                <Ionicons
-                  name="close-circle"
-                  size={20}
-                  color="#9ca3af"
-                  onPress={() => setSearchQuery("")}
-                />
-              )}
-            </XStack>
+            <SearchBar
+              active
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder="Zoeken naar een tuin"
+            />
           </TopNavPill>
 
           {/* Search Results */}
