@@ -88,7 +88,6 @@ export default function Dashboard() {
           {/* Top Navigation */}
           <TopNavPill
             hideBack
-            inlineChildren
             title={
               <XStack gap="$2" alignItems="center">
                 <MaterialCommunityIcons
