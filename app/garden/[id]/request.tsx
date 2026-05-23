@@ -122,12 +122,7 @@ export default function GardenRequestScreen() {
 
           {/* Main Form Container */}
           <YStack
-            backgroundColor="rgba(255, 255, 255, 0.4)"
             borderRadius="$10"
-            borderWidth={1}
-            borderColor="rgba(255, 255, 255, 0.45)"
-            padding="$4"
-            gap="$6"
             overflow="hidden"
             shadowColor="#0f1a0f"
             shadowOpacity={0.08}
@@ -141,6 +136,14 @@ export default function GardenRequestScreen() {
               experimentalBlurMethod="dimezisBlurView"
               style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, borderRadius: 40 }}
             />
+            <YStack
+              backgroundColor="rgba(255, 255, 255, 0.4)"
+              borderRadius="$10"
+              borderWidth={1}
+              borderColor="rgba(255, 255, 255, 0.45)"
+              padding="$4"
+              gap="$6"
+            >
 
             {/* Motivation Section */}
             <YStack gap="$3">
@@ -376,6 +379,7 @@ export default function GardenRequestScreen() {
                 </Text>
               )}
             </YStack>
+          </YStack>
           </YStack>
 
           {showPicker && (
