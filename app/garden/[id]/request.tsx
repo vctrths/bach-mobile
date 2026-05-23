@@ -283,7 +283,7 @@ export default function GardenRequestScreen() {
                   alignItems="center"
                   justifyContent="center"
                   gap={12}
-                  onPress={() => setShowPicker(true)}
+                  onPress={() => setShowPicker((prev) => !prev)}
                   pressStyle={{
                     scale: 0.98,
                     opacity: 0.9,
@@ -315,7 +315,7 @@ export default function GardenRequestScreen() {
                   alignItems="center"
                   justifyContent="center"
                   gap={12}
-                  onPress={() => setShowPicker(true)}
+                  onPress={() => setShowPicker((prev) => !prev)}
                   pressStyle={{
                     scale: 0.98,
                     opacity: 0.9,
@@ -347,7 +347,7 @@ export default function GardenRequestScreen() {
                   alignItems="center"
                   justifyContent="center"
                   gap={12}
-                  onPress={() => setShowPicker(true)}
+                  onPress={() => setShowPicker((prev) => !prev)}
                   pressStyle={{
                     scale: 0.98,
                     opacity: 0.9,
