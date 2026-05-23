@@ -173,26 +173,21 @@ export default function OwnerDashboard() {
           <TopNavPill
             hideBack
             title={
-              <YStack gap="$2">
-                <Text fontSize="$3" fontWeight="600" color="$text_dark">
-                  Locatie
+              <XStack gap="$2" alignItems="center">
+                <MaterialCommunityIcons
+                  name="map-marker"
+                  size={18}
+                  color="$primary"
+                />
+                <Text fontSize="$4" fontWeight="600" color="$text_dark">
+                  Leuven, BE
                 </Text>
-                <XStack gap="$2" alignItems="center">
-                  <MaterialCommunityIcons
-                    name="map-marker"
-                    size={18}
-                    color="$primary"
-                  />
-                  <Text fontSize="$5" fontWeight="bold" color="$text_dark">
-                    Leuven, BE
-                  </Text>
-                  <MaterialCommunityIcons
-                    name="chevron-down"
-                    size={18}
-                    color="$text_dark"
-                  />
-                </XStack>
-              </YStack>
+                <MaterialCommunityIcons
+                  name="chevron-down"
+                  size={16}
+                  color="$text_dark"
+                />
+              </XStack>
             }
             rightElement={
               <XStack gap="$3" alignItems="center">

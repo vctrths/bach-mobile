@@ -154,14 +154,21 @@ export default function GardenerDashboard() {
           <TopNavPill
             hideBack
             title={
-              <YStack gap="$2">
-                <Text fontSize="$3" fontWeight="600" color="$text_dark">
-                  Welkom terug
+              <XStack gap="$2" alignItems="center">
+                <MaterialCommunityIcons
+                  name="map-marker"
+                  size={18}
+                  color="$primary"
+                />
+                <Text fontSize="$4" fontWeight="600" color="$text_dark">
+                  Leuven, BE
                 </Text>
-                <Text fontSize="$5" fontWeight="bold" color="$text_dark">
-                  {profile?.first_name ?? "Tuinzoeker"}
-                </Text>
-              </YStack>
+                <MaterialCommunityIcons
+                  name="chevron-down"
+                  size={16}
+                  color="$text_dark"
+                />
+              </XStack>
             }
             rightElement={
               <XStack gap="$3" alignItems="center">

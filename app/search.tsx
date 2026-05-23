@@ -3,7 +3,6 @@ import Button from "@/components/ui/Button";
 import NotificationBell from "@/components/ui/NotificationBell";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
-import ScreenContent from "@/components/ui/ScreenContent";
 import { supabase } from "@/utils/supabase";
 import { Image as ExpoImage } from "@/lib/image";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -91,31 +90,26 @@ export default function SearchScreen() {
   return (
     <ThemedSafeArea>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <ScreenContent>
+        <YStack flex={1} paddingHorizontal="$4" paddingVertical="$4" gap="$6" paddingBottom="$25">
           {/* Top Navigation */}
           <TopNavPill
             hideBack
             title={
-              <YStack gap="$2">
-                <Text fontSize="$3" fontWeight="600" color="$text_dark">
-                  Locatie
+              <XStack gap="$2" alignItems="center">
+                <MaterialCommunityIcons
+                  name="map-marker"
+                  size={18}
+                  color="$primary"
+                />
+                <Text fontSize="$4" fontWeight="600" color="$text_dark">
+                  Leuven, BE
                 </Text>
-                <XStack gap="$2" alignItems="center">
-                  <MaterialCommunityIcons
-                    name="map-marker"
-                    size={18}
-                    color="$primary"
-                  />
-                  <Text fontSize="$5" fontWeight="bold" color="$text_dark">
-                    Leuven, BE
-                  </Text>
-                  <MaterialCommunityIcons
-                    name="chevron-down"
-                    size={18}
-                    color="$text_dark"
-                  />
-                </XStack>
-              </YStack>
+                <MaterialCommunityIcons
+                  name="chevron-down"
+                  size={16}
+                  color="$text_dark"
+                />
+              </XStack>
             }
             rightElement={
               <XStack gap="$3" alignItems="center">
@@ -299,7 +293,7 @@ export default function SearchScreen() {
               ))
             )}
           </YStack>
-        </ScreenContent>
+        </YStack>
       </ScrollView>
 
       {/* Bottom Navigation */}
