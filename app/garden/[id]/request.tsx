@@ -4,9 +4,8 @@ import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
 import { supabase } from "@/utils/supabase";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { BlurView } from "expo-blur";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Alert, Platform, ScrollView } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Circle, Text, TextArea, Input, XStack, YStack } from "tamagui";
@@ -36,6 +35,7 @@ const requestSchema = z.object({
 
 export default function GardenRequestScreen() {
   const { id } = useLocalSearchParams();
+  const [gardenName, setGardenName] = useState("Aanvraag");
   const [motivation, setMotivation] = useState("");
   const [collabType, setCollabType] = useState("");
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
@@ -43,6 +43,25 @@ export default function GardenRequestScreen() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
+
+  useEffect(() => {
+    async function fetchGarden() {
+      if (!id) return;
+      try {
+        const { data, error } = await supabase
+          .from("gardens")
+          .select("name")
+          .eq("id", id)
+          .single();
+        if (data && !error && (data as any).name) {
+          setGardenName((data as any).name);
+        }
+      } catch {
+        // fallback: keep default "Aanvraag"
+      }
+    }
+    fetchGarden();
+  }, [id]);
 
   const toggleDay = (dayKey: string) => {
     setSelectedDays((prev) =>
@@ -113,41 +132,18 @@ export default function GardenRequestScreen() {
   return (
     <ThemedSafeArea>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <YStack paddingHorizontal="$4" paddingTop="$6" gap="$6" paddingBottom={200}>
+        <YStack paddingHorizontal={16} paddingTop="$6" gap={32} paddingBottom={200}>
           {/* Top Navigation */}
           <TopNavPill
-            title="Aanvraag"
+            title={gardenName}
             onBackPress={() => router.back()}
           />
 
-          {/* Main Form Container */}
-          <YStack
-            borderRadius="$10"
-            overflow="hidden"
-            borderWidth={1}
-            borderColor="rgba(255, 255, 255, 0.45)"
-            shadowColor="#0f1a0f"
-            shadowOpacity={0.08}
-            shadowRadius={16}
-            shadowOffset={{ width: 0, height: 4 }}
-            elevation={4}
-          >
-            <BlurView
-              intensity={45}
-              tint="light"
-              experimentalBlurMethod="dimezisBlurView"
-              style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, borderRadius: 40 }}
-            />
-            <YStack
-              backgroundColor="rgba(255, 255, 255, 0.4)"
-              borderRadius="$10"
-              padding="$4"
-              gap="$6"
-            >
-
+          {/* Form Fields */}
+          <YStack gap={16}>
             {/* Motivation Section */}
-            <YStack gap="$3">
-              <Text color="$text_dark" fontSize="$3" fontWeight="500">
+            <YStack gap={16}>
+              <Text color="#000000" fontSize={16} fontWeight="400">
                 Motivatie (max 300 tekens):
               </Text>
               <TextArea
@@ -158,41 +154,42 @@ export default function GardenRequestScreen() {
                   setErrors((e) => ({ ...e, motivation: "" }));
                 }}
                 minHeight={100}
-                backgroundColor="$canvas"
-                borderColor={errors.motivation ? "$error" : "$borderColor"}
+                backgroundColor="white"
+                borderWidth={1}
+                borderColor={errors.motivation ? "$error" : "#EAEAEA"}
+                borderRadius={8}
+                padding={12}
                 focusStyle={{
-                  borderColor: errors.motivation ? "$error" : "$background",
+                  borderColor: errors.motivation ? "$error" : "#000000",
                 }}
                 maxLength={300}
               />
               <XStack justifyContent="flex-end">
-                <Text fontSize="$2" color="$text_light">
+                <Text fontSize={14} color="#929292">
                   {motivation.length}/300
                 </Text>
               </XStack>
               {errors.motivation && (
-                <Text color="$error" fontSize="$2">
+                <Text color="red" fontSize={14}>
                   {errors.motivation}
                 </Text>
               )}
             </YStack>
 
             {/* Collaboration Type Section */}
-            <YStack gap="$3">
-              <Text color="$text_dark" fontSize="$3" fontWeight="500">
+            <YStack gap={16}>
+              <Text color="#000000" fontSize={16} fontWeight="400">
                 Type samenwerking:
               </Text>
               <XStack
-                backgroundColor="$canvas"
+                backgroundColor="white"
                 borderWidth={1}
-                borderColor={errors.collaborationType ? "$error" : "$borderColor"}
-                borderRadius="$4"
-                padding="$3"
+                borderColor={errors.collaborationType ? "$error" : "#EAEAEA"}
+                borderRadius={8}
+                padding={12}
+                paddingHorizontal={16}
                 alignItems="center"
                 justifyContent="space-between"
-                focusStyle={{
-                  borderColor: errors.collaborationType ? "$error" : "$background",
-                }}
               >
                 <Input
                   flex={1}
@@ -205,92 +202,100 @@ export default function GardenRequestScreen() {
                   backgroundColor="transparent"
                   borderWidth={0}
                   padding={0}
+                  fontSize={14}
+                  color={collabType ? "#000000" : "#929292"}
                 />
                 <MaterialCommunityIcons
                   name="chevron-down"
                   size={20}
-                  color="$text_dark"
+                  color="#000000"
                 />
               </XStack>
               {errors.collaborationType && (
-                <Text color="$error" fontSize="$2">
+                <Text color="red" fontSize={14}>
                   {errors.collaborationType}
                 </Text>
               )}
             </YStack>
 
             {/* Days Selection Section */}
-            <YStack gap="$3">
-              <Text color="$text_dark" fontSize="$3" fontWeight="500">
-                Percelen
-              </Text>
-              <XStack justifyContent="space-between" paddingHorizontal="$2">
-                {DAYS.map((day) => (
-                  <YStack key={day.key} alignItems="center" gap="$2">
-                    <Circle
-                      size={44}
-                      backgroundColor={
-                        selectedDays.includes(day.key)
-                          ? "rgba(55, 57, 43, 0.1)"
-                          : "rgba(255, 255, 255, 0.4)"
-                      }
-                      borderWidth={1}
-                      borderColor={
-                        selectedDays.includes(day.key)
-                          ? "$primary"
-                          : "rgba(0, 0, 0, 0.1)"
-                      }
-                      justifyContent="center"
+            <YStack gap={8}>
+              <YStack gap={12} padding={10}>
+                {/* Dag Row */}
+                <XStack gap={4} alignItems="center">
+                  <Text width={56} color="#56594D" fontSize={16} fontWeight="500" opacity={0.4}>
+                    Dag
+                  </Text>
+                  {DAYS.map((day) => (
+                    <YStack
+                      key={day.key}
+                      flex={1}
                       alignItems="center"
+                      justifyContent="center"
                       onPress={() => toggleDay(day.key)}
-                      pressStyle={{ scale: 0.94, opacity: 0.85 }}
                     >
                       <Text
-                        color={
-                          selectedDays.includes(day.key)
-                            ? "$primary"
-                            : "$text_dark"
-                        }
-                        fontSize="$4"
+                        color={selectedDays.includes(day.key) ? "$primary" : "#36392B"}
+                        fontSize={16}
                         fontWeight="500"
+                        opacity={selectedDays.includes(day.key) ? 1 : 0.4}
                       >
                         {day.label}
                       </Text>
-                    </Circle>
-                    <Circle
-                      size={8}
-                      backgroundColor={
-                        selectedDays.includes(day.key)
-                          ? "$primary"
-                          : "rgba(0, 0, 0, 0.1)"
-                      }
-                    />
-                  </YStack>
-                ))}
-              </XStack>
+                    </YStack>
+                  ))}
+                </XStack>
+
+                {/* Aanw. Row */}
+                <XStack gap={6} alignItems="center">
+                  <Text width={56} color="#56594D" fontSize={16} fontWeight="500" opacity={0.4}>
+                    Aanw.
+                  </Text>
+                  {DAYS.map((day) => (
+                    <YStack
+                      key={day.key}
+                      width={32}
+                      height={32}
+                      alignItems="center"
+                      justifyContent="center"
+                      onPress={() => toggleDay(day.key)}
+                    >
+                      <Circle
+                        size={8}
+                        backgroundColor={
+                          selectedDays.includes(day.key)
+                            ? "$primary"
+                            : "rgba(0, 0, 0, 0.1)"
+                        }
+                      />
+                    </YStack>
+                  ))}
+                </XStack>
+              </YStack>
               {errors.days && (
-                <Text color="$error" fontSize="$2">
+                <Text color="red" fontSize={14}>
                   {errors.days}
                 </Text>
               )}
             </YStack>
 
             {/* Start Date Section */}
-            <YStack gap="$3">
-              <Text color="$text_dark" fontSize="$3" fontWeight="500">
+            <YStack gap={16}>
+              <Text color="#000000" fontSize={16} fontWeight="400">
                 Gewenste start datum:
               </Text>
-              <XStack gap="$3">
+              <XStack gap={8}>
                 <XStack
                   flex={1}
-                  backgroundColor="$canvas"
+                  backgroundColor="#F1F1F1"
                   borderWidth={1}
-                  borderColor={errors.startDate ? "$error" : "$borderColor"}
-                  borderRadius="$6"
-                  padding="$3"
+                  borderColor={errors.startDate ? "red" : "#E3E3E3"}
+                  borderRadius={50}
+                  padding={8}
+                  paddingHorizontal={16}
                   alignItems="center"
                   justifyContent="center"
-                  gap="$2"
+                  gap={12}
                   onPress={() => setShowPicker(true)}
                   pressStyle={{
                     scale: 0.98,
@@ -298,9 +303,9 @@ export default function GardenRequestScreen() {
                   }}
                 >
                   <Text
-                    color={startDate ? "$text_dark" : "$text_light"}
-                    fontSize="$4"
-                    fontWeight="500"
+                    color={startDate ? "#000000" : "#929292"}
+                    fontSize={16}
+                    fontWeight="600"
                   >
                     {startDate
                       ? `${startDate.getDate().toString().padStart(2, "0")}`
@@ -309,19 +314,20 @@ export default function GardenRequestScreen() {
                   <MaterialCommunityIcons
                     name="calendar"
                     size={16}
-                    color="$text_dark"
+                    color="#000000"
                   />
                 </XStack>
                 <XStack
                   flex={1}
-                  backgroundColor="$canvas"
+                  backgroundColor="#F1F1F1"
                   borderWidth={1}
-                  borderColor={errors.startDate ? "$error" : "$borderColor"}
-                  borderRadius="$6"
-                  padding="$3"
+                  borderColor={errors.startDate ? "red" : "#E3E3E3"}
+                  borderRadius={50}
+                  padding={8}
+                  paddingHorizontal={16}
                   alignItems="center"
                   justifyContent="center"
-                  gap="$2"
+                  gap={12}
                   onPress={() => setShowPicker(true)}
                   pressStyle={{
                     scale: 0.98,
@@ -329,9 +335,9 @@ export default function GardenRequestScreen() {
                   }}
                 >
                   <Text
-                    color={startDate ? "$text_dark" : "$text_light"}
-                    fontSize="$4"
-                    fontWeight="500"
+                    color={startDate ? "#000000" : "#929292"}
+                    fontSize={16}
+                    fontWeight="600"
                   >
                     {startDate
                       ? `${(startDate.getMonth() + 1).toString().padStart(2, "0")}`
@@ -340,19 +346,20 @@ export default function GardenRequestScreen() {
                   <MaterialCommunityIcons
                     name="calendar"
                     size={16}
-                    color="$text_dark"
+                    color="#000000"
                   />
                 </XStack>
                 <XStack
                   flex={1}
-                  backgroundColor="$canvas"
+                  backgroundColor="#F1F1F1"
                   borderWidth={1}
-                  borderColor={errors.startDate ? "$error" : "$borderColor"}
-                  borderRadius="$6"
-                  padding="$3"
+                  borderColor={errors.startDate ? "red" : "#E3E3E3"}
+                  borderRadius={50}
+                  padding={8}
+                  paddingHorizontal={16}
                   alignItems="center"
                   justifyContent="center"
-                  gap="$2"
+                  gap={12}
                   onPress={() => setShowPicker(true)}
                   pressStyle={{
                     scale: 0.98,
@@ -360,26 +367,25 @@ export default function GardenRequestScreen() {
                   }}
                 >
                   <Text
-                    color={startDate ? "$text_dark" : "$text_light"}
-                    fontSize="$4"
-                    fontWeight="500"
+                    color={startDate ? "#000000" : "#929292"}
+                    fontSize={16}
+                    fontWeight="600"
                   >
                     {startDate ? `${startDate.getFullYear()}` : "YYYY"}
                   </Text>
                   <MaterialCommunityIcons
                     name="calendar"
                     size={16}
-                    color="$text_dark"
+                    color="#000000"
                   />
                 </XStack>
               </XStack>
               {errors.startDate && (
-                <Text color="$error" fontSize="$2">
+                <Text color="red" fontSize={14}>
                   {errors.startDate}
                 </Text>
               )}
             </YStack>
-          </YStack>
           </YStack>
 
           {showPicker && (
@@ -395,8 +401,10 @@ export default function GardenRequestScreen() {
           {/* Submit Button */}
           <Button
             label={loading ? "Bezig..." : "Verzoek sturen"}
-            backgroundColor="$background"
-            color="$white"
+            backgroundColor="#EAF0D8"
+            color="#172211"
+            borderWidth={1}
+            borderColor="#D4E1AE"
             onPress={handleSubmit}
             disabled={loading}
             opacity={loading ? 0.7 : 1}
