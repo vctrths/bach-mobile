@@ -123,6 +123,9 @@ export default function GardenRequestScreen() {
           {/* Main Form Container */}
           <YStack
             borderRadius="$10"
+            overflow="hidden"
+            borderWidth={1}
+            borderColor="rgba(255, 255, 255, 0.45)"
             shadowColor="#0f1a0f"
             shadowOpacity={0.08}
             shadowRadius={16}
@@ -138,8 +141,6 @@ export default function GardenRequestScreen() {
             <YStack
               backgroundColor="rgba(255, 255, 255, 0.4)"
               borderRadius="$10"
-              borderWidth={1}
-              borderColor="rgba(255, 255, 255, 0.45)"
               padding="$4"
               gap="$6"
             >
