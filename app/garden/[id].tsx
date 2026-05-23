@@ -1,7 +1,7 @@
+import BottomNav from "@/components/ui/BottomNav";
 import Button from "@/components/ui/Button";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
-import ScreenContent from "@/components/ui/ScreenContent";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { Image as ExpoImage } from "@/lib/image";
@@ -114,7 +114,7 @@ export default function GardenDetailsScreen() {
   return (
     <ThemedSafeArea>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <ScreenContent>
+        <YStack paddingHorizontal="$4" paddingTop="$6" gap="$6" paddingBottom={200}>
           
           {/* Back Button */}
           <TopNavPill title="Terug naar overzicht" />
@@ -219,8 +219,14 @@ export default function GardenDetailsScreen() {
             />
           </Card>
 
-        </ScreenContent>
+        </YStack>
       </ScrollView>
+      <BottomNav
+        activeTab="home"
+        onHomePress={() => router.push("/dashboard")}
+        onMessagePress={() => router.push("/messages" as any)}
+        onProfilePress={() => router.push("/profile")}
+      />
     </ThemedSafeArea>
   );
 }
