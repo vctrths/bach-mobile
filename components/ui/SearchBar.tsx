@@ -44,14 +44,14 @@ export default function SearchBar({
           style={{
             flex: 1,
             fontSize: 16,
-            color: "#1f2937",
+            color: "#172211",
             fontFamily: "Satoshi",
           }}
           autoCapitalize="none"
           autoCorrect={false}
         />
       ) : (
-        <Text fontSize="$3" color="#172211" flex={1}>
+        <Text fontSize="$4" color="#172211" flex={1}>
           {placeholder}
         </Text>
       )}
