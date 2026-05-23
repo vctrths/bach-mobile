@@ -11,9 +11,10 @@ export type GardenLog = {
 
 interface LogCardProps {
   log: GardenLog;
+  onPress?: () => void;
 }
 
-export function LogCard({ log }: LogCardProps) {
+export function LogCard({ log, onPress }: LogCardProps) {
   return (
     <Card
       elevation={2}
@@ -26,6 +27,8 @@ export function LogCard({ log }: LogCardProps) {
       borderWidth={1}
       justifyContent="space-between"
       padding="$3"
+      onPress={onPress}
+      pressStyle={onPress ? { scale: 0.98, opacity: 0.9 } : undefined}
     >
       <YStack justifyContent="space-between" height="100%">
         <XStack justifyContent="space-between" alignItems="flex-start">

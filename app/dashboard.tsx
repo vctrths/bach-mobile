@@ -394,7 +394,7 @@ export default function Dashboard() {
                         name={garden.name}
                         rating={garden.rating}
                         location={garden.location}
-                        imageUrl={garden.image_url}
+                        image={garden.image_url}
                         onDetailsPress={() =>
                           router.push(("/garden/" + garden.id) as any)
                         }
@@ -453,10 +453,7 @@ export default function Dashboard() {
                     {logs.map((log) => (
                       <LogCard
                         key={log.id}
-                        id={log.id}
-                        title={log.title}
-                        status={log.status}
-                        created_at={log.created_at}
+                        log={log}
                         onPress={() =>
                           router.push(("/logbook/" + log.id) as any)
                         }
