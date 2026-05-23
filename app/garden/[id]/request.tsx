@@ -220,58 +220,45 @@ export default function GardenRequestScreen() {
 
             {/* Days Selection Section */}
             <YStack gap={8}>
-              <YStack gap={12} padding={10}>
-                {/* Dag Row */}
-                <XStack gap={4} alignItems="center">
-                  <Text width={56} color="#56594D" fontSize={16} fontWeight="500" opacity={0.4}>
+              <XStack gap={4} alignItems="flex-start" padding={10}>
+                {/* Labels column */}
+                <YStack width={56} gap={12} alignItems="flex-start">
+                  <Text color="#56594D" fontSize={16} fontWeight="500" opacity={0.4}>
                     Dag
                   </Text>
-                  {DAYS.map((day) => (
-                    <YStack
-                      key={day.key}
-                      flex={1}
-                      alignItems="center"
-                      justifyContent="center"
-                      onPress={() => toggleDay(day.key)}
-                    >
-                      <Text
-                        color={selectedDays.includes(day.key) ? "$primary" : "#36392B"}
-                        fontSize={16}
-                        fontWeight="500"
-                        opacity={selectedDays.includes(day.key) ? 1 : 0.4}
-                      >
-                        {day.label}
-                      </Text>
-                    </YStack>
-                  ))}
-                </XStack>
-
-                {/* Aanw. Row */}
-                <XStack gap={6} alignItems="center">
-                  <Text width={56} color="#56594D" fontSize={16} fontWeight="500" opacity={0.4}>
+                  <Text color="#56594D" fontSize={16} fontWeight="500" opacity={0.4}>
                     Aanw.
                   </Text>
-                  {DAYS.map((day) => (
-                    <YStack
-                      key={day.key}
-                      width={32}
-                      height={32}
-                      alignItems="center"
-                      justifyContent="center"
-                      onPress={() => toggleDay(day.key)}
+                </YStack>
+
+                {/* Day columns */}
+                {DAYS.map((day) => (
+                  <YStack
+                    key={day.key}
+                    flex={1}
+                    alignItems="center"
+                    gap={12}
+                    onPress={() => toggleDay(day.key)}
+                  >
+                    <Text
+                      color={selectedDays.includes(day.key) ? "$primary" : "#36392B"}
+                      fontSize={16}
+                      fontWeight="500"
+                      opacity={selectedDays.includes(day.key) ? 1 : 0.4}
                     >
-                      <Circle
-                        size={8}
-                        backgroundColor={
-                          selectedDays.includes(day.key)
-                            ? "$primary"
-                            : "rgba(0, 0, 0, 0.1)"
-                        }
-                      />
-                    </YStack>
-                  ))}
-                </XStack>
-              </YStack>
+                      {day.label}
+                    </Text>
+                    <Circle
+                      size={8}
+                      backgroundColor={
+                        selectedDays.includes(day.key)
+                          ? "$primary"
+                          : "rgba(0, 0, 0, 0.25)"
+                      }
+                    />
+                  </YStack>
+                ))}
+              </XStack>
               {errors.days && (
                 <Text color="red" fontSize={14}>
                   {errors.days}
