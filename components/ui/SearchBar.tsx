@@ -6,6 +6,8 @@ import { Text, XStack } from "tamagui";
 interface SearchBarProps {
   value?: string;
   onChangeText?: (text: string) => void;
+  onFocus?: () => void;
+  onBlur?: () => void;
   onPress?: () => void;
   placeholder?: string;
   active?: boolean;
@@ -14,6 +16,8 @@ interface SearchBarProps {
 export default function SearchBar({
   value,
   onChangeText,
+  onFocus,
+  onBlur,
   onPress,
   placeholder = "Zoeken naar een tuin",
   active = false,
@@ -39,6 +43,8 @@ export default function SearchBar({
         <TextInput
           value={value}
           onChangeText={onChangeText}
+          onFocus={onFocus}
+          onBlur={onBlur}
           placeholder={placeholder}
           placeholderTextColor="#6b7280"
           style={{
