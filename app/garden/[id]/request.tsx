@@ -123,7 +123,6 @@ export default function GardenRequestScreen() {
           {/* Main Form Container */}
           <YStack
             borderRadius="$10"
-            overflow="hidden"
             shadowColor="#0f1a0f"
             shadowOpacity={0.08}
             shadowRadius={16}
