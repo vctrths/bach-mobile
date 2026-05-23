@@ -10,6 +10,7 @@ interface TopNavPillProps {
   hideBack?: boolean;
   rightElement?: React.ReactNode;
   children?: React.ReactNode;
+  inlineChildren?: boolean;
 }
 
 export default function TopNavPill({
@@ -18,6 +19,7 @@ export default function TopNavPill({
   hideBack = false,
   rightElement,
   children,
+  inlineChildren = false,
 }: TopNavPillProps) {
   const handleBack = onBackPress || (() => router.back());
 
@@ -51,7 +53,7 @@ export default function TopNavPill({
           }}
         />
         
-        <XStack alignItems="center" gap="$4">
+        <XStack alignItems="center" gap="$4" flex={inlineChildren ? undefined : 0}>
           {!hideBack && (
             <Circle
               size={44}
@@ -79,9 +81,11 @@ export default function TopNavPill({
           )}
         </XStack>
 
+        {inlineChildren && children}
+
         {rightElement && rightElement}
       </XStack>
-      {children && children}
+      {!inlineChildren && children}
     </YStack>
   );
 }

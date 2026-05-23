@@ -88,27 +88,23 @@ export default function Dashboard() {
           {/* Top Navigation */}
           <TopNavPill
             hideBack
+            inlineChildren
             title={
-              <YStack gap="$2">
-                <Text fontSize="$3" fontWeight="600" color="$text_dark">
-                  Locatie
+              <XStack gap="$2" alignItems="center">
+                <MaterialCommunityIcons
+                  name="map-marker"
+                  size={18}
+                  color="$primary"
+                />
+                <Text fontSize="$4" fontWeight="600" color="$text_dark">
+                  Leuven, BE
                 </Text>
-                <XStack gap="$2" alignItems="center">
-                  <MaterialCommunityIcons
-                    name="map-marker"
-                    size={18}
-                    color="$primary"
-                  />
-                  <Text fontSize="$5" fontWeight="bold" color="$text_dark">
-                    Leuven, BE
-                  </Text>
-                  <MaterialCommunityIcons
-                    name="chevron-down"
-                    size={18}
-                    color="$text_dark"
-                  />
-                </XStack>
-              </YStack>
+                <MaterialCommunityIcons
+                  name="chevron-down"
+                  size={16}
+                  color="$text_dark"
+                />
+              </XStack>
             }
             rightElement={
               <XStack gap="$3" alignItems="center">
@@ -137,12 +133,14 @@ export default function Dashboard() {
               </XStack>
             }
           >
-            {/* Search Bar as Child */}
+            {/* Search Bar inline inside the pill */}
             <XStack
+              flex={1}
               backgroundColor="white"
               borderRadius="$8"
               paddingHorizontal="$4"
-              paddingVertical="$3"
+              paddingVertical="$2"
+              marginHorizontal="$2"
               alignItems="center"
               gap="$2"
               borderWidth={1}
@@ -151,7 +149,7 @@ export default function Dashboard() {
             >
               <MaterialCommunityIcons
                 name="magnify"
-                size={20}
+                size={18}
                 color="$text_dark"
               />
               <Text fontSize="$3" color="$text_dark" flex={1}>
