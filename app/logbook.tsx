@@ -28,12 +28,12 @@ type RecentLog = {
 
 const DAY_LABELS = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
 
-function getWeekDays() {
+function getWeekDays(offset = 0) {
   const now = new Date();
   const dayOfWeek = now.getDay();
   const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
   const monday = new Date(now);
-  monday.setDate(now.getDate() + mondayOffset);
+  monday.setDate(now.getDate() + mondayOffset + offset * 7);
   monday.setHours(0, 0, 0, 0);
 
   const days: Date[] = [];
@@ -132,8 +132,9 @@ export default function LogbookScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [weeklyCount, setWeeklyCount] = useState(0);
   const [activeDates, setActiveDates] = useState<Set<string>>(new Set());
+  const [weekOffset, setWeekOffset] = useState(0);
 
-  const weekDays = useMemo(() => getWeekDays(), []);
+  const weekDays = useMemo(() => getWeekDays(weekOffset), [weekOffset]);
   const today = useMemo(() => new Date(), []);
   const monthName = useMemo(
     () =>
@@ -352,7 +353,14 @@ export default function LogbookScreen() {
               >
                 {monthName}
               </Text>
-              <Ionicons name="chevron-down" size={18} color="#57594D" />
+              <XStack alignItems="center" gap="$3">
+                <Pressable onPress={() => setWeekOffset((prev) => prev - 1)}>
+                  <Ionicons name="chevron-back" size={20} color="#57594D" />
+                </Pressable>
+                <Pressable onPress={() => setWeekOffset((prev) => prev + 1)}>
+                  <Ionicons name="chevron-forward" size={20} color="#57594D" />
+                </Pressable>
+              </XStack>
             </XStack>
 
             <XStack justifyContent="space-between">
