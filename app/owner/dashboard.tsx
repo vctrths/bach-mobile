@@ -144,10 +144,11 @@ export default function OwnerDashboard() {
 
       if (!error) {
         setRequests((prev) => prev.filter((r) => r.id !== requestId));
-        // Refresh gardeners list if approved
-        if (status === "approved") {
-          fetchData();
-        }
+        router.push(
+          status === "approved"
+            ? (`/owner/request-accepted?requestId=${requestId}` as any)
+            : (`/owner/request-rejected?requestId=${requestId}` as any)
+        );
       }
     } catch (error) {
       console.error("Error updating request:", error);
