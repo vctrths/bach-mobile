@@ -317,12 +317,10 @@ export default function LogbookScreen() {
                     }
                   >
                     <YStack alignItems="center" gap="$1">
-                      {isLogged && (
-                        <Circle
-                          size={8}
-                          backgroundColor="#173300"
-                        />
-                      )}
+                      <Circle
+                        size={8}
+                        backgroundColor={isLogged ? "#173300" : "transparent"}
+                      />
                       <YStack
                         alignItems="center"
                         gap="$2"
