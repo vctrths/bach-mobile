@@ -9,6 +9,25 @@ import React, { useState } from "react";
 import { Alert, ScrollView } from "react-native";
 import { Input, Spinner, Text, TextArea, XStack, YStack } from "tamagui";
 
+async function geocodeLocation(location: string): Promise<{ latitude: number; longitude: number } | null> {
+  try {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&limit=1`,
+      { headers: { "User-Agent": "GroeneVingersApp/1.0" } }
+    );
+    const data = await response.json();
+    if (data && data.length > 0) {
+      return {
+        latitude: parseFloat(data[0].lat),
+        longitude: parseFloat(data[0].lon),
+      };
+    }
+  } catch (error) {
+    console.error("Geocoding error:", error);
+  }
+  return null;
+}
+
 export default function GardenCreateScreen() {
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
@@ -35,12 +54,20 @@ export default function GardenCreateScreen() {
         return;
       }
 
-      const { error } = await supabase.from("gardens").insert({
+      const coords = await geocodeLocation(location.trim());
+
+      const insertData = {
         owner_id: user.id,
         name: name.trim(),
         location: location.trim(),
         description: description.trim(),
-      });
+        ...(coords && {
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+        }),
+      };
+
+      const { error } = await supabase.from("gardens").insert(insertData as any);
 
       if (error) {
         Alert.alert("Fout", error.message);
