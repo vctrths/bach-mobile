@@ -5,21 +5,44 @@ import TopNavPill from "@/components/ui/TopNavPill";
 import { supabase } from "@/utils/supabase";
 import { OnboardingContext } from "@/context/OnboardingContext";
 import { router } from "expo-router";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Alert, ScrollView } from "react-native";
 import { Input, Spinner, Text, TextArea, XStack, YStack } from "tamagui";
 
 export default function PersonalDetailsScreen() {
   const { data, updateData } = useContext(OnboardingContext);
 
-  const [firstName, setFirstName] = useState(data.firstName || "Victor");
-  const [lastName, setLastName] = useState(data.lastName || "Thys");
-  const [email, setEmail] = useState(data.email || "victor.thys@gmail.com");
-  const [description, setDescription] = useState(
-    data.description ||
-      "Ik woon in hartje Leuven en heb altijd gedroomd van een eigen tuin. Helaas heb ik zelf geen groene vingers of buitenruimte. Daarom ben ik op zoek naar een plek waar ik mijn passie voor planten en bloemen kan uitleven.",
-  );
+  const [firstName, setFirstName] = useState(data.firstName || "");
+  const [lastName, setLastName] = useState(data.lastName || "");
+  const [email, setEmail] = useState(data.email || "");
+  const [description, setDescription] = useState(data.description || "");
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("first_name, last_name, email, description")
+        .eq("id", user.id)
+        .single();
+
+      if (profile) {
+        setFirstName(profile.first_name ?? "");
+        setLastName(profile.last_name ?? "");
+        setEmail(profile.email ?? "");
+        setDescription(profile.description ?? "");
+      }
+      setLoading(false);
+    };
+
+    loadProfile();
+  }, []);
 
   const handleSave = async () => {
     if (!firstName.trim() || !lastName.trim()) {
@@ -73,7 +96,12 @@ export default function PersonalDetailsScreen() {
           {/* Header Block */}
           <TopNavPill title="Persoonlijke gegevens" />
 
-          {/* Form */}
+          {loading ? (
+            <YStack padding="$10" justifyContent="center" alignItems="center">
+              <Spinner size="large" color="$primary" />
+            </YStack>
+          ) : (
+          <>
           <YStack gap="$4">
             <YStack gap="$1.5">
               <Text
@@ -189,6 +217,8 @@ export default function PersonalDetailsScreen() {
               flex={1}
             />
           </XStack>
+          </>
+          )}
         </YStack>
       </ScrollView>
 
