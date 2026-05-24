@@ -96,6 +96,11 @@ export default function OwnerDashboard() {
 
       if (!error) {
         setRequests((prev) => prev.filter((r) => r.id !== requestId));
+        router.push(
+          status === "approved"
+            ? (`/owner/request-accepted?requestId=${requestId}` as any)
+            : (`/owner/request-rejected?requestId=${requestId}` as any)
+        );
       }
     } catch (error) {
       console.error("Error updating request:", error);
