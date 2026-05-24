@@ -3,7 +3,8 @@ import { Map, Marker, ZoomControl } from "pigeon-maps";
 import { router } from "expo-router";
 import { supabase } from "@/utils/supabase";
 import TopNavPill from "@/components/ui/TopNavPill";
-import { YStack, Text, Image, Spinner, XStack } from "tamagui";
+import { YStack, Text, Spinner, XStack } from "tamagui";
+import { Image as ExpoImage } from "@/lib/image";
 import { StyleSheet, View, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -96,12 +97,10 @@ function GardenPopup({
         <Pressable onPress={(e) => e.stopPropagation()}>
           <YStack gap="8">
             {garden.image_url && (
-              <Image
+              <ExpoImage
                 source={{ uri: garden.image_url }}
-                width="100%"
-                height={120}
-                borderRadius="12"
-                objectFit="cover"
+                style={{ width: "100%", height: 120, borderRadius: 12 }}
+                contentFit="cover"
               />
             )}
             <YStack gap="2">
