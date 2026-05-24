@@ -11,14 +11,7 @@ import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { RefreshControl, ScrollView } from "react-native";
 import { Card, Circle, Spinner, Text, XStack, YStack } from "tamagui";
-
-type Garden = {
-  id: string;
-  name: string;
-  rating: number;
-  location: string;
-  image_url: string | null;
-};
+import { type Garden } from "@/types/garden";
 
 type UserProfile = {
   first_name: string;
@@ -208,8 +201,8 @@ export default function Dashboard() {
                     <GardenCard
                       key={garden.id}
                       name={garden.name}
-                      rating={garden.rating}
-                      location={garden.location}
+                      rating={garden.rating ?? 0}
+                      location={garden.location ?? "Onbekende locatie"}
                       image={
                         garden.image_url
                           ? { uri: garden.image_url }

@@ -10,42 +10,7 @@ import React, { useEffect, useState } from "react";
 import { ScrollView } from "react-native";
 import { Card, H1, H2, Spinner, Text, XStack, YStack } from "tamagui";
 import { supabase } from "@/utils/supabase";
-
-interface Garden {
-  id: string;
-  name: string;
-  rating: number;
-  location: string;
-  description: string;
-  image_url: string;
-}
-
-const fallbackGardens: Record<string, Garden> = {
-  "1": {
-    id: "1",
-    name: "Victor's tuin",
-    rating: 4.8,
-    location: "Heverlee, België",
-    description: "Een heerlijk ruime tuin met een overvloed aan bloemen, fruitbomen en een gezellige zithoek. Perfect om rustig te tuinieren en te genieten van het groen.",
-    image_url: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64",
-  },
-  "2": {
-    id: "2",
-    name: "Griet's bloemenweide",
-    rating: 4.7,
-    location: "Leuven, België",
-    description: "Een kleurrijke en open bloemenweide. Ideaal voor natuurliefhebbers en rustzoekers.",
-    image_url: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae",
-  },
-  "3": {
-    id: "3",
-    name: "Groen Domein",
-    rating: 4.9,
-    location: "Kessel-Lo, België",
-    description: "Groot groen domein met een prachtige vijver, moestuin en een serre.",
-    image_url: "https://images.unsplash.com/photo-1584479898061-15742e14f50d",
-  },
-};
+import { type Garden } from "@/types/garden";
 
 export default function GardenDetailsScreen() {
   const { id } = useLocalSearchParams();
@@ -62,21 +27,10 @@ export default function GardenDetailsScreen() {
           .single();
 
         if (data && !error) {
-          setGarden({
-            id: data.id,
-            name: data.name,
-            rating: data.rating ?? 0,
-            location: data.location ?? "Onbekende locatie",
-            description: data.description ?? "",
-            image_url: data.image_url ?? "",
-          });
-        } else {
-          const fallback = fallbackGardens[id as string];
-          if (fallback) setGarden(fallback);
+          setGarden(data as Garden);
         }
-      } catch {
-        const fallback = fallbackGardens[id as string];
-        if (fallback) setGarden(fallback);
+      } catch (err) {
+        console.error("Error fetching garden:", err);
       } finally {
         setLoading(false);
       }
@@ -150,13 +104,13 @@ export default function GardenDetailsScreen() {
               <XStack gap="$2" alignItems="center">
                 <MaterialCommunityIcons name="map-marker" size={18} color="$primary" />
                 <Text color="$text_dark" fontSize="$3" fontWeight="500">
-                  {garden.location}
+                  {garden.location ?? "Onbekende locatie"}
                 </Text>
               </XStack>
               <XStack gap="$1" alignItems="center">
                 <MaterialCommunityIcons name="star" size={18} color="#FFB800" />
                 <Text color="$text_dark" fontSize="$3" fontWeight="bold">
-                  {garden.rating}
+                  {garden.rating ?? 0}
                 </Text>
               </XStack>
             </XStack>
@@ -191,7 +145,7 @@ export default function GardenDetailsScreen() {
               Over deze tuin
             </H2>
             <Text color="$text_dark" fontSize="$3" lineHeight="$4">
-              {garden.description}
+              {garden.description ?? ""}
             </Text>
           </YStack>
 
