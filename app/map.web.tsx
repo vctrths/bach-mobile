@@ -3,6 +3,7 @@ import { Map, Marker, ZoomControl } from "pigeon-maps";
 import { router } from "expo-router";
 import { supabase } from "@/utils/supabase";
 import TopNavPill from "@/components/ui/TopNavPill";
+import BottomNav from "@/components/ui/BottomNav";
 import { YStack, Text, Spinner, XStack } from "tamagui";
 import { Image as ExpoImage } from "@/lib/image";
 import { StyleSheet, View, Pressable } from "react-native";
@@ -220,6 +221,8 @@ export default function MapScreen() {
       >
         <TopNavPill title="Kaart" />
       </YStack>
+
+      <BottomNav activeTab="map" />
     </View>
   );
 }

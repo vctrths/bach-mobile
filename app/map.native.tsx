@@ -3,6 +3,7 @@ import MapView, { Marker, Callout } from "react-native-maps";
 import { router } from "expo-router";
 import { supabase } from "@/utils/supabase";
 import TopNavPill from "@/components/ui/TopNavPill";
+import BottomNav from "@/components/ui/BottomNav";
 import { YStack, Text, Image, Spinner } from "tamagui";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -92,6 +93,8 @@ export default function MapScreen() {
       <YStack position="absolute" top={insets.top} left={0} right={0} paddingHorizontal="$4">
         <TopNavPill title="Kaart" />
       </YStack>
+
+      <BottomNav activeTab="map" />
     </View>
   );
 }
