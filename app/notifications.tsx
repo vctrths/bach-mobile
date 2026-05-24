@@ -344,7 +344,7 @@ export default function NotificationsScreen() {
       </ScrollView>
 
       <BottomNav
-        activeTab="notification"
+        activeTab="profile"
         onMessagePress={() => router.push("/messages" as any)}
         onProfilePress={() => router.push("/profile")}
       />

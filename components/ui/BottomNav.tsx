@@ -7,11 +7,10 @@ import { useAuth } from "@/context/AuthContext";
 import { getHomeRoute } from "@/utils/role-routing";
 
 interface BottomNavProps {
-  activeTab?: "home" | "map" | "message" | "notification" | "profile";
+  activeTab?: "home" | "map" | "message" | "profile";
   onHomePress?: () => void;
   onMapPress?: () => void;
   onMessagePress?: () => void;
-  onNotificationPress?: () => void;
   onProfilePress?: () => void;
 }
 
@@ -20,7 +19,6 @@ export default function BottomNav({
   onHomePress,
   onMapPress,
   onMessagePress,
-  onNotificationPress,
   onProfilePress,
 }: BottomNavProps) {
   const { profile } = useAuth();
@@ -29,7 +27,6 @@ export default function BottomNav({
     router.push(getHomeRoute(profile?.role) as any);
   const defaultMapPress = () => router.push("/map" as any);
   const defaultMessagePress = () => router.push("/messages" as any);
-  const defaultNotificationPress = () => router.push("/notifications" as any);
   const defaultProfilePress = () => router.push("/profile");
 
   const navItems = [
@@ -50,12 +47,6 @@ export default function BottomNav({
       icon: "message-text-outline",
       label: "Messages",
       onPress: onMessagePress || defaultMessagePress,
-    },
-    {
-      key: "notification",
-      icon: "bell-outline",
-      label: "Meldingen",
-      onPress: onNotificationPress || defaultNotificationPress,
     },
     {
       key: "profile",
