@@ -3,6 +3,7 @@ import Button from "@/components/ui/Button";
 import NotificationBell from "@/components/ui/NotificationBell";
 import SearchBar from "@/components/ui/SearchBar";
 import GardenCard from "@/components/ui/GardenCard";
+import MapPreview from "@/components/ui/MapPreview";
 import { LogCard, type GardenLog } from "@/components/ui/LogCard";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
@@ -20,6 +21,8 @@ type Garden = {
   rating: number;
   location: string;
   image_url: string | null;
+  latitude: number | null;
+  longitude: number | null;
 };
 
 type UserProfile = {
@@ -96,7 +99,7 @@ export default function GardenerDashboard() {
             : Promise.resolve({ data: null }) as any,
           supabase
             .from("gardens")
-            .select("id, name, rating, location, image_url")
+            .select("id, name, rating, location, image_url, latitude, longitude")
             .limit(5),
           supabase.from("garden_logs").select("id, title, status, created_at").limit(5),
           user
@@ -444,11 +447,15 @@ export default function GardenerDashboard() {
               pressStyle={{ opacity: 0.9, scale: 0.98 }}
               onPress={() => router.push("/map")}
             >
-              <ExpoImage
-                source={require("@/assets/images/hero.png")}
-                style={{ width: "100%", height: "100%" }}
-                contentFit="cover"
-              />
+              {recommended.some((g) => g.latitude != null && g.longitude != null) ? (
+                <MapPreview gardens={recommended} />
+              ) : (
+                <ExpoImage
+                  source={require("@/assets/images/hero.png")}
+                  style={{ width: "100%", height: "100%" }}
+                  contentFit="cover"
+                />
+              )}
               <YStack
                 position="absolute"
                 bottom={0}
