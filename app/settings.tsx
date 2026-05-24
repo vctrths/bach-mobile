@@ -2,14 +2,83 @@ import BottomNav from "@/components/ui/BottomNav";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
 import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React from "react";
-import { Alert, ScrollView } from "react-native";
+import React, { useState } from "react";
+import { ActivityIndicator, Alert, ScrollView } from "react-native";
 import { Card, Circle, Text, XStack, YStack } from "tamagui";
 
 export default function SettingsScreen() {
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
+  const [deleting, setDeleting] = useState(false);
+
+  const handleVerifyAccount = async () => {
+    if (!user) {
+      Alert.alert("Fout", "Je bent niet ingelogd.");
+      return;
+    }
+    if (user.email_confirmed_at) {
+      Alert.alert("Account verifiëren", "Je e-mailadres is al geverifieerd.");
+    } else {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: user.email!,
+      });
+      if (error) {
+        Alert.alert("Fout", error.message);
+      } else {
+        Alert.alert(
+          "Verificatie verstuurd",
+          "Controleer je inbox voor de verificatie-e-mail."
+        );
+      }
+    }
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      "Account verwijderen",
+      "Weet je zeker dat je je account wilt verwijderen? Dit kan niet ongedaan worden gemaakt.",
+      [
+        { text: "Annuleren", style: "cancel" },
+        {
+          text: "Verwijderen",
+          style: "destructive",
+          onPress: async () => {
+            if (!user) {
+              Alert.alert("Fout", "Je bent niet ingelogd.");
+              return;
+            }
+            setDeleting(true);
+            try {
+              // Delete profile data first
+              const { error: profileError } = await supabase
+                .from("profiles")
+                .delete()
+                .eq("id", user.id);
+
+              if (profileError) {
+                Alert.alert("Fout", profileError.message);
+                setDeleting(false);
+                return;
+              }
+
+              // Sign out
+              await signOut();
+              router.replace("/login");
+              Alert.alert("Account verwijderd", "Je account is succesvol verwijderd.");
+            } catch {
+              Alert.alert("Fout", "Er is iets misgegaan bij het verwijderen van je account.");
+            } finally {
+              setDeleting(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const accountItems = [
     {
       id: "persoonlijk",
@@ -24,12 +93,12 @@ export default function SettingsScreen() {
     {
       id: "verifieer",
       label: "Account verifiëren",
-      onPress: () => Alert.alert("Account verifiëren", "Je account is geverifieerd."),
+      onPress: handleVerifyAccount,
     },
     {
       id: "notificaties",
       label: "Notificaties",
-      onPress: () => Alert.alert("Notificaties", "Hier kun je je notificaties instellen."),
+      onPress: () => router.push("/notifications"),
     },
   ];
 
@@ -37,7 +106,9 @@ export default function SettingsScreen() {
     {
       id: "verwijder",
       label: "Account verwijderen",
-      icon: (
+      icon: deleting ? (
+        <ActivityIndicator size="small" color="#D32F2F" />
+      ) : (
         <Circle
           size={38}
           backgroundColor="rgba(211, 47, 47, 0.08)"
@@ -47,19 +118,8 @@ export default function SettingsScreen() {
           <Ionicons name="trash-outline" size={20} color="#D32F2F" />
         </Circle>
       ),
-      onPress: () =>
-        Alert.alert(
-          "Account verwijderen",
-          "Weet je zeker dat je je account wilt verwijderen?",
-          [
-            { text: "Annuleren", style: "cancel" },
-            {
-              text: "Verwijderen",
-              style: "destructive",
-              onPress: () => router.replace("/login"),
-            },
-          ]
-        ),
+      onPress: handleDeleteAccount,
+      disabled: deleting,
     },
     {
       id: "uitloggen",
@@ -159,8 +219,9 @@ export default function SettingsScreen() {
                 paddingVertical="$3"
                 justifyContent="space-between"
                 alignItems="center"
-                onPress={item.onPress}
-                pressStyle={{ scale: 0.98, opacity: 0.85 }}
+                onPress={item.disabled ? undefined : item.onPress}
+                pressStyle={item.disabled ? undefined : { scale: 0.98, opacity: 0.85 }}
+                opacity={item.disabled ? 0.5 : 1}
               >
                 <Text color="$text_dark" fontSize="$4" fontWeight="500">
                   {item.label}

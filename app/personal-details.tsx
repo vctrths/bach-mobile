@@ -3,23 +3,31 @@ import Button from "@/components/ui/Button";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
 import { supabase } from "@/utils/supabase";
+import { useAuth } from "@/context/AuthContext";
 import { OnboardingContext } from "@/context/OnboardingContext";
 import { router } from "expo-router";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Alert, ScrollView } from "react-native";
 import { Input, Spinner, Text, TextArea, XStack, YStack } from "tamagui";
 
 export default function PersonalDetailsScreen() {
   const { data, updateData } = useContext(OnboardingContext);
+  const { profile } = useAuth();
 
-  const [firstName, setFirstName] = useState(data.firstName || "Victor");
-  const [lastName, setLastName] = useState(data.lastName || "Thys");
-  const [email, setEmail] = useState(data.email || "victor.thys@gmail.com");
-  const [description, setDescription] = useState(
-    data.description ||
-      "Ik woon in hartje Leuven en heb altijd gedroomd van een eigen tuin. Helaas heb ik zelf geen groene vingers of buitenruimte. Daarom ben ik op zoek naar een plek waar ik mijn passie voor planten en bloemen kan uitleven.",
-  );
+  const [firstName, setFirstName] = useState(data.firstName || "");
+  const [lastName, setLastName] = useState(data.lastName || "");
+  const [email, setEmail] = useState(data.email || "");
+  const [description, setDescription] = useState(data.description || "");
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (profile) {
+      setFirstName(profile.first_name || data.firstName || "");
+      setLastName(profile.last_name || data.lastName || "");
+      setEmail(profile.email || data.email || "");
+      setDescription(profile.description || data.description || "");
+    }
+  }, [profile]);
 
   const handleSave = async () => {
     if (!firstName.trim() || !lastName.trim()) {
