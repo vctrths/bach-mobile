@@ -5,7 +5,7 @@ import { router } from "expo-router";
 import { useEffect } from "react";
 import { Spinner, YStack } from "tamagui";
 
-export default function SplashScreen() {
+export default function SplashRouteScreen() {
   const { session, loading } = useAuth();
 
   useEffect(() => {

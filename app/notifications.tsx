@@ -3,7 +3,7 @@ import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
 import ScreenContent from "@/components/ui/ScreenContent";
 import { supabase } from "@/utils/supabase";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ScrollView } from "react-native";
