@@ -11,15 +11,7 @@ import { router } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { ScrollView } from "react-native";
 import { Card, Circle, Spinner, Text, XStack, YStack } from "tamagui";
-
-type Garden = {
-  id: string;
-  name: string;
-  rating: number | null;
-  location: string | null;
-  description: string | null;
-  image_url: string | null;
-};
+import { type Garden } from "@/types/garden";
 
 export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState("");
