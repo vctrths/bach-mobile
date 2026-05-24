@@ -58,8 +58,8 @@ export default function RequestRejectedScreen() {
         <YStack marginTop="auto" paddingBottom="$6">
           <Button
             label="Terug naar dashboard"
-            backgroundColor=""
-            color=""
+            backgroundColor="rgba(239, 68, 68, 0.85)"
+            color="white"
             onPress={() => router.push("/owner/dashboard")}
           />
         </YStack>
