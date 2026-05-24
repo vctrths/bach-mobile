@@ -33,19 +33,27 @@ export default function SavedGardensScreen() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // For now, fetch all gardens as a placeholder for saved gardens
-      // In a real implementation, you'd have a saved_gardens table
       const { data, error } = await supabase
-        .from("gardens")
-        .select("id, name, rating, location, description, image_url")
-        .limit(10);
+        .from("saved_gardens")
+        .select("garden_id, gardens(id, name, rating, location, description, image_url)")
+        .eq("user_id", user.id);
 
       if (error) {
         console.error("Error fetching saved gardens:", error);
         return;
       }
 
-      setSavedGardens(data || []);
+      const mapped =
+        data?.map((row: any) => ({
+          id: row.garden_id,
+          name: row.gardens?.name ?? "Onbekende tuin",
+          rating: row.gardens?.rating ?? null,
+          location: row.gardens?.location ?? null,
+          description: row.gardens?.description ?? null,
+          image_url: row.gardens?.image_url ?? null,
+        })) ?? [];
+
+      setSavedGardens(mapped);
     } catch (error) {
       console.error("Error:", error);
     } finally {

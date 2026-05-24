@@ -6,7 +6,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useContext, useEffect, useState } from "react";
 import { ScrollView } from "react-native";
-import { Card, Circle, H1, Image, Spinner, Text, XStack, YStack } from "tamagui";
+import { Card, Circle, H1, Spinner, Text, XStack, YStack } from "tamagui";
+import { Image as ExpoImage } from "@/lib/image";
 import { OnboardingContext } from "@/context/OnboardingContext";
 
 export default function ProfileScreen() {
@@ -18,6 +19,15 @@ export default function ProfileScreen() {
     role: string;
     profile_image: string | null;
   } | null>(null);
+  const [savedGardens, setSavedGardens] = useState<
+    {
+      id: string;
+      name: string;
+      rating: number | null;
+      location: string | null;
+      image_url: string | null;
+    }[]
+  >([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,6 +47,23 @@ export default function ProfileScreen() {
         .single();
 
       setProfile(profileData);
+
+      // Fetch real saved gardens
+      const { data: savedData } = await supabase
+        .from("saved_gardens")
+        .select("garden_id, gardens(id, name, rating, location, image_url)")
+        .eq("user_id", user.id);
+
+      const mapped =
+        savedData?.map((row: any) => ({
+          id: row.garden_id,
+          name: row.gardens?.name ?? "Onbekende tuin",
+          rating: row.gardens?.rating ?? null,
+          location: row.gardens?.location ?? null,
+          image_url: row.gardens?.image_url ?? null,
+        })) ?? [];
+
+      setSavedGardens(mapped);
       setLoading(false);
     };
 
@@ -61,11 +88,10 @@ export default function ProfileScreen() {
         <YStack flex={1} paddingBottom={120}>
           {/* Header Section with Hero Image */}
           <YStack position="relative" height={190} overflow="hidden">
-            <Image
+            <ExpoImage
               source={require("@/assets/images/hero.png")}
-              width="100%"
-              height="100%"
-              resizeMode="cover"
+              style={{ width: "100%", height: "100%" }}
+              contentFit="cover"
             />
 
             {/* Glassmorphic "Account" container overlay */}
@@ -119,11 +145,14 @@ export default function ProfileScreen() {
                 shadowRadius={8}
                 shadowOffset={{ width: 0, height: 4 }}
               >
-                <Image
-                  source={require("@/assets/images/hero.png")}
-                  width="100%"
-                  height="100%"
-                  resizeMode="cover"
+                <ExpoImage
+                  source={
+                    profile?.profile_image
+                      ? { uri: profile.profile_image }
+                      : require("@/assets/images/hero.png")
+                  }
+                  style={{ width: "100%", height: "100%" }}
+                  contentFit="cover"
                 />
               </Circle>
               {/* Online status indicator */}
@@ -163,19 +192,22 @@ export default function ProfileScreen() {
 
               {/* Right Column */}
               <YStack gap="$1.5" alignItems="flex-end">
-                {/* Stars rating */}
-                <XStack gap="$1" alignItems="center">
-                  {[1, 2, 3, 4].map((s) => (
-                    <Ionicons key={s} name="star" size={18} color="#172211" />
-                  ))}
-                  <Ionicons name="star" size={18} color="#D1D5DB" />
-                </XStack>
-                <Text color="$text_dark" fontSize="$6" fontWeight="bold">
-                  Heverlee
-                </Text>
-                <Text color="$secondary" fontSize="$3" fontWeight="500">
-                  3001
-                </Text>
+                <Circle
+                  size={36}
+                  backgroundColor="white"
+                  borderWidth={1}
+                  borderColor="rgba(0, 0, 0, 0.05)"
+                  justifyContent="center"
+                  alignItems="center"
+                  onPress={() => router.push("/saved")}
+                  pressStyle={{ scale: 0.94, opacity: 0.85 }}
+                  shadowColor="#000"
+                  shadowOpacity={0.04}
+                  shadowRadius={4}
+                  shadowOffset={{ width: 0, height: 2 }}
+                >
+                  <Ionicons name="bookmark-outline" size={20} color="#172211" />
+                </Circle>
               </YStack>
             </XStack>
 
@@ -196,107 +228,88 @@ export default function ProfileScreen() {
                 Jouw opgeslagen percelen
               </H1>
 
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                scrollEventThrottle={16}
-              >
-                <XStack gap="$3">
-                  {/* Plot Card 1 */}
-                  <Card
-                    elevation={2}
-                    backgroundColor="$background_secondary"
-                    borderColor="$borderColor"
-                    borderWidth={1}
-                    borderRadius="$6"
-                    padding="$3"
-                    width={210}
-                    gap="$2"
-                  >
-                    <Image
-                      source={require("@/assets/images/hero.png")}
-                      width="100%"
-                      height={110}
-                      borderRadius="$4"
-                      resizeMode="cover"
-                    />
-                    <YStack gap="$0.5">
-                      <XStack
-                        justifyContent="space-between"
-                        alignItems="center"
+              {savedGardens.length === 0 ? (
+                <YStack
+                  padding="$6"
+                  justifyContent="center"
+                  alignItems="center"
+                  gap="$2"
+                  backgroundColor="rgba(23, 51, 0, 0.03)"
+                  borderRadius="$4"
+                >
+                  <Ionicons name="bookmark-outline" size={32} color="#57594D" />
+                  <Text color="$secondary" fontSize="$3" textAlign="center">
+                    Je hebt nog geen tuinen opgeslagen.
+                  </Text>
+                </YStack>
+              ) : (
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  scrollEventThrottle={16}
+                >
+                  <XStack gap="$3">
+                    {savedGardens.map((garden) => (
+                      <Card
+                        key={garden.id}
+                        elevation={2}
+                        backgroundColor="white"
+                        borderColor="rgba(23, 51, 0, 0.1)"
+                        borderWidth={1}
+                        borderRadius="$6"
+                        padding="$3"
+                        width={210}
+                        gap="$2"
+                        onPress={() =>
+                          router.push(("/garden/" + garden.id) as any)
+                        }
+                        pressStyle={{ scale: 0.97, opacity: 0.9 }}
                       >
-                        <Text
-                          color="$text_dark"
-                          fontSize="$3"
-                          fontWeight="bold"
-                        >
-                          {"Arno's tuin"}
-                        </Text>
-                        <XStack gap="$1" alignItems="center">
-                          <Ionicons name="star" size={14} color="#FFB800" />
-                          <Text
-                            color="$text_dark"
-                            fontSize="$2"
-                            fontWeight="600"
+                        <ExpoImage
+                          source={
+                            garden.image_url
+                              ? { uri: garden.image_url }
+                              : require("@/assets/images/hero.png")
+                          }
+                          style={{ width: "100%", height: 110, borderRadius: 8 }}
+                          contentFit="cover"
+                        />
+                        <YStack gap="$0.5">
+                          <XStack
+                            justifyContent="space-between"
+                            alignItems="center"
                           >
-                            4.8
+                            <Text
+                              color="$text_dark"
+                              fontSize="$3"
+                              fontWeight="bold"
+                            >
+                              {garden.name}
+                            </Text>
+                            <XStack gap="$1" alignItems="center">
+                              <Ionicons
+                                name="star"
+                                size={14}
+                                color="#FFB800"
+                              />
+                              <Text
+                                color="$text_dark"
+                                fontSize="$2"
+                                fontWeight="600"
+                              >
+                                {garden.rating?.toFixed(1) ?? "N/A"}
+                              </Text>
+                            </XStack>
+                          </XStack>
+                          <Text color="$secondary" fontSize="$2">
+                            {garden.location || "Onbekende locatie"}
                           </Text>
-                        </XStack>
-                      </XStack>
-                      <Text color="$secondary" fontSize="$2">
-                        Leuven, BE
-                      </Text>
-                    </YStack>
-                  </Card>
-
-                  {/* Plot Card 2 */}
-                  <Card
-                    elevation={2}
-                    backgroundColor="$background_secondary"
-                    borderColor="$borderColor"
-                    borderWidth={1}
-                    borderRadius="$6"
-                    padding="$3"
-                    width={210}
-                    gap="$2"
-                  >
-                    <Image
-                      source={require("@/assets/images/hero.png")}
-                      width="100%"
-                      height={110}
-                      borderRadius="$4"
-                      resizeMode="cover"
-                    />
-                    <YStack gap="$0.5">
-                      <XStack
-                        justifyContent="space-between"
-                        alignItems="center"
-                      >
-                        <Text
-                          color="$text_dark"
-                          fontSize="$3"
-                          fontWeight="bold"
-                        >
-                          {"Arthur's tuin"}
-                        </Text>
-                        <XStack gap="$1" alignItems="center">
-                          <Ionicons name="star" size={14} color="#FFB800" />
-                          <Text
-                            color="$text_dark"
-                            fontSize="$2"
-                            fontWeight="600"
-                          >
-                            4.7
-                          </Text>
-                        </XStack>
-                      </XStack>
-                      <Text color="$secondary" fontSize="$2">
-                        Heverlee, BE
-                      </Text>
-                    </YStack>
-                  </Card>
-                </XStack>
-              </ScrollView>
+                        </YStack>
+                      </Card>
+                    ))}
+                  </XStack>
+                </ScrollView>
+              )}
             </YStack>
           </YStack>
         </YStack>
