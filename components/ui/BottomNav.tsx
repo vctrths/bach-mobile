@@ -28,7 +28,9 @@ export default function BottomNav({
   const defaultHomePress = () =>
     router.push(getHomeRoute(profile?.role) as any);
   const defaultMapPress = () => router.push("/map" as any);
+  const defaultMessagePress = () => router.push("/messages" as any);
   const defaultNotificationPress = () => router.push("/notifications" as any);
+  const defaultProfilePress = () => router.push("/profile");
 
   const navItems = [
     {
@@ -45,9 +47,9 @@ export default function BottomNav({
     },
     {
       key: "message",
-      icon: "message",
+      icon: "message-text-outline",
       label: "Messages",
-      onPress: onMessagePress,
+      onPress: onMessagePress || defaultMessagePress,
     },
     {
       key: "notification",
@@ -59,7 +61,7 @@ export default function BottomNav({
       key: "profile",
       icon: "account",
       label: "Profile",
-      onPress: onProfilePress,
+      onPress: onProfilePress || defaultProfilePress,
     },
   ];
 
