@@ -2,14 +2,59 @@ import BottomNav from "@/components/ui/BottomNav";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
 import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import { Alert, ScrollView } from "react-native";
-import { Card, Circle, Text, XStack, YStack } from "tamagui";
+import { Card, Circle, Spinner, Text, XStack, YStack } from "tamagui";
 
 export default function SettingsScreen() {
   const { signOut } = useAuth();
+  const [deleting, setDeleting] = useState(false);
+
+  const handleVerify = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      Alert.alert("Fout", "Je bent niet ingelogd.");
+      return;
+    }
+    if (user.email_confirmed_at) {
+      Alert.alert("Account verifiëren", "Je account is al geverifieerd.");
+    } else {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: user.email!,
+      });
+      if (error) {
+        Alert.alert("Fout", error.message);
+      } else {
+        Alert.alert("Verificatie verstuurd", "Check je e-mail om je account te verifiëren.");
+      }
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await supabase.from("profiles").delete().eq("id", user.id);
+      if (error) {
+        Alert.alert("Fout", "Kon account niet verwijderen.");
+        setDeleting(false);
+        return;
+      }
+
+      await signOut();
+      router.replace("/login");
+    } catch {
+      Alert.alert("Fout", "Er is iets misgegaan. Probeer opnieuw.");
+      setDeleting(false);
+    }
+  };
+
   const accountItems = [
     {
       id: "persoonlijk",
@@ -24,12 +69,12 @@ export default function SettingsScreen() {
     {
       id: "verifieer",
       label: "Account verifiëren",
-      onPress: () => Alert.alert("Account verifiëren", "Je account is geverifieerd."),
+      onPress: handleVerify,
     },
     {
       id: "notificaties",
       label: "Notificaties",
-      onPress: () => Alert.alert("Notificaties", "Hier kun je je notificaties instellen."),
+      onPress: () => router.push("/notifications"),
     },
   ];
 
@@ -37,7 +82,9 @@ export default function SettingsScreen() {
     {
       id: "verwijder",
       label: "Account verwijderen",
-      icon: (
+      icon: deleting ? (
+        <Spinner size="small" color="#D32F2F" />
+      ) : (
         <Circle
           size={38}
           backgroundColor="rgba(211, 47, 47, 0.08)"
@@ -50,13 +97,13 @@ export default function SettingsScreen() {
       onPress: () =>
         Alert.alert(
           "Account verwijderen",
-          "Weet je zeker dat je je account wilt verwijderen?",
+          "Weet je zeker dat je je account wilt verwijderen? Dit kan niet ongedaan worden gemaakt.",
           [
             { text: "Annuleren", style: "cancel" },
             {
               text: "Verwijderen",
               style: "destructive",
-              onPress: () => router.replace("/login"),
+              onPress: handleDeleteAccount,
             },
           ]
         ),
