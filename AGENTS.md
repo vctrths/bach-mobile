@@ -303,7 +303,10 @@ Examples: `feat: add garden request form`, `fix: correct email validation regex`
    git commit -m "<type>: <description of this unit>"
    ```
    Do not batch unrelated changes into one commit. Each commit should be atomic and self-contained.
-4. **Push** — When the task is complete or at natural breakpoints:
+4. **Merge into staging (ASK)** — Before merging into `staging`, ask the user explicitly:
+   > "Can I merge `<branch-name>` into `staging`?"
+   Do NOT merge without an affirmative answer.
+5. **Push** — When the task is complete or at natural breakpoints:
    ```
    git push -u origin <branch>
    ```
