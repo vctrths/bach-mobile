@@ -68,11 +68,11 @@ export default function Photo() {
         const fileName = `${userId}_profile_${Date.now()}.jpg`;
         try {
           const response = await fetch(image);
-          const blob = await response.blob();
+          const arrayBuffer = await response.arrayBuffer();
           const { data: uploadData, error: uploadError } =
             await supabase.storage
               .from("profile-images")
-              .upload(fileName, blob, {
+              .upload(fileName, arrayBuffer, {
                 contentType: "image/jpeg",
                 upsert: true,
               });

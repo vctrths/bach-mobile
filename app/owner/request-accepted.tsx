@@ -58,14 +58,14 @@ export default function RequestAcceptedScreen() {
         <YStack gap="$3" marginTop="auto" paddingBottom="$6">
           <Button
             label="Ga naar chat"
-            backgroundColor=""
-            color=""
+            backgroundColor="rgba(23, 51, 0, 0.85)"
+            color="white"
             onPress={() => router.push("/messages" as any)}
           />
           <Button
             label="Terug naar dashboard"
             backgroundColor="transparent"
-            color=""
+            color="#173300"
             onPress={() => router.push("/owner/dashboard")}
           />
         </YStack>
