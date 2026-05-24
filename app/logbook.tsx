@@ -197,26 +197,6 @@ export default function LogbookScreen() {
                 </Text>
               </XStack>
             }
-            rightElement={
-              <XStack
-                backgroundColor="white"
-                borderRadius={99}
-                paddingHorizontal="$4"
-                paddingVertical="$3"
-                alignItems="center"
-                gap="$2"
-                shadowColor="#000"
-                shadowOpacity={0.15}
-                shadowRadius={57.5}
-                shadowOffset={{ width: 0, height: 3 }}
-                width={180}
-              >
-                <Ionicons name="search" size={18} color="#172211" />
-                <Text fontSize={16} color="#172211" fontFamily="Inter" flex={1}>
-                  Zoeken naar een tuin
-                </Text>
-              </XStack>
-            }
           />
 
           {/* Weekly Progress Card */}
@@ -308,7 +288,7 @@ export default function LogbookScreen() {
             borderWidth={1}
             borderRadius={20}
             padding={16}
-            gap="$8"
+            gap="$4"
             shadowColor="#000"
             shadowOpacity={0.05}
             shadowRadius={20}
@@ -326,37 +306,6 @@ export default function LogbookScreen() {
               <Ionicons name="chevron-down" size={18} color="#57594D" />
             </XStack>
 
-            {/* Green activity dots */}
-            <YStack position="relative" height={0}>
-              <XStack
-                position="absolute"
-                top={-24}
-                left={29}
-                width={10}
-                height={10}
-                borderRadius={5}
-                backgroundColor="#173300"
-              />
-              <XStack
-                position="absolute"
-                top={-24}
-                left={167}
-                width={10}
-                height={10}
-                borderRadius={5}
-                backgroundColor="#173300"
-              />
-              <XStack
-                position="absolute"
-                top={-24}
-                left={213}
-                width={10}
-                height={10}
-                borderRadius={5}
-                backgroundColor="#173300"
-              />
-            </YStack>
-
             <XStack justifyContent="space-between">
               {DAYS.map((day) => {
                 const isLogged = [1, 3, 5].includes(day.date);
@@ -367,30 +316,38 @@ export default function LogbookScreen() {
                       router.push(`/logbook/${day.date}` as any)
                     }
                   >
-                    <YStack
-                      alignItems="center"
-                      gap="$2"
-                      padding={8}
-                      borderRadius={32}
-                      borderWidth={1}
-                      borderColor="#EAF0D8"
-                      backgroundColor="white"
-                      width={36}
-                    >
-                      <Text
-                        fontSize={16}
-                        color="rgba(0,0,0,0.6)"
-                        fontFamily="Inter"
+                    <YStack alignItems="center" gap="$1">
+                      {isLogged && (
+                        <Circle
+                          size={8}
+                          backgroundColor="#173300"
+                        />
+                      )}
+                      <YStack
+                        alignItems="center"
+                        gap="$2"
+                        padding={8}
+                        borderRadius={32}
+                        borderWidth={1}
+                        borderColor="#EAF0D8"
+                        backgroundColor="white"
+                        minWidth={44}
                       >
-                        {day.key}
-                      </Text>
-                      <Text
-                        fontSize={16}
-                        color="#172211"
-                        fontFamily="Inter"
-                      >
-                        {String(day.date).padStart(2, "0")}
-                      </Text>
+                        <Text
+                          fontSize={14}
+                          color="rgba(0,0,0,0.6)"
+                          fontFamily="Inter"
+                        >
+                          {day.key}
+                        </Text>
+                        <Text
+                          fontSize={14}
+                          color="#172211"
+                          fontFamily="Inter"
+                        >
+                          {String(day.date).padStart(2, "0")}
+                        </Text>
+                      </YStack>
                     </YStack>
                   </Pressable>
                 );
