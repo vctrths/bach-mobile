@@ -26,7 +26,7 @@ export default function Messages() {
     fetchConversations();
 
     const messagesChannel = supabase
-      .channel("messages-changes")
+      .channel(`messages-changes-${Date.now()}`)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages" },
