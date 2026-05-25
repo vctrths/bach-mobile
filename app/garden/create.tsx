@@ -209,6 +209,58 @@ export default function GardenCreateScreen() {
                 focusStyle={{ borderColor: "$primary" }}
               />
             </YStack>
+
+            {/* Garden Image Upload */}
+            <YStack gap="$1.5">
+              <Text color="$secondary" fontSize="$3" fontWeight="500">
+                Tuinafbeelding
+              </Text>
+              <Card
+                borderRadius="$6"
+                borderWidth={1}
+                borderColor="$borderColor"
+                overflow="hidden"
+                height={200}
+                pressStyle={{ scale: 0.98, opacity: 0.9 }}
+                onPress={pickImage}
+              >
+                {imageUri ? (
+                  <>
+                    <ExpoImage
+                      source={{ uri: imageUri }}
+                      style={{ width: "100%", height: "100%" }}
+                      contentFit="cover"
+                    />
+                    <YStack
+                      position="absolute"
+                      top={8}
+                      right={8}
+                      backgroundColor="rgba(0,0,0,0.6)"
+                      borderRadius={20}
+                      padding={6}
+                      onPress={(e) => {
+                        e?.stopPropagation?.();
+                        setImageUri(null);
+                      }}
+                    >
+                      <Ionicons name="close" size={16} color="white" />
+                    </YStack>
+                  </>
+                ) : (
+                  <YStack
+                    flex={1}
+                    justifyContent="center"
+                    alignItems="center"
+                    gap="$2"
+                  >
+                    <Ionicons name="camera" size={32} color="#57594D" />
+                    <Text color="text_light" fontSize="$3">
+                      Tik om een afbeelding te selecteren
+                    </Text>
+                  </YStack>
+                )}
+              </Card>
+            </YStack>
           </YStack>
 
           <XStack gap="$2" alignItems="center" justifyContent="center">
