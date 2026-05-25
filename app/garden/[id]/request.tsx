@@ -36,6 +36,7 @@ const requestSchema = z.object({
 export default function GardenRequestScreen() {
   const { id } = useLocalSearchParams();
   const [gardenName, setGardenName] = useState("Aanvraag");
+  const [ownerId, setOwnerId] = useState<string | null>(null);
   const [motivation, setMotivation] = useState("");
   const [collabType, setCollabType] = useState("");
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
@@ -50,11 +51,12 @@ export default function GardenRequestScreen() {
       try {
         const { data, error } = await supabase
           .from("gardens")
-          .select("name")
+          .select("name, owner_id")
           .eq("id", id)
           .single();
-        if (data && !error && (data as any).name) {
+        if (data && !error) {
           setGardenName((data as any).name);
+          setOwnerId((data as any).owner_id);
         }
       } catch {
         // fallback: keep default "Aanvraag"
@@ -120,6 +122,30 @@ export default function GardenRequestScreen() {
       if (error) {
         Alert.alert("Fout", error.message);
       } else {
+        // Send notification to garden owner
+        if (ownerId) {
+          try {
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("first_name, last_name")
+              .eq("id", user.id)
+              .single();
+
+            const requesterName = profile
+              ? `${profile.first_name || ""} ${profile.last_name || ""}`.trim()
+              : "Iemand";
+
+            await supabase.from("notifications").insert({
+              user_id: ownerId,
+              type: "request_received",
+              title: "Nieuwe aanvraag",
+              body: `${requesterName} wil je tuin "${gardenName}" beheren`,
+              related_id: id as string,
+            });
+          } catch {
+            // Silently fail if notification can't be sent
+          }
+        }
         router.push("/succesverzoek");
       }
     } catch (error) {

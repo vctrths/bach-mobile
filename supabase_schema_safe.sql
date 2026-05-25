@@ -183,7 +183,7 @@ CREATE POLICY "Users can send messages to their conversations"
 CREATE TABLE IF NOT EXISTS public.notifications (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
-  type text NOT NULL CHECK (type IN ('request_accepted', 'request_rejected', 'message', 'reminder', 'system')),
+  type text NOT NULL CHECK (type IN ('request_accepted', 'request_rejected', 'request_received', 'message', 'reminder', 'system')),
   title text NOT NULL,
   body text,
   read boolean DEFAULT false,
