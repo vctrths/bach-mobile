@@ -7,7 +7,7 @@ import { Image as ExpoImage } from "@/lib/image";
 import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Pressable, RefreshControl, ScrollView } from "react-native";
 import {
   Card,
@@ -26,15 +26,43 @@ type RecentLog = {
   image_url?: string | null;
 };
 
-const DAYS = [
-  { key: "Ma", label: "Ma", date: 1 },
-  { key: "Di", label: "Di", date: 2 },
-  { key: "Wo", label: "Wo", date: 3 },
-  { key: "Do", label: "Do", date: 4 },
-  { key: "Vr", label: "Vr", date: 5 },
-  { key: "Za", label: "Za", date: 6 },
-  { key: "Zo", label: "Zo", date: 7 },
-];
+const DAY_LABELS = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
+
+function getWeekDays(offset = 0) {
+  const now = new Date();
+  const dayOfWeek = now.getDay();
+  const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+  const monday = new Date(now);
+  monday.setDate(now.getDate() + mondayOffset + offset * 7);
+  monday.setHours(0, 0, 0, 0);
+
+  const days: Date[] = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    days.push(d);
+  }
+  return days;
+}
+
+function formatDateKey(d: Date) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function isSameDay(a: Date, b: Date) {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+}
+
+function capitalize(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
 
 function CircularProgress({
   current,
@@ -103,6 +131,18 @@ export default function LogbookScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [weeklyCount, setWeeklyCount] = useState(0);
+  const [activeDates, setActiveDates] = useState<Set<string>>(new Set());
+  const [weekOffset, setWeekOffset] = useState(0);
+
+  const weekDays = useMemo(() => getWeekDays(weekOffset), [weekOffset]);
+  const today = useMemo(() => new Date(), []);
+  const monthName = useMemo(
+    () =>
+      capitalize(
+        weekDays[0].toLocaleDateString("nl-BE", { month: "long" })
+      ),
+    [weekDays]
+  );
 
   const fetchLogs = async () => {
     try {
@@ -125,11 +165,21 @@ export default function LogbookScreen() {
 
       setLogs(formattedLogs);
 
+      // Build active dates set
+      const actives = new Set<string>();
+      (data || []).forEach((log) => {
+        actives.add(formatDateKey(new Date(log.created_at)));
+      });
+      setActiveDates(actives);
+
       // Count this week's logs
       const now = new Date();
+      const dayOfWeek = now.getDay();
+      const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
       const startOfWeek = new Date(now);
-      startOfWeek.setDate(now.getDate() - now.getDay() + 1);
+      startOfWeek.setDate(now.getDate() + mondayOffset);
       startOfWeek.setHours(0, 0, 0, 0);
+
       const weekLogs = (data || []).filter(
         (log) => new Date(log.created_at) >= startOfWeek
       );
@@ -301,51 +351,61 @@ export default function LogbookScreen() {
                 color="#172211"
                 fontFamily="Satoshi"
               >
-                Januari
+                {monthName}
               </Text>
-              <Ionicons name="chevron-down" size={18} color="#57594D" />
+              <XStack alignItems="center" gap="$3">
+                <Pressable onPress={() => setWeekOffset((prev) => prev - 1)}>
+                  <Ionicons name="chevron-back" size={20} color="#57594D" />
+                </Pressable>
+                <Pressable onPress={() => setWeekOffset((prev) => prev + 1)}>
+                  <Ionicons name="chevron-forward" size={20} color="#57594D" />
+                </Pressable>
+              </XStack>
             </XStack>
 
             <XStack justifyContent="space-between">
-              {DAYS.map((day) => {
-                const isLogged = [1, 3, 5].includes(day.date);
+              {weekDays.map((dayDate, index) => {
+                const dateKey = formatDateKey(dayDate);
+                const isLogged = activeDates.has(dateKey);
+                const isToday = isSameDay(dayDate, today);
+                const dayLabel = DAY_LABELS[index];
+                const dayNum = String(dayDate.getDate()).padStart(2, "0");
+
                 return (
                   <Pressable
-                    key={day.key}
+                    key={dateKey}
                     onPress={() =>
-                      router.push(`/logbook/${day.date}` as any)
+                      router.push(`/logbook/${dayDate.getDate()}` as any)
                     }
                   >
                     <YStack alignItems="center" gap="$1">
-                      {isLogged && (
-                        <Circle
-                          size={8}
-                          backgroundColor="#173300"
-                        />
-                      )}
+                      <Circle
+                        size={8}
+                        backgroundColor={isLogged ? "#173300" : "transparent"}
+                      />
                       <YStack
                         alignItems="center"
                         gap="$2"
                         padding={8}
                         borderRadius={32}
                         borderWidth={1}
-                        borderColor="#EAF0D8"
-                        backgroundColor="white"
+                        borderColor={isToday ? "#173300" : "#EAF0D8"}
+                        backgroundColor={isToday ? "#173300" : "white"}
                         minWidth={44}
                       >
                         <Text
                           fontSize={14}
-                          color="rgba(0,0,0,0.6)"
+                          color={isToday ? "white" : "rgba(0,0,0,0.6)"}
                           fontFamily="Inter"
                         >
-                          {day.key}
+                          {dayLabel}
                         </Text>
                         <Text
                           fontSize={14}
-                          color="#172211"
+                          color={isToday ? "white" : "#172211"}
                           fontFamily="Inter"
                         >
-                          {String(day.date).padStart(2, "0")}
+                          {dayNum}
                         </Text>
                       </YStack>
                     </YStack>
