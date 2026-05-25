@@ -18,11 +18,9 @@ export default function ChatBubble({
       paddingHorizontal="$4"
       paddingVertical="$3"
       borderRadius={5000}
-      backgroundColor={isOwn ? "#EAF0D8" : "#F0F3EC"}
-      borderWidth={1}
-      borderColor="#D4E1AE"
+      backgroundColor={isOwn ? "#173300" : "#F0F0F0"}
     >
-      <Text fontSize="$4" color="$text_dark">
+      <Text fontSize="$4" color={isOwn ? "$white" : "$text_dark"}>
         {content}
       </Text>
       {timestamp && (
