@@ -10,7 +10,8 @@ import { supabase } from "@/utils/supabase";
 import { Image as ExpoImage } from "@/lib/image";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
+import { OnboardingContext } from "@/context/OnboardingContext";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { RefreshControl, ScrollView } from "react-native";
 import { Card, Circle, Spinner, Text, XStack, YStack } from "tamagui";
 import { type Garden } from "@/types/garden";
@@ -21,6 +22,7 @@ type UserProfile = {
 };
 
 export default function Dashboard() {
+  const { data: onboardingData } = useContext(OnboardingContext);
   const [gardens, setGardens] = useState<Garden[]>([]);
   const [logs, setLogs] = useState<GardenLog[]>([]);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -67,8 +69,12 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+    if (onboardingData.role === "tuineigenaar") {
+      router.replace("/owner/dashboard");
+      return;
+    }
     fetchData();
-  }, []);
+  }, [onboardingData.role]);
 
   const onRefresh = () => {
     setRefreshing(true);
