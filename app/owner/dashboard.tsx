@@ -9,7 +9,8 @@ import { supabase } from "@/utils/supabase";
 import { Image as ExpoImage } from "@/lib/image";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { OnboardingContext } from "@/context/OnboardingContext";
+import React, { useContext, useEffect, useState } from "react";
 import { RefreshControl, ScrollView } from "react-native";
 import { Card, Circle, Spinner, Text, XStack, YStack } from "tamagui";
 import { type Garden } from "@/types/garden";
@@ -45,6 +46,7 @@ const DAY_NAMES = [
 ];
 
 export default function OwnerDashboard() {
+  const { data: onboardingData } = useContext(OnboardingContext);
   const [gardens, setGardens] = useState<Garden[]>([]);
   const [gardeners, setGardeners] = useState<ApprovedGardener[]>([]);
   const [requests, setRequests] = useState<GardenRequest[]>([]);
@@ -117,8 +119,12 @@ export default function OwnerDashboard() {
   };
 
   useEffect(() => {
+    if (onboardingData.role && onboardingData.role !== "tuineigenaar") {
+      router.replace("/dashboard");
+      return;
+    }
     fetchData();
-  }, []);
+  }, [onboardingData.role]);
 
   const onRefresh = () => {
     setRefreshing(true);

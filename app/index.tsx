@@ -1,8 +1,9 @@
 import Button from "@/components/ui/Button";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
+import { OnboardingContext } from "@/context/OnboardingContext";
 import { router } from "expo-router";
-import React from "react";
-import { H1, Text, YStack } from "tamagui";
+import React, { useContext } from "react";
+import { H1, Text, XStack, YStack } from "tamagui";
 
 /**
  * DEBUG GATE
@@ -13,6 +14,17 @@ import { H1, Text, YStack } from "tamagui";
  * when development is complete.
  */
 export default function DebugGate() {
+  const { updateData } = useContext(OnboardingContext);
+
+  const startAsRole = (role: "tuineigenaar" | "tuinzoeker") => {
+    updateData({ role });
+    if (role === "tuineigenaar") {
+      router.push("/owner/dashboard");
+    } else {
+      router.push("/dashboard");
+    }
+  };
+
   return (
     <ThemedSafeArea>
       <YStack flex={1} justifyContent="center" padding="$6" gap="$4">
@@ -31,8 +43,27 @@ export default function DebugGate() {
           pressStyle={{ scale: 0.98, opacity: 0.9 }}
         />
 
+        <XStack gap="$3">
+          <Button
+            label="Tuineigenaar"
+            flex={1}
+            size="$6"
+            backgroundColor="$primary"
+            onPress={() => startAsRole("tuineigenaar")}
+            pressStyle={{ scale: 0.98, opacity: 0.9 }}
+          />
+          <Button
+            label="Tuinzoeker"
+            flex={1}
+            size="$6"
+            backgroundColor="$accent"
+            onPress={() => startAsRole("tuinzoeker")}
+            pressStyle={{ scale: 0.98, opacity: 0.9 }}
+          />
+        </XStack>
+
         <Button
-          label="Skip to Dashboard"
+          label="Skip to Dashboard (no role)"
           size="$6"
           backgroundColor="transparent"
           borderWidth={1}
@@ -40,6 +71,14 @@ export default function DebugGate() {
           onPress={() => router.push("/dashboard")}
           pressStyle={{ scale: 0.98, opacity: 0.8 }}
           color="$primary"
+        />
+
+        <Button
+          label="Login / Sign Up"
+          size="$6"
+          backgroundColor="$accent"
+          onPress={() => router.push("/login")}
+          pressStyle={{ scale: 0.98, opacity: 0.9 }}
         />
 
         <YStack marginTop="$10" padding="$4" backgroundColor="$borderColor" borderRadius="$4">

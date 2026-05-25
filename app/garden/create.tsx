@@ -4,10 +4,13 @@ import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import TopNavPill from "@/components/ui/TopNavPill";
 import ScreenContent from "@/components/ui/ScreenContent";
 import { supabase } from "@/utils/supabase";
+import * as ImagePicker from "expo-image-picker";
+import { Image as ExpoImage } from "@/lib/image";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { Alert, ScrollView } from "react-native";
-import { Input, Spinner, Text, TextArea, XStack, YStack } from "tamagui";
+import { Card, Input, Spinner, Text, TextArea, XStack, YStack } from "tamagui";
 
 async function geocodeLocation(location: string): Promise<{ latitude: number; longitude: number } | null> {
   try {
@@ -32,7 +35,30 @@ export default function GardenCreateScreen() {
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
+  const [imageUri, setImageUri] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Toestemming nodig",
+        "We hebben toegang tot je foto's nodig om een tuinafbeelding te kunnen kiezen."
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [16, 9],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
+    }
+  };
 
   const handleCreate = async () => {
     if (!name.trim()) {
@@ -56,11 +82,41 @@ export default function GardenCreateScreen() {
 
       const coords = await geocodeLocation(location.trim());
 
+      let imageUrl: string | null = null;
+
+      // Upload garden image if provided
+      if (imageUri) {
+        const fileName = `${user.id}_garden_${Date.now()}.jpg`;
+        try {
+          const response = await fetch(imageUri);
+          const arrayBuffer = await response.arrayBuffer();
+          const { data: uploadData, error: uploadError } =
+            await supabase.storage
+              .from("garden-images")
+              .upload(fileName, arrayBuffer, {
+                contentType: "image/jpeg",
+                upsert: true,
+              });
+
+          if (uploadError) {
+            console.warn("Failed to upload garden image:", uploadError);
+          } else if (uploadData) {
+            const { data: urlData } = supabase.storage
+              .from("garden-images")
+              .getPublicUrl(fileName);
+            imageUrl = urlData?.publicUrl ?? null;
+          }
+        } catch (uploadFetchErr) {
+          console.warn("Error reading or uploading the local file:", uploadFetchErr);
+        }
+      }
+
       const insertData = {
         owner_id: user.id,
         name: name.trim(),
         location: location.trim(),
         description: description.trim(),
+        ...(imageUrl && { image_url: imageUrl }),
         ...(coords && {
           latitude: coords.latitude,
           longitude: coords.longitude,
@@ -152,6 +208,58 @@ export default function GardenCreateScreen() {
                 minHeight={110}
                 focusStyle={{ borderColor: "$primary" }}
               />
+            </YStack>
+
+            {/* Garden Image Upload */}
+            <YStack gap="$1.5">
+              <Text color="$secondary" fontSize="$3" fontWeight="500">
+                Tuinafbeelding
+              </Text>
+              <Card
+                borderRadius="$6"
+                borderWidth={1}
+                borderColor="$borderColor"
+                overflow="hidden"
+                height={200}
+                pressStyle={{ scale: 0.98, opacity: 0.9 }}
+                onPress={pickImage}
+              >
+                {imageUri ? (
+                  <>
+                    <ExpoImage
+                      source={{ uri: imageUri }}
+                      style={{ width: "100%", height: "100%" }}
+                      contentFit="cover"
+                    />
+                    <YStack
+                      position="absolute"
+                      top={8}
+                      right={8}
+                      backgroundColor="rgba(0,0,0,0.6)"
+                      borderRadius={20}
+                      padding={6}
+                      onPress={(e) => {
+                        e?.stopPropagation?.();
+                        setImageUri(null);
+                      }}
+                    >
+                      <Ionicons name="close" size={16} color="white" />
+                    </YStack>
+                  </>
+                ) : (
+                  <YStack
+                    flex={1}
+                    justifyContent="center"
+                    alignItems="center"
+                    gap="$2"
+                  >
+                    <Ionicons name="camera" size={32} color="#57594D" />
+                    <Text color="text_light" fontSize="$3">
+                      Tik om een afbeelding te selecteren
+                    </Text>
+                  </YStack>
+                )}
+              </Card>
             </YStack>
           </YStack>
 
