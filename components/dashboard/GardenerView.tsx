@@ -1,6 +1,5 @@
 import GardenCard from "@/components/ui/GardenCard";
 import { LogCard, type GardenLog } from "@/components/ui/LogCard";
-import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { supabase } from "@/utils/supabase";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -105,11 +104,6 @@ export default function GardenerView() {
       }
     >
       <YStack paddingHorizontal="$4" paddingBottom="$4">
-        <DashboardHeader
-          title="Mijn tuinwerk"
-          searchPlaceholder="Zoek tuinen"
-        />
-
         {loading ? (
           <XStack padding="$10" justifyContent="center">
             <Spinner size="large" color="$primary" />

@@ -1,7 +1,6 @@
 import Button from "@/components/ui/Button";
 import GardenCard from "@/components/ui/GardenCard";
 import { LogCard, type GardenLog } from "@/components/ui/LogCard";
-import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { supabase } from "@/utils/supabase";
 import { Image as ExpoImage } from "@/lib/image";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -11,16 +10,31 @@ import { RefreshControl, ScrollView } from "react-native";
 import { Card, Spinner, Text, XStack, YStack } from "tamagui";
 import { type Garden } from "@/types/garden";
 
-export default function SeekerView() {
+interface SeekerViewProps {
+  searchQuery?: string;
+  searchResults?: Garden[];
+  searchLoading?: boolean;
+  isSearchFocused?: boolean;
+  showingSearch?: boolean;
+  onSearchChange?: (text: string) => void;
+  onSearchFocus?: () => void;
+  onSearchBlur?: () => void;
+}
+
+export default function SeekerView({
+  searchQuery = "",
+  searchResults = [],
+  searchLoading = false,
+  isSearchFocused = false,
+  showingSearch = false,
+  onSearchChange,
+  onSearchFocus,
+  onSearchBlur,
+}: SeekerViewProps) {
   const [gardens, setGardens] = useState<Garden[]>([]);
   const [logs, setLogs] = useState<GardenLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<Garden[]>([]);
-  const [searchLoading, setSearchLoading] = useState(false);
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
@@ -54,35 +68,6 @@ export default function SeekerView() {
     fetchData();
   };
 
-  const handleSearch = useCallback(async (query: string) => {
-    if (!query.trim()) {
-      setSearchResults([]);
-      return;
-    }
-
-    setSearchLoading(true);
-    try {
-      const { data } = await supabase
-        .from("gardens")
-        .select("id, name, rating, location, image_url")
-        .or(`name.ilike.%${query}%,location.ilike.%${query}%,description.ilike.%${query}%`)
-        .limit(10);
-
-      if (data) setSearchResults(data as Garden[]);
-    } catch (error) {
-      console.error("Search error:", error);
-    } finally {
-      setSearchLoading(false);
-    }
-  }, []);
-
-  const onSearchChange = (text: string) => {
-    setSearchQuery(text);
-    handleSearch(text);
-  };
-
-  const showingSearch = !!(searchQuery.trim() || isSearchFocused);
-
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
@@ -91,15 +76,6 @@ export default function SeekerView() {
       }
     >
       <YStack paddingHorizontal="$4" paddingBottom="$4">
-        <DashboardHeader
-          title="Groene Vingers"
-          searchPlaceholder="Zoeken naar een tuin"
-          searchValue={searchQuery}
-          onSearchChange={onSearchChange}
-          onSearchFocus={() => setIsSearchFocused(true)}
-          onSearchBlur={() => setIsSearchFocused(false)}
-        />
-
         {loading ? (
           <XStack padding="$10" justifyContent="center">
             <Spinner size="large" color="$primary" />

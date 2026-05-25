@@ -3,7 +3,6 @@ import ProgressDots from "@/components/ui/ProgressDots";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import { OnboardingContext } from "@/context/OnboardingContext";
 import { supabase } from "@/utils/supabase";
-import { getHomeRoute } from "@/utils/role-routing";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { Image as ExpoImage } from "@/lib/image";
@@ -112,10 +111,9 @@ export default function Photo() {
         return;
       }
 
-      // 4. Clear onboarding context and navigate to role-based dashboard
-      const home = getHomeRoute(data.role);
+      // 4. Clear onboarding context and navigate to dashboard
       reset();
-      router.replace(home as any);
+      router.replace("/dashboard");
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "An unexpected error occurred",

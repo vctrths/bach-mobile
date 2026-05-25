@@ -1,6 +1,5 @@
-import BottomNav from "@/components/ui/BottomNav";
-import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
-import TopNavPill from "@/components/ui/TopNavPill";
+import PageContainer from "@/components/ui/PageContainer";
+import Button from "@/components/ui/Button";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
@@ -137,13 +136,9 @@ export default function SettingsScreen() {
   ];
 
   return (
-    <ThemedSafeArea>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 130 }}>
-        <YStack paddingHorizontal="$5" paddingTop="$5" gap="$5">
-          {/* Header Block */}
-          <TopNavPill title="Instellingen" />
-
-          {/* Pro Banner */}
+    <PageContainer topNavTitle="Instellingen" activeTab="profile">
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <YStack gap="$5">
           <Card
             backgroundColor="rgba(227, 236, 215, 0.5)"
             borderColor="rgba(227, 236, 215, 0.85)"
@@ -161,7 +156,6 @@ export default function SettingsScreen() {
             </Text>
           </Card>
 
-          {/* Section: Account */}
           <YStack gap="$2.5">
             <Text color="$secondary" fontSize="$3" fontWeight="500" marginLeft="$1">
               Account
@@ -189,7 +183,6 @@ export default function SettingsScreen() {
             ))}
           </YStack>
 
-          {/* Section: Meer */}
           <YStack gap="$2.5">
             <Text color="$secondary" fontSize="$3" fontWeight="500" marginLeft="$1">
               Meer
@@ -218,13 +211,6 @@ export default function SettingsScreen() {
           </YStack>
         </YStack>
       </ScrollView>
-
-      {/* Floating Bottom Navigation */}
-      <BottomNav
-        activeTab="profile"
-        onMessagePress={() => router.push("/messages" as any)}
-        onProfilePress={() => router.push("/profile")}
-      />
-    </ThemedSafeArea>
+    </PageContainer>
   );
 }

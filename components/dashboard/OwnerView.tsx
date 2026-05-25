@@ -1,12 +1,11 @@
 import Button from "@/components/ui/Button";
 import GardenCard from "@/components/ui/GardenCard";
-import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { supabase } from "@/utils/supabase";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { RefreshControl, ScrollView } from "react-native";
-import { Card, Circle, Spinner, Text, XStack, YStack } from "tamagui";
+import { Card, Spinner, Text, XStack, YStack } from "tamagui";
 import { type Garden } from "@/types/garden";
 
 type ApprovedGardener = {
@@ -147,8 +146,6 @@ export default function OwnerView() {
     fetchData();
   };
 
-  const locationText = gardens[0]?.location ?? "Leuven, BE";
-
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
@@ -157,12 +154,6 @@ export default function OwnerView() {
       }
     >
       <YStack paddingHorizontal="$4" paddingBottom="$4" gap="$6">
-        <DashboardHeader
-          title="Locatie"
-          location={locationText}
-          searchPlaceholder="Zoeken naar een tuin"
-        />
-
         {loading ? (
           <XStack padding="$10" justifyContent="center">
             <Spinner size="large" color="$primary" />

@@ -52,8 +52,6 @@ export default function RootLayout() {
             <Stack.Screen name="succesabo" />
             <Stack.Screen name="dashboard" />
             <Stack.Screen name="saved" />
-            <Stack.Screen name="owner/dashboard" />
-            <Stack.Screen name="gardener/dashboard" />
             <Stack.Screen name="pro/payment" />
             <Stack.Screen name="garden/create" />
             <Stack.Screen name="garden/[id]/request" />

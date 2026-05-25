@@ -1,9 +1,6 @@
-import BottomNav from "@/components/ui/BottomNav";
+import PageContainer from "@/components/ui/PageContainer";
 import MessageItem from "@/components/ui/MessageItem";
-import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
-import TopNavPill from "@/components/ui/TopNavPill";
 import { supabase } from "@/utils/supabase";
-import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { FlatList } from "react-native";
 import { Spinner, Text, YStack } from "tamagui";
@@ -127,53 +124,40 @@ export default function Messages() {
   };
 
   return (
-    <ThemedSafeArea>
-      <YStack flex={1}>
-        <YStack paddingHorizontal="$4" paddingTop="$4">
-          <TopNavPill title="Chats" />
+    <PageContainer topNavTitle="Chats" activeTab="message">
+      {loading ? (
+        <YStack flex={1} justifyContent="center" alignItems="center">
+          <Spinner size="large" color="$primary" />
         </YStack>
-
-        {loading ? (
-          <YStack flex={1} justifyContent="center" alignItems="center">
-            <Spinner size="large" color="$primary" />
-          </YStack>
-        ) : conversations.length === 0 ? (
-          <YStack flex={1} justifyContent="center" alignItems="center" gap="$4">
-            <Text fontSize="$5" color="$secondary">
-              Nog geen gesprekken
-            </Text>
-            <Text fontSize="$4" color="$secondary" textAlign="center">
-              Begin een gesprek vanuit een tuinpagina
-            </Text>
-          </YStack>
-        ) : (
-          <FlatList
-            data={conversations}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <MessageItem
-                id={item.id}
-                avatarUrl={item.partner_image}
-                name={item.partner_name}
-                lastMessage={item.last_message}
-                timestamp={formatRelativeTime(item.last_message_time)}
-                isUnread={false}
-                isOnline={item.is_online}
-              />
-            )}
-            ItemSeparatorComponent={() => (
-              <YStack height={1} backgroundColor="$divider" />
-            )}
-            contentContainerStyle={{ paddingBottom: 100 }}
-          />
-        )}
-      </YStack>
-
-      <BottomNav
-        activeTab="message"
-        onProfilePress={() => router.push("/profile")}
-        unreadMessageCount={unreadCount}
-      />
-    </ThemedSafeArea>
+      ) : conversations.length === 0 ? (
+        <YStack flex={1} justifyContent="center" alignItems="center" gap="$4">
+          <Text fontSize="$5" color="$secondary">
+            Nog geen gesprekken
+          </Text>
+          <Text fontSize="$4" color="$secondary" textAlign="center">
+            Begin een gesprek vanuit een tuinpagina
+          </Text>
+        </YStack>
+      ) : (
+        <FlatList
+          data={conversations}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <MessageItem
+              id={item.id}
+              avatarUrl={item.partner_image}
+              name={item.partner_name}
+              lastMessage={item.last_message}
+              timestamp={formatRelativeTime(item.last_message_time)}
+              isUnread={false}
+              isOnline={item.is_online}
+            />
+          )}
+          ItemSeparatorComponent={() => (
+            <YStack height={1} backgroundColor="$divider" />
+          )}
+        />
+      )}
+    </PageContainer>
   );
 }

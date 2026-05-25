@@ -90,9 +90,7 @@ export default function MapScreen() {
         </MapView>
       )}
 
-      <YStack position="absolute" top={insets.top} left={0} right={0} paddingHorizontal="$4">
-        <TopNavPill title="Kaart" />
-      </YStack>
+      <TopNavPill title="Kaart" />
 
       <BottomNav activeTab="map" />
     </View>

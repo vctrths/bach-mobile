@@ -3,6 +3,7 @@ import { BlurView } from "expo-blur";
 import { router } from "expo-router";
 import React from "react";
 import { StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Circle, Text, XStack, YStack } from "tamagui";
 
 interface TopNavPillProps {
@@ -20,10 +21,18 @@ export default function TopNavPill({
   rightElement,
   children,
 }: TopNavPillProps) {
+  const insets = useSafeAreaInsets();
   const handleBack = onBackPress || (() => router.back());
 
   return (
-    <YStack gap="$4">
+    <YStack
+      position="absolute"
+      top={insets.top}
+      left={0}
+      right={0}
+      paddingHorizontal="$4"
+      zIndex={10}
+    >
       <YStack
         borderRadius="$10"
         padding={1}
@@ -47,40 +56,40 @@ export default function TopNavPill({
           />
 
           <YStack paddingHorizontal="$4" paddingVertical="$3" gap="$3">
-          <XStack alignItems="center" justifyContent="space-between">
-            <XStack alignItems="center" gap="$4">
-              {!hideBack && (
-                <Circle
-                  size={44}
-                  backgroundColor="white"
-                  borderWidth={1}
-                  borderColor="rgba(0, 0, 0, 0.04)"
-                  justifyContent="center"
-                  alignItems="center"
-                  shadowColor="#000"
-                  shadowOpacity={0.05}
-                  shadowRadius={6}
-                  shadowOffset={{ width: 0, height: 2 }}
-                  onPress={handleBack}
-                  pressStyle={{ scale: 0.94, opacity: 0.85 }}
-                >
-                  <Ionicons name="arrow-back" size={24} color="#172211" />
-                </Circle>
-              )}
-              {typeof title === "string" ? (
-                <Text color="$text_dark" fontSize="$5" fontWeight="bold">
-                  {title}
-                </Text>
-              ) : (
-                title
-              )}
+            <XStack alignItems="center" justifyContent="space-between">
+              <XStack alignItems="center" gap="$4">
+                {!hideBack && (
+                  <Circle
+                    size={44}
+                    backgroundColor="white"
+                    borderWidth={1}
+                    borderColor="rgba(0, 0, 0, 0.04)"
+                    justifyContent="center"
+                    alignItems="center"
+                    shadowColor="#000"
+                    shadowOpacity={0.05}
+                    shadowRadius={6}
+                    shadowOffset={{ width: 0, height: 2 }}
+                    onPress={handleBack}
+                    pressStyle={{ scale: 0.94, opacity: 0.85 }}
+                  >
+                    <Ionicons name="arrow-back" size={24} color="#172211" />
+                  </Circle>
+                )}
+                {typeof title === "string" ? (
+                  <Text color="$text_dark" fontSize="$5" fontWeight="bold">
+                    {title}
+                  </Text>
+                ) : (
+                  title
+                )}
+              </XStack>
+
+              {rightElement && rightElement}
             </XStack>
 
-            {rightElement && rightElement}
-          </XStack>
-
-          {children}
-        </YStack>
+            {children}
+          </YStack>
         </YStack>
       </YStack>
     </YStack>

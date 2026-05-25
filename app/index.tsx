@@ -4,6 +4,7 @@ import { OnboardingContext } from "@/context/OnboardingContext";
 import { router } from "expo-router";
 import React, { useContext } from "react";
 import { H1, Text, XStack, YStack } from "tamagui";
+import { UserRole } from "@/utils/role";
 
 /**
  * DEBUG GATE
@@ -16,13 +17,9 @@ import { H1, Text, XStack, YStack } from "tamagui";
 export default function DebugGate() {
   const { updateData } = useContext(OnboardingContext);
 
-  const startAsRole = (role: "tuineigenaar" | "tuinzoeker") => {
+  const startAsRole = (role: UserRole) => {
     updateData({ role });
-    if (role === "tuineigenaar") {
-      router.push("/owner/dashboard");
-    } else {
-      router.push("/dashboard");
-    }
+    router.push("/dashboard");
   };
 
   return (
@@ -49,7 +46,7 @@ export default function DebugGate() {
             flex={1}
             size="$6"
             backgroundColor="$primary"
-            onPress={() => startAsRole("tuineigenaar")}
+            onPress={() => startAsRole(UserRole.TUIN_EIGENAAR)}
             pressStyle={{ scale: 0.98, opacity: 0.9 }}
           />
           <Button
@@ -57,10 +54,18 @@ export default function DebugGate() {
             flex={1}
             size="$6"
             backgroundColor="$accent"
-            onPress={() => startAsRole("tuinzoeker")}
+            onPress={() => startAsRole(UserRole.TUIN_ZOEKER)}
             pressStyle={{ scale: 0.98, opacity: 0.9 }}
           />
         </XStack>
+
+        <Button
+          label="Tuinzoeker (met tuin)"
+          size="$6"
+          backgroundColor="$accent"
+          onPress={() => startAsRole(UserRole.TUIN_ZOEKER_MET_TUIN)}
+          pressStyle={{ scale: 0.98, opacity: 0.9 }}
+        />
 
         <Button
           label="Skip to Dashboard (no role)"

@@ -27,9 +27,7 @@ export default function MapScreen() {
         </Text>
       </YStack>
 
-      <YStack position="absolute" top={insets.top} left={0} right={0} paddingHorizontal="$4">
-        <TopNavPill title="Kaart" onBackPress={() => router.back()} />
-      </YStack>
+      <TopNavPill title="Kaart" onBackPress={() => router.back()} />
     </View>
   );
 }

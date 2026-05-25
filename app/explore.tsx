@@ -1,19 +1,14 @@
-import BottomNav from "@/components/ui/BottomNav";
-import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
-import TopNavPill from "@/components/ui/TopNavPill";
+import PageContainer from "@/components/ui/PageContainer";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
 import React from "react";
 import { ScrollView } from "react-native";
 import { Card, H2, Text, XStack, YStack } from "tamagui";
 
 export default function ExploreScreen() {
   return (
-    <ThemedSafeArea>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 130 }}>
-        <YStack paddingHorizontal="$5" paddingTop="$5" gap="$5">
-          <TopNavPill title="Ontdekken" />
-
+    <PageContainer>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <YStack gap="$5">
           {/* Explorer Hero Card */}
           <Card
             backgroundColor="$background_secondary"
@@ -46,13 +41,6 @@ export default function ExploreScreen() {
           </YStack>
         </YStack>
       </ScrollView>
-
-      {/* Floating Bottom Navigation */}
-      <BottomNav
-        activeTab="home"
-        onMessagePress={() => router.push("/messages" as any)}
-        onProfilePress={() => router.push("/profile")}
-      />
-    </ThemedSafeArea>
+    </PageContainer>
   );
 }

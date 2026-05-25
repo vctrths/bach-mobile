@@ -1,6 +1,5 @@
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import { supabase } from "@/utils/supabase";
-import { getHomeRoute } from "@/utils/role-routing";
 import { router } from "expo-router";
 import { useEffect } from "react";
 import { Spinner, Text, YStack } from "tamagui";
@@ -24,7 +23,7 @@ export default function AuthCallbackScreen() {
         .single();
 
       if (existingProfile) {
-        router.replace(getHomeRoute(existingProfile.role) as any);
+        router.replace("/dashboard");
       } else {
         const { error } = await supabase.from("profiles").insert({
           id: session.user.id,

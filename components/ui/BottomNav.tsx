@@ -3,8 +3,6 @@ import { BlurView } from "expo-blur";
 import { router } from "expo-router";
 import React from "react";
 import { Circle, XStack } from "tamagui";
-import { useAuth } from "@/context/AuthContext";
-import { getHomeRoute } from "@/utils/role-routing";
 
 interface BottomNavProps {
   activeTab?: "home" | "map" | "message" | "profile";
@@ -23,10 +21,7 @@ export default function BottomNav({
   onProfilePress,
   unreadMessageCount = 0,
 }: BottomNavProps) {
-  const { profile } = useAuth();
-
-  const defaultHomePress = () =>
-    router.push(getHomeRoute(profile?.role) as any);
+  const defaultHomePress = () => router.push("/dashboard");
   const defaultMapPress = () => router.push("/map" as any);
   const defaultMessagePress = () => router.push("/messages" as any);
   const defaultProfilePress = () => router.push("/profile");

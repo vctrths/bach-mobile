@@ -30,7 +30,7 @@ export default function Login() {
             return;
         }
 
-        router.replace("/login-succes");
+        router.replace("/splash");
     };
 
     const handleOAuth = async (provider: "google" | "facebook") => {

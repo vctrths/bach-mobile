@@ -1,7 +1,5 @@
-import BottomNav from "@/components/ui/BottomNav";
-import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
+import PageContainer from "@/components/ui/PageContainer";
 import TopNavPill from "@/components/ui/TopNavPill";
-import ScreenContent from "@/components/ui/ScreenContent";
 import { supabase } from "@/utils/supabase";
 import { Image as ExpoImage } from "@/lib/image";
 import { useAuth } from "@/context/AuthContext";
@@ -165,14 +163,12 @@ export default function LogbookScreen() {
 
       setLogs(formattedLogs);
 
-      // Build active dates set
       const actives = new Set<string>();
       (data || []).forEach((log) => {
         actives.add(formatDateKey(new Date(log.created_at)));
       });
       setActiveDates(actives);
 
-      // Count this week's logs
       const now = new Date();
       const dayOfWeek = now.getDay();
       const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
@@ -204,52 +200,48 @@ export default function LogbookScreen() {
   const hasLogs = logs.length > 0;
 
   return (
-    <ThemedSafeArea>
+    <PageContainer
+      topNavTitle={
+        <XStack alignItems="center" gap="$3">
+          <Circle size={50} overflow="hidden">
+            {profile?.profile_image ? (
+              <ExpoImage
+                source={{ uri: profile.profile_image }}
+                style={{ width: 50, height: 50 }}
+                contentFit="cover"
+              />
+            ) : (
+              <XStack
+                width={50}
+                height={50}
+                backgroundColor="#E3ECD7"
+                justifyContent="center"
+                alignItems="center"
+              >
+                <Ionicons name="person" size={22} color="#57594D" />
+              </XStack>
+            )}
+          </Circle>
+          <Text
+            fontSize={16}
+            fontWeight="700"
+            color="#000000"
+            fontFamily="Inter"
+          >
+            {profile?.first_name
+              ? `${profile.first_name} ${profile.last_name || ""}`.trim()
+              : "Victor Thys"}
+          </Text>
+        </XStack>
+      }
+    >
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        <ScreenContent>
-          <TopNavPill
-            hideBack
-            title={
-              <XStack alignItems="center" gap="$3">
-                <Circle size={50} overflow="hidden">
-                  {profile?.profile_image ? (
-                    <ExpoImage
-                      source={{ uri: profile.profile_image }}
-                      style={{ width: 50, height: 50 }}
-                      contentFit="cover"
-                    />
-                  ) : (
-                    <XStack
-                      width={50}
-                      height={50}
-                      backgroundColor="#E3ECD7"
-                      justifyContent="center"
-                      alignItems="center"
-                    >
-                      <Ionicons name="person" size={22} color="#57594D" />
-                    </XStack>
-                  )}
-                </Circle>
-                <Text
-                  fontSize={16}
-                  fontWeight="700"
-                  color="#000000"
-                  fontFamily="Inter"
-                >
-                  {profile?.first_name
-                    ? `${profile.first_name} ${profile.last_name || ""}`.trim()
-                    : "Victor Thys"}
-                </Text>
-              </XStack>
-            }
-          />
-
-          {/* Weekly Progress Card */}
+        <YStack gap="$6">
           <Card
             backgroundColor="#F0F3EC"
             borderColor="#E3ECD7"
@@ -279,7 +271,6 @@ export default function LogbookScreen() {
             </XStack>
           </Card>
 
-          {/* Action Buttons */}
           <XStack gap="$4">
             <XStack
               flex={1}
@@ -295,12 +286,7 @@ export default function LogbookScreen() {
               shadowRadius={20}
               shadowOffset={{ width: 0, height: 4 }}
             >
-              <Text
-                fontSize={14}
-                color="#172211"
-                fontFamily="Satoshi"
-                textAlign="center"
-              >
+              <Text fontSize={14} color="#172211" fontFamily="Satoshi" textAlign="center">
                 Logboek
               </Text>
             </XStack>
@@ -320,18 +306,12 @@ export default function LogbookScreen() {
               onPress={() => router.push("/logbook/new" as any)}
               pressStyle={{ scale: 0.96, opacity: 0.8 }}
             >
-              <Text
-                fontSize={14}
-                color="#172211"
-                fontFamily="Satoshi"
-                textAlign="center"
-              >
+              <Text fontSize={14} color="#172211" fontFamily="Satoshi" textAlign="center">
                 Nieuwe log
               </Text>
             </XStack>
           </XStack>
 
-          {/* Mini Calendar */}
           <Card
             backgroundColor="#F0F3EC"
             borderColor="#E3ECD7"
@@ -345,12 +325,7 @@ export default function LogbookScreen() {
             shadowOffset={{ width: 0, height: 4 }}
           >
             <XStack justifyContent="space-between" alignItems="center">
-              <Text
-                fontSize={20}
-                fontWeight="700"
-                color="#172211"
-                fontFamily="Satoshi"
-              >
+              <Text fontSize={20} fontWeight="700" color="#172211" fontFamily="Satoshi">
                 {monthName}
               </Text>
               <XStack alignItems="center" gap="$3">
@@ -374,15 +349,10 @@ export default function LogbookScreen() {
                 return (
                   <Pressable
                     key={dateKey}
-                    onPress={() =>
-                      router.push(`/logbook/${dayDate.getDate()}` as any)
-                    }
+                    onPress={() => router.push(`/logbook/${dayDate.getDate()}` as any)}
                   >
                     <YStack alignItems="center" gap="$1">
-                      <Circle
-                        size={8}
-                        backgroundColor={isLogged ? "#173300" : "transparent"}
-                      />
+                      <Circle size={8} backgroundColor={isLogged ? "#173300" : "transparent"} />
                       <YStack
                         alignItems="center"
                         gap="$2"
@@ -393,18 +363,10 @@ export default function LogbookScreen() {
                         backgroundColor={isToday ? "#173300" : "white"}
                         minWidth={44}
                       >
-                        <Text
-                          fontSize={14}
-                          color={isToday ? "white" : "rgba(0,0,0,0.6)"}
-                          fontFamily="Inter"
-                        >
+                        <Text fontSize={14} color={isToday ? "white" : "rgba(0,0,0,0.6)"} fontFamily="Inter">
                           {dayLabel}
                         </Text>
-                        <Text
-                          fontSize={14}
-                          color={isToday ? "white" : "#172211"}
-                          fontFamily="Inter"
-                        >
+                        <Text fontSize={14} color={isToday ? "white" : "#172211"} fontFamily="Inter">
                           {dayNum}
                         </Text>
                       </YStack>
@@ -415,33 +377,17 @@ export default function LogbookScreen() {
             </XStack>
           </Card>
 
-          {/* Recent Logs */}
           <YStack gap="$4">
-            <Text
-              fontSize={20}
-              fontWeight="900"
-              color="#000000"
-              fontFamily="Inter"
-            >
+            <Text fontSize={20} fontWeight="900" color="#000000" fontFamily="Inter">
               Recente logs
             </Text>
 
             {loading ? (
-              <YStack
-                padding="$10"
-                justifyContent="center"
-                alignItems="center"
-              >
+              <YStack padding="$10" justifyContent="center" alignItems="center">
                 <Spinner size="large" color="primary" />
               </YStack>
             ) : !hasLogs ? (
-              <YStack
-                padding="$6"
-                alignItems="center"
-                gap="$2"
-                backgroundColor="rgba(23, 51, 0, 0.03)"
-                borderRadius="$6"
-              >
+              <YStack padding="$6" alignItems="center" gap="$2" backgroundColor="rgba(23, 51, 0, 0.03)" borderRadius="$6">
                 <Ionicons name="leaf-outline" size={48} color="#57594D" />
                 <Text color="secondary" fontSize="$3" textAlign="center">
                   het is hier nog heel stil...
@@ -459,61 +405,27 @@ export default function LogbookScreen() {
                     padding={8}
                     justifyContent="space-between"
                     alignItems="center"
-                    onPress={() =>
-                      router.push(`/logbook/${log.id}` as any)
-                    }
+                    onPress={() => router.push(`/logbook/${log.id}` as any)}
                     pressStyle={{ scale: 0.98, opacity: 0.9 }}
                   >
                     <XStack alignItems="center" gap="$2">
                       <ExpoImage
                         source={require("@/assets/images/hero.png")}
-                        style={{
-                          width: 56,
-                          height: 56,
-                          borderRadius: 7,
-                        }}
+                        style={{ width: 56, height: 56, borderRadius: 7 }}
                         contentFit="cover"
                       />
                       <YStack gap="$2" width={175}>
-                        <Text
-                          fontSize={18}
-                          fontWeight="700"
-                          color="#000000"
-                          fontFamily="Satoshi"
-                        >
+                        <Text fontSize={18} fontWeight="700" color="#000000" fontFamily="Satoshi">
                           {log.date}
                         </Text>
-                        <Text
-                          fontSize={14}
-                          color="rgba(0,0,0,0.6)"
-                          fontFamily="Satoshi"
-                          numberOfLines={2}
-                        >
+                        <Text fontSize={14} color="rgba(0,0,0,0.6)" fontFamily="Satoshi" numberOfLines={2}>
                           {log.description}
                         </Text>
                       </YStack>
                     </XStack>
-                    <XStack
-                      width={32}
-                      height={32}
-                      borderRadius={8}
-                      justifyContent="center"
-                      alignItems="center"
-                    >
-                      <Circle
-                        size={48}
-                        backgroundColor="white"
-                        borderWidth={1}
-                        borderColor="#E3ECD7"
-                        justifyContent="center"
-                        alignItems="center"
-                      >
-                        <Text
-                          fontSize={14}
-                          fontWeight="700"
-                          color="#172211"
-                          fontFamily="Inter"
-                        >
+                    <XStack width={32} height={32} borderRadius={8} justifyContent="center" alignItems="center">
+                      <Circle size={48} backgroundColor="white" borderWidth={1} borderColor="#E3ECD7" justifyContent="center" alignItems="center">
+                        <Text fontSize={14} fontWeight="700" color="#172211" fontFamily="Inter">
                           →
                         </Text>
                       </Circle>
@@ -523,14 +435,8 @@ export default function LogbookScreen() {
               </YStack>
             )}
           </YStack>
-        </ScreenContent>
+        </YStack>
       </ScrollView>
-
-      <BottomNav
-        activeTab="home"
-        onMessagePress={() => router.push("/messages" as any)}
-        onProfilePress={() => router.push("/profile")}
-      />
-    </ThemedSafeArea>
+    </PageContainer>
   );
 }

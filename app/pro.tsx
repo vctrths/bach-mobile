@@ -1,7 +1,5 @@
 import Button from "@/components/ui/Button";
-import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
-import TopNavPill from "@/components/ui/TopNavPill";
-import ScreenContent from "@/components/ui/ScreenContent";
+import PageContainer from "@/components/ui/PageContainer";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { router } from "expo-router";
@@ -11,14 +9,9 @@ import { Card, H1, Text, XStack, YStack } from "tamagui";
 
 export default function ProScreen() {
   return (
-    <ThemedSafeArea>
+    <PageContainer topNavTitle="Terug naar dashboard">
       <ScrollView showsVerticalScrollIndicator={false}>
-        <ScreenContent>
-          
-          {/* Back Button */}
-          <TopNavPill title="Terug naar dashboard" />
-
-          {/* Premium Glassmorphic Title Card */}
+        <YStack gap="$4">
           <YStack
             position="relative"
             backgroundColor="rgba(255, 255, 255, 0.4)"
@@ -41,7 +34,6 @@ export default function ProScreen() {
               experimentalBlurMethod="dimezisBlurView"
               style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
             />
-            
             <H1 color="$text_dark" fontWeight="bold" textAlign="center">
               Groene Vingers Pro
             </H1>
@@ -50,7 +42,6 @@ export default function ProScreen() {
             </Text>
           </YStack>
 
-          {/* Pro Benefits */}
           <YStack gap="$4" paddingVertical="$2">
             <XStack gap="$3" alignItems="center">
               <Ionicons name="checkmark-circle" size={26} color="#173300" />
@@ -58,21 +49,18 @@ export default function ProScreen() {
                 Stuur onbeperkt aantal aanvragen naar tuinen
               </Text>
             </XStack>
-
             <XStack gap="$3" alignItems="center">
               <Ionicons name="checkmark-circle" size={26} color="#173300" />
               <Text color="$text_dark" fontSize="$4" flex={1}>
                 Exclusieve toegang tot premium oases
               </Text>
             </XStack>
-
             <XStack gap="$3" alignItems="center">
               <Ionicons name="checkmark-circle" size={26} color="#173300" />
               <Text color="$text_dark" fontSize="$4" flex={1}>
                 Uitgebreid logboek en planningstools
               </Text>
             </XStack>
-
             <XStack gap="$3" alignItems="center">
               <Ionicons name="checkmark-circle" size={26} color="#173300" />
               <Text color="$text_dark" fontSize="$4" flex={1}>
@@ -81,7 +69,6 @@ export default function ProScreen() {
             </XStack>
           </YStack>
 
-          {/* Price Card */}
           <Card
             elevation={2}
             backgroundColor="$background_secondary"
@@ -108,9 +95,8 @@ export default function ProScreen() {
               onPress={() => router.push("/pro/payment")}
             />
           </Card>
-
-        </ScreenContent>
+        </YStack>
       </ScrollView>
-    </ThemedSafeArea>
+    </PageContainer>
   );
 }
