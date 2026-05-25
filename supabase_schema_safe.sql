@@ -101,8 +101,12 @@ CREATE POLICY "Users can update own requests"
   ON public.garden_requests FOR UPDATE USING (auth.uid() = user_id);
 
 -- Trigger: auto-create notification for garden owner when request is received
+-- Uses SECURITY DEFINER to bypass RLS and run with service role privileges
 CREATE OR REPLACE FUNCTION notify_garden_owner_on_request()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+SECURITY DEFINER
+SET search_path = public
+AS $$
 DECLARE
   garden_record RECORD;
   requester_record RECORD;
