@@ -44,7 +44,7 @@ export default function TopNavPill({
         shadowOffset={{ width: 0, height: 4 }}
       >
         <YStack
-          borderRadius="$9"
+          borderRadius={33}
           overflow="hidden"
           backgroundColor="rgba(255, 255, 255, 0.55)"
         >

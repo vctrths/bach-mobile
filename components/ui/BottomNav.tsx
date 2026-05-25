@@ -73,7 +73,7 @@ export default function BottomNav({
     >
       <XStack
         flex={1}
-        borderRadius="$11"
+        borderRadius={49}
         overflow="hidden"
         backgroundColor="rgba(255, 255, 255, 0.12)"
       >
