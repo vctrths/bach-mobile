@@ -28,8 +28,13 @@ const requestSchema = z.object({
     .max(300, "Max 300 tekens"),
   collaborationType: z.string().min(1, "Selecteer een type samenwerking"),
   days: z.array(z.string()).min(1, "Selecteer minstens één dag"),
-  startDate: z.custom<Date>((val) => val instanceof Date && !isNaN(val.getTime()), {
-    message: "Selecteer een startdatum",
+  startDate: z.custom<Date>((val) => {
+    if (!(val instanceof Date) || isNaN(val.getTime())) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return val >= today;
+  }, {
+    message: "Startdatum kan niet in het verleden liggen",
   }),
 });
 
@@ -44,6 +49,8 @@ export default function GardenRequestScreen() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
+  const [hasExistingRequest, setHasExistingRequest] = useState(false);
+  const [checkingRequest, setCheckingRequest] = useState(true);
 
   useEffect(() => {
     async function fetchGarden() {
@@ -65,6 +72,37 @@ export default function GardenRequestScreen() {
     fetchGarden();
   }, [id]);
 
+  useEffect(() => {
+    async function checkExistingRequest() {
+      if (!id) return;
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) {
+          setCheckingRequest(false);
+          return;
+        }
+
+        const { data, error } = await supabase
+          .from("garden_requests")
+          .select("id")
+          .eq("garden_id", id)
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (data && !error) {
+          setHasExistingRequest(true);
+        }
+      } catch (err) {
+        console.error("Error checking existing request:", err);
+      } finally {
+        setCheckingRequest(false);
+      }
+    }
+    checkExistingRequest();
+  }, [id]);
+
   const toggleDay = (dayKey: string) => {
     setSelectedDays((prev) =>
       prev.includes(dayKey)
@@ -83,6 +121,14 @@ export default function GardenRequestScreen() {
   };
 
   const handleSubmit = async () => {
+    if (hasExistingRequest) {
+      Alert.alert(
+        "Aanvraag bestaat al",
+        "Je hebt al een aanvraag verstuurd voor deze tuin."
+      );
+      return;
+    }
+
     const result = requestSchema.safeParse({
       motivation,
       collaborationType: collabType,
@@ -135,15 +181,19 @@ export default function GardenRequestScreen() {
               ? `${profile.first_name || ""} ${profile.last_name || ""}`.trim()
               : "Iemand";
 
-            await supabase.from("notifications").insert({
+            const { error: notifError } = await supabase.from("notifications").insert({
               user_id: ownerId,
               type: "request_received",
               title: "Nieuwe aanvraag",
               body: `${requesterName} wil je tuin "${gardenName}" beheren`,
               related_id: id as string,
             });
-          } catch {
-            // Silently fail if notification can't be sent
+
+            if (notifError) {
+              console.error("Failed to send notification:", notifError);
+            }
+          } catch (notifErr) {
+            console.error("Notification error:", notifErr);
           }
         }
         router.push("/succesverzoek");
@@ -164,6 +214,25 @@ export default function GardenRequestScreen() {
             title={gardenName}
             onBackPress={() => router.back()}
           />
+
+          {/* Existing Request Warning */}
+          {hasExistingRequest && (
+            <YStack
+              backgroundColor="rgba(239, 68, 68, 0.1)"
+              borderColor="#ef4444"
+              borderWidth={1}
+              borderRadius={12}
+              padding={16}
+              gap={8}
+            >
+              <Text color="#ef4444" fontSize={16} fontWeight="600">
+                Aanvraag al verstuurd
+              </Text>
+              <Text color="#ef4444" fontSize={14}>
+                Je hebt al een aanvraag voor deze tuin verstuurd. Je kan slechts één aanvraag per tuin indienen.
+              </Text>
+            </YStack>
+          )}
 
           {/* Form Fields */}
           <YStack gap={16}>
@@ -413,14 +482,22 @@ export default function GardenRequestScreen() {
 
           {/* Submit Button */}
           <Button
-            label={loading ? "Bezig..." : "Verzoek sturen"}
-            backgroundColor="#EAF0D8"
-            color="#172211"
+            label={
+              checkingRequest
+                ? "Laden..."
+                : hasExistingRequest
+                ? "Aanvraag al verstuurd"
+                : loading
+                ? "Bezig..."
+                : "Verzoek sturen"
+            }
+            backgroundColor={hasExistingRequest ? "#d1d5db" : "#EAF0D8"}
+            color={hasExistingRequest ? "#6b7280" : "#172211"}
             borderWidth={1}
-            borderColor="#D4E1AE"
+            borderColor={hasExistingRequest ? "#9ca3af" : "#D4E1AE"}
             onPress={handleSubmit}
-            disabled={loading}
-            opacity={loading ? 0.7 : 1}
+            disabled={loading || hasExistingRequest || checkingRequest}
+            opacity={loading || hasExistingRequest || checkingRequest ? 0.7 : 1}
           />
         </YStack>
       </ScrollView>
