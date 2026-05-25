@@ -29,15 +29,27 @@ type GardenRequest = {
 };
 
 const DAY_LETTERS = ["M", "D", "W", "D", "V", "Z", "Z"];
-const DAY_NAMES = [
-  "maandag",
-  "dinsdag",
-  "woensdag",
-  "donderdag",
-  "vrijdag",
-  "zaterdag",
-  "zondag",
-];
+
+const DAY_KEY_TO_INDEX: Record<string, number> = {
+  M: 0,   // maandag
+  D: 1,   // dinsdag
+  W: 2,   // woensdag
+  Do: 3,  // donderdag
+  V: 4,   // vrijdag
+  Za: 5,  // zaterdag
+  Zo: 6,  // zondag
+};
+
+function getActiveDayIndices(days: string[]): Set<number> {
+  const indices = new Set<number>();
+  for (const day of days) {
+    const index = DAY_KEY_TO_INDEX[day];
+    if (index !== undefined) {
+      indices.add(index);
+    }
+  }
+  return indices;
+}
 
 export default function OwnerView() {
   const [gardens, setGardens] = useState<Garden[]>([]);
@@ -60,28 +72,41 @@ export default function OwnerView() {
         return;
       }
 
-      const [gardensRes, gardenersRes, requestsRes] = await Promise.all([
-        supabase
-          .from("gardens")
-          .select("id, name, rating, location, image_url")
-          .eq("owner_id", user.id)
-          .limit(10),
+      const gardensRes = await supabase
+        .from("gardens")
+        .select("id, name, rating, location, image_url")
+        .eq("owner_id", user.id)
+        .limit(10);
+
+      if (gardensRes.data) setGardens(gardensRes.data as Garden[]);
+
+      const gardenIds = (gardensRes.data as unknown as Garden[] ?? []).map((g) => g.id);
+
+      if (gardenIds.length === 0) {
+        setGardeners([]);
+        setRequests([]);
+        return;
+      }
+
+      const [gardenersRes, requestsRes] = await Promise.all([
         supabase
           .from("garden_requests")
           .select(
             `id, garden_id, user_id, days, profiles(first_name, last_name, profile_image)`
           )
           .eq("status", "approved")
+          .in("garden_id", gardenIds)
           .limit(20),
         supabase
           .from("garden_requests")
-          .select("id, garden_id, user_id, motivation, status, created_at")
+          .select(
+            `id, garden_id, user_id, motivation, status, created_at, profiles(first_name, last_name, profile_image)`
+          )
           .eq("status", "pending")
+          .in("garden_id", gardenIds)
           .order("created_at", { ascending: false })
           .limit(10),
       ]);
-
-      if (gardensRes.data) setGardens(gardensRes.data as Garden[]);
 
       if (gardenersRes.data) {
         const mappedGardeners = (gardenersRes.data as any[]).map((r) => ({
@@ -96,7 +121,9 @@ export default function OwnerView() {
         setGardeners(mappedGardeners);
       }
 
-      if (requestsRes.data) setRequests(requestsRes.data as GardenRequest[]);
+      if (requestsRes.data) {
+        setRequests(requestsRes.data as unknown as GardenRequest[]);
+      }
     } catch (error) {
       console.error("Error fetching owner dashboard data:", error);
     } finally {
@@ -227,8 +254,9 @@ export default function OwnerView() {
                       >
                         {gardener.first_name}
                       </Text>
-                      {DAY_NAMES.map((dayName, i) => {
-                        const isActive = gardener.days.includes(dayName);
+                      {[0, 1, 2, 3, 4, 5, 6].map((i) => {
+                        const activeDays = getActiveDayIndices(gardener.days);
+                        const isActive = activeDays.has(i);
                         return (
                           <YStack
                             key={i}
