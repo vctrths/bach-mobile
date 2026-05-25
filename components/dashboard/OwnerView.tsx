@@ -174,6 +174,54 @@ export default function OwnerView() {
     }
   };
 
+  const handleAccept = async (request: GardenRequest) => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      setRequests((prev) => prev.filter((r) => r.id !== request.id));
+
+      await supabase
+        .from("garden_requests")
+        .update({ status: "approved" })
+        .eq("id", request.id);
+
+      await supabase.from("collaborations").insert({
+        garden_id: request.garden_id,
+        gardener_id: request.user_id,
+        owner_id: user.id,
+        request_id: request.id,
+        days: request.days ?? [],
+        start_date: request.start_date ?? null,
+        collaboration_type: request.collaboration_type ?? null,
+        status: "active",
+      });
+
+      router.push(`/owner/request-accepted?requestId=${request.id}`);
+    } catch (error) {
+      console.error("Error accepting request:", error);
+      fetchData();
+    }
+  };
+
+  const handleReject = async (requestId: string) => {
+    try {
+      setRequests((prev) => prev.filter((r) => r.id !== requestId));
+
+      await supabase
+        .from("garden_requests")
+        .update({ status: "rejected" })
+        .eq("id", requestId);
+
+      router.push(`/owner/request-rejected?requestId=${requestId}`);
+    } catch (error) {
+      console.error("Error rejecting request:", error);
+      fetchData();
+    }
+  };
+
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
@@ -328,107 +376,122 @@ export default function OwnerView() {
                   Openstaande aanvragen ({requests.length})
                 </Text>
                 {requests.map((request) => (
-                  <YStack key={request.id} gap="$2">
-                    <Button
-                      label="Chatten"
-                      backgroundColor="#173300"
-                      color="white"
-                      onPress={() => handleChat(request)}
-                    />
-                    <Card
-                      backgroundColor="white"
-                      borderColor="#E3ECD7"
-                      borderWidth={1}
-                      borderRadius={16}
-                      padding="$3"
-                      marginBottom="$2"
-                      onPress={() =>
-                        router.push(`/garden/${request.garden_id}`)
-                      }
-                      pressStyle={{ scale: 0.98, opacity: 0.9 }}
-                    >
-                      <YStack gap="$3">
-                        {/* Requester info */}
-                        <XStack gap="$3" alignItems="center">
-                          <Circle
-                            size={48}
-                            backgroundColor="rgba(23, 51, 0, 0.08)"
-                            overflow="hidden"
-                          >
-                            {request.profiles?.profile_image ? (
-                              <XStack width="100%" height="100%">
-                                <img
-                                  src={request.profiles.profile_image}
-                                  style={{
-                                    width: "100%",
-                                    height: "100%",
-                                    objectFit: "cover",
-                                    borderRadius: 24,
-                                  }}
-                                />
-                              </XStack>
-                            ) : (
-                              <MaterialCommunityIcons
-                                name="account-outline"
-                                size={22}
-                                color="#173300"
+                  <Card
+                    key={request.id}
+                    backgroundColor="white"
+                    borderColor="#E3ECD7"
+                    borderWidth={1}
+                    borderRadius={16}
+                    padding="$3"
+                    marginBottom="$2"
+                  >
+                    <YStack gap="$3">
+                      {/* Requester info */}
+                      <XStack gap="$3" alignItems="center">
+                        <Circle
+                          size={48}
+                          backgroundColor="rgba(23, 51, 0, 0.08)"
+                          overflow="hidden"
+                        >
+                          {request.profiles?.profile_image ? (
+                            <XStack width="100%" height="100%">
+                              <img
+                                src={request.profiles.profile_image}
+                                style={{
+                                  width: "100%",
+                                  height: "100%",
+                                  objectFit: "cover",
+                                  borderRadius: 24,
+                                }}
                               />
+                            </XStack>
+                          ) : (
+                            <MaterialCommunityIcons
+                              name="account-outline"
+                              size={22}
+                              color="#173300"
+                            />
+                          )}
+                        </Circle>
+                        <YStack flex={1} gap="$1">
+                          <Text
+                            fontSize="$4"
+                            fontWeight="bold"
+                            color="$text_dark"
+                          >
+                            {request.profiles?.first_name ?? "Tuinzoeker"}{" "}
+                            {request.profiles?.last_name ?? ""}
+                          </Text>
+                          <Text fontSize="$2" color="#56594D">
+                            {new Date(request.created_at).toLocaleDateString(
+                              "nl-NL"
                             )}
-                          </Circle>
-                          <YStack flex={1} gap="$1">
-                            <Text
-                              fontSize="$4"
-                              fontWeight="bold"
-                              color="$text_dark"
-                            >
-                              {request.profiles?.first_name ?? "Tuinzoeker"}{" "}
-                              {request.profiles?.last_name ?? ""}
-                            </Text>
-                            <Text fontSize="$2" color="#56594D">
-                              {new Date(request.created_at).toLocaleDateString(
-                                "nl-NL"
-                              )}
+                          </Text>
+                        </YStack>
+                      </XStack>
+
+                      {/* Motivation */}
+                      {request.motivation && (
+                        <Text fontSize="$3" color="#56594D" numberOfLines={3}>
+                          &ldquo;{request.motivation}&rdquo;
+                        </Text>
+                      )}
+
+                      {/* Days and type info */}
+                      <XStack gap="$2" flexWrap="wrap">
+                        {request.collaboration_type && (
+                          <YStack
+                            backgroundColor="rgba(23, 51, 0, 0.06)"
+                            borderRadius="$4"
+                            paddingHorizontal="$2"
+                            paddingVertical="$1"
+                          >
+                            <Text fontSize="$2" color="#173300">
+                              {request.collaboration_type}
                             </Text>
                           </YStack>
-                        </XStack>
-
-                        {/* Motivation */}
-                        {request.motivation && (
-                          <Text fontSize="$3" color="#56594D" numberOfLines={3}>
-                            &ldquo;{request.motivation}&rdquo;
-                          </Text>
                         )}
+                        {request.days?.length > 0 && (
+                          <YStack
+                            backgroundColor="rgba(23, 51, 0, 0.06)"
+                            borderRadius="$4"
+                            paddingHorizontal="$2"
+                            paddingVertical="$1"
+                          >
+                            <Text fontSize="$2" color="#173300">
+                              {request.days.join(", ")}
+                            </Text>
+                          </YStack>
+                        )}
+                      </XStack>
 
-                        {/* Days and type info */}
-                        <XStack gap="$2" flexWrap="wrap">
-                          {request.collaboration_type && (
-                            <YStack
-                              backgroundColor="rgba(23, 51, 0, 0.06)"
-                              borderRadius="$4"
-                              paddingHorizontal="$2"
-                              paddingVertical="$1"
-                            >
-                              <Text fontSize="$2" color="#173300">
-                                {request.collaboration_type}
-                              </Text>
-                            </YStack>
-                          )}
-                          {request.days?.length > 0 && (
-                            <YStack
-                              backgroundColor="rgba(23, 51, 0, 0.06)"
-                              borderRadius="$4"
-                              paddingHorizontal="$2"
-                              paddingVertical="$1"
-                            >
-                              <Text fontSize="$2" color="#173300">
-                                {request.days.join(", ")}
-                              </Text>
-                            </YStack>
-                          )}
-                        </XStack>
-                      </YStack>
-                    </Card>
-                  </YStack>
+                      {/* Chat button */}
+                      <Button
+                        label="Chatten"
+                        backgroundColor="#173300"
+                        color="white"
+                        onPress={() => handleChat(request)}
+                      />
+
+                      {/* Action buttons */}
+                      <XStack gap="$2">
+                        <Button
+                          label="Afwijzen"
+                          flex={1}
+                          backgroundColor="transparent"
+                          color="#ef4444"
+                          onPress={() => handleReject(request.id)}
+                        />
+                        <Button
+                          label="Accepteren"
+                          flex={1}
+                          backgroundColor="#22c55e"
+                          color="white"
+                          onPress={() => handleAccept(request)}
+                        />
+                      </XStack>
+                    </YStack>
+                  </Card>
                 ))}
               </YStack>
             )}
