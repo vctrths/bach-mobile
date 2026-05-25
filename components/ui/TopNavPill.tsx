@@ -25,24 +25,28 @@ export default function TopNavPill({
   return (
     <YStack gap="$4">
       <YStack
-        backgroundColor="rgba(255, 255, 255, 0.55)"
         borderRadius="$10"
-        borderWidth={1}
-        borderColor="rgba(227, 236, 215, 0.55)"
+        padding={1}
+        backgroundColor="rgba(227, 236, 215, 0.55)"
         overflow="hidden"
         shadowColor="#0f1a0f"
         shadowOpacity={0.06}
         shadowRadius={12}
         shadowOffset={{ width: 0, height: 4 }}
       >
-        <BlurView
-          intensity={45}
-          tint="light"
-          experimentalBlurMethod="dimezisBlurView"
-          style={StyleSheet.absoluteFill}
-        />
+        <YStack
+          borderRadius="$9"
+          overflow="hidden"
+          backgroundColor="rgba(255, 255, 255, 0.55)"
+        >
+          <BlurView
+            intensity={45}
+            tint="light"
+            experimentalBlurMethod="dimezisBlurView"
+            style={StyleSheet.absoluteFill}
+          />
 
-        <YStack paddingHorizontal="$4" paddingVertical="$3" gap="$3">
+          <YStack paddingHorizontal="$4" paddingVertical="$3" gap="$3">
           <XStack alignItems="center" justifyContent="space-between">
             <XStack alignItems="center" gap="$4">
               {!hideBack && (
@@ -76,6 +80,7 @@ export default function TopNavPill({
           </XStack>
 
           {children}
+        </YStack>
         </YStack>
       </YStack>
     </YStack>
