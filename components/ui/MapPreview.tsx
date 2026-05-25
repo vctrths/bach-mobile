@@ -18,7 +18,7 @@ const DEFAULT_LNG = 4.7005;
 
 function computeNativeRegion(gardens: Garden[]) {
   const coords = gardens.filter(
-    (g) => g.latitude != null && g.longitude != null
+    (g) => g.latitude != null && g.longitude != null,
   ) as { latitude: number; longitude: number }[];
 
   if (coords.length === 0) {
@@ -57,7 +57,7 @@ function computeNativeRegion(gardens: Garden[]) {
 
 function computeWebCenterAndZoom(gardens: Garden[]) {
   const coords = gardens.filter(
-    (g) => g.latitude != null && g.longitude != null
+    (g) => g.latitude != null && g.longitude != null,
   ) as { latitude: number; longitude: number }[];
 
   if (coords.length === 0) {
@@ -101,7 +101,7 @@ export default function MapPreview({ gardens }: MapPreviewProps) {
     const { Map, Marker } = require("pigeon-maps") as any;
     const { center, zoom } = computeWebCenterAndZoom(gardens);
     const validGardens = gardens.filter(
-      (g) => g.latitude != null && g.longitude != null
+      (g) => g.latitude != null && g.longitude != null,
     );
 
     return (
@@ -152,7 +152,7 @@ export default function MapPreview({ gardens }: MapPreviewProps) {
   const { default: MapView, Marker } = require("react-native-maps") as any;
   const region = computeNativeRegion(gardens);
   const validGardens = gardens.filter(
-    (g) => g.latitude != null && g.longitude != null
+    (g) => g.latitude != null && g.longitude != null,
   );
 
   return (

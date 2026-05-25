@@ -6,7 +6,11 @@ interface ChatBubbleProps {
   timestamp?: string;
 }
 
-export default function ChatBubble({ content, isOwn, timestamp }: ChatBubbleProps) {
+export default function ChatBubble({
+  content,
+  isOwn,
+  timestamp,
+}: ChatBubbleProps) {
   return (
     <YStack
       alignSelf={isOwn ? "flex-end" : "flex-start"}

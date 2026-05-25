@@ -24,10 +24,10 @@ type UserProfile = {
 
 export default function Dashboard() {
   const { data: onboardingData } = useContext(OnboardingContext);
-  const { profile } = useAuth();
+  const { profile: authProfile } = useAuth();
   const [gardens, setGardens] = useState<Garden[]>([]);
   const [logs, setLogs] = useState<GardenLog[]>([]);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -61,7 +61,7 @@ export default function Dashboard() {
 
       if (gardensRes.data) setGardens(gardensRes.data as Garden[]);
       if (logsRes.data) setLogs(logsRes.data as GardenLog[]);
-      if (profileRes.data) setProfile(profileRes.data as UserProfile);
+      if (profileRes.data) setUserProfile(profileRes.data as UserProfile);
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
     } finally {
@@ -71,7 +71,7 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    const effectiveRole = profile?.role || onboardingData.role;
+    const effectiveRole = authProfile?.role || onboardingData.role;
     if (effectiveRole === "tuineigenaar") {
       router.replace("/owner/dashboard");
       return;
@@ -81,7 +81,7 @@ export default function Dashboard() {
       return;
     }
     fetchData();
-  }, [profile?.role, onboardingData.role]);
+  }, [authProfile?.role, onboardingData.role]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -159,14 +159,14 @@ export default function Dashboard() {
             rightElement={
               <XStack gap="$3" alignItems="center">
                 <NotificationBell />
-                {profile?.profile_image ? (
+                {userProfile?.profile_image ? (
                   <Circle
                     size={50}
                     onPress={() => router.push("/profile")}
                     overflow="hidden"
                   >
                   <ExpoImage
-                    source={{ uri: profile.profile_image }}
+                    source={{ uri: userProfile.profile_image }}
                     style={{ width: "100%", height: "100%" }}
                     contentFit="cover"
                   />

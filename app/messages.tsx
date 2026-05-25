@@ -21,6 +21,7 @@ type ConversationWithPartner = {
 export default function Messages() {
   const [conversations, setConversations] = useState<ConversationWithPartner[]>([]);
   const [loading, setLoading] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     fetchConversations();
@@ -55,6 +56,17 @@ export default function Messages() {
         .order("updated_at", { ascending: false });
 
       if (error || !conversationsData) return;
+
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+      const { count: unread } = await supabase
+        .from("messages")
+        .select("*", { count: "exact", head: true })
+        .neq("sender_id", user.id)
+        .gte("created_at", sevenDaysAgo.toISOString());
+
+      setUnreadCount(unread || 0);
 
       const conversationsWithDetails = await Promise.all(
         conversationsData.map(async (conv) => {
@@ -160,6 +172,7 @@ export default function Messages() {
       <BottomNav
         activeTab="message"
         onProfilePress={() => router.push("/profile")}
+        unreadMessageCount={unreadCount}
       />
     </ThemedSafeArea>
   );

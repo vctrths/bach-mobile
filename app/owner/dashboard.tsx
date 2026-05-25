@@ -52,7 +52,7 @@ export default function OwnerDashboard() {
   const [gardens, setGardens] = useState<Garden[]>([]);
   const [gardeners, setGardeners] = useState<ApprovedGardener[]>([]);
   const [requests, setRequests] = useState<GardenRequest[]>([]);
-  const [profile, setProfile] = useState<{
+  const [userProfile, setUserProfile] = useState<{
     first_name: string;
     profile_image: string | null;
   } | null>(null);
@@ -111,7 +111,7 @@ export default function OwnerDashboard() {
       }
 
       if (requestsRes.data) setRequests(requestsRes.data as GardenRequest[]);
-      if (profileRes.data) setProfile(profileRes.data);
+      if (profileRes.data) setUserProfile(profileRes.data);
     } catch (error) {
       console.error("Error fetching owner dashboard data:", error);
     } finally {
@@ -200,14 +200,14 @@ export default function OwnerDashboard() {
             rightElement={
               <XStack gap="$3" alignItems="center">
                 <NotificationBell />
-                {profile?.profile_image ? (
+                {userProfile?.profile_image ? (
                   <Circle
                     size={50}
                     onPress={() => router.push("/profile")}
                     overflow="hidden"
                   >
                     <ExpoImage
-                      source={{ uri: profile.profile_image }}
+                      source={{ uri: userProfile.profile_image }}
                       style={{ width: "100%", height: "100%" }}
                       contentFit="cover"
                     />

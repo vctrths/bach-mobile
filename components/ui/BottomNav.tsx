@@ -12,6 +12,7 @@ interface BottomNavProps {
   onMapPress?: () => void;
   onMessagePress?: () => void;
   onProfilePress?: () => void;
+  unreadMessageCount?: number;
 }
 
 export default function BottomNav({
@@ -20,6 +21,7 @@ export default function BottomNav({
   onMapPress,
   onMessagePress,
   onProfilePress,
+  unreadMessageCount = 0,
 }: BottomNavProps) {
   const { profile } = useAuth();
 
@@ -47,6 +49,7 @@ export default function BottomNav({
       icon: "message-text-outline",
       label: "Messages",
       onPress: onMessagePress || defaultMessagePress,
+      badge: unreadMessageCount > 0 ? unreadMessageCount : undefined,
     },
     {
       key: "profile",
@@ -91,23 +94,33 @@ export default function BottomNav({
         alignItems="center"
       >
         {navItems.map((item) => (
-          <Circle
-            key={item.key}
-            size={46}
-            backgroundColor="rgba(255, 255, 255, 0.92)"
-            borderWidth={1}
-            borderColor="rgba(255, 255, 255, 0.6)"
-            justifyContent="center"
-            alignItems="center"
-            onPress={item.onPress || (() => {})}
-            pressStyle={{ scale: 0.94, opacity: 0.85 }}
-          >
-            <MaterialCommunityIcons
-              name={item.icon as any}
-              size={24}
-              color={activeTab === item.key ? "$primary" : "rgba(23, 51, 0, 0.45)"}
-            />
-          </Circle>
+          <XStack key={item.key} position="relative" justifyContent="center" alignItems="center">
+            <Circle
+              size={46}
+              backgroundColor="rgba(255, 255, 255, 0.92)"
+              borderWidth={1}
+              borderColor="rgba(255, 255, 255, 0.6)"
+              justifyContent="center"
+              alignItems="center"
+              onPress={item.onPress || (() => {})}
+              pressStyle={{ scale: 0.94, opacity: 0.85 }}
+            >
+              <MaterialCommunityIcons
+                name={item.icon as any}
+                size={24}
+                color={activeTab === item.key ? "$primary" : "rgba(23, 51, 0, 0.45)"}
+              />
+            </Circle>
+            {item.badge && (
+              <Circle
+                size={16}
+                backgroundColor="#E74C3C"
+                position="absolute"
+                top={-2}
+                right={-2}
+              />
+            )}
+          </XStack>
         ))}
       </XStack>
     </XStack>
