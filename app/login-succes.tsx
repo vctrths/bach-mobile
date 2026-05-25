@@ -4,18 +4,10 @@ import { useAuth } from "@/context/AuthContext";
 import { getHomeRoute } from "@/utils/role-routing";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useEffect } from "react";
-import { Spinner, Text, XStack, YStack } from "tamagui";
+import { Text, XStack, YStack } from "tamagui";
 
 export default function LoginSuccessScreen() {
-  const { profile, loading } = useAuth();
-
-  // Auto-redirect when profile is loaded
-  useEffect(() => {
-    if (!loading && profile) {
-      router.replace(getHomeRoute(profile.role) as any);
-    }
-  }, [loading, profile]);
+  const { profile } = useAuth();
 
   const handleGoToDashboard = () => {
     router.replace(getHomeRoute(profile?.role) as any);
@@ -43,21 +35,12 @@ export default function LoginSuccessScreen() {
           </Text>
         </YStack>
 
-        {loading ? (
-          <YStack alignItems="center" gap="$2">
-            <Spinner size="large" color="$primary" />
-            <Text fontSize="$3" color="$secondary" textAlign="center">
-              Profiel laden...
-            </Text>
-          </YStack>
-        ) : (
-          <Button
-            label="Ga naar dashboard"
-            backgroundColor="$background"
-            color="$white"
-            onPress={handleGoToDashboard}
-          />
-        )}
+        <Button
+          label="Ga naar dashboard"
+          backgroundColor="$background"
+          color="$white"
+          onPress={handleGoToDashboard}
+        />
       </YStack>
     </ThemedSafeArea>
   );
