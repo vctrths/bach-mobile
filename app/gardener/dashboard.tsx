@@ -447,15 +447,7 @@ export default function GardenerDashboard() {
               pressStyle={{ opacity: 0.9, scale: 0.98 }}
               onPress={() => router.push("/map")}
             >
-              {recommended.some((g) => g.latitude != null && g.longitude != null) ? (
-                <MapPreview gardens={recommended} />
-              ) : (
-                <ExpoImage
-                  source={require("@/assets/images/hero.png")}
-                  style={{ width: "100%", height: "100%" }}
-                  contentFit="cover"
-                />
-              )}
+              <MapPreview gardens={recommended} />
               <YStack
                 position="absolute"
                 bottom={0}
