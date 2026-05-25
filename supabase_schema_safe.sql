@@ -230,13 +230,18 @@ CREATE POLICY "Users can send messages to their conversations"
 CREATE TABLE IF NOT EXISTS public.notifications (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
-  type text NOT NULL CHECK (type IN ('request_accepted', 'request_rejected', 'request_received', 'message', 'reminder', 'system')),
+  type text NOT NULL,
   title text NOT NULL,
   body text,
   read boolean DEFAULT false,
   related_id uuid,
   created_at timestamp with time zone DEFAULT now()
 );
+
+-- Recreate type check constraint to ensure all types are allowed (safe for existing tables)
+ALTER TABLE public.notifications DROP CONSTRAINT IF EXISTS notifications_type_check;
+ALTER TABLE public.notifications ADD CONSTRAINT notifications_type_check
+  CHECK (type IN ('request_accepted', 'request_rejected', 'request_received', 'message', 'reminder', 'system'));
 
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 
