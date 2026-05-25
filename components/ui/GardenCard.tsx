@@ -3,85 +3,88 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
 import { Card, Text, XStack, YStack } from "tamagui";
 import Button from "./Button";
+import { type Garden } from "@/types/garden";
 
 interface GardenCardProps {
-  name: string;
-  rating: number;
-  location: string;
-  image: any;
-  onDetailsPress?: () => void;
+  garden: Garden;
+  onPress?: () => void;
   onFavoritePress?: () => void;
 }
 
 export default function GardenCard({
-  name,
-  rating,
-  location,
-  image,
-  onDetailsPress,
+  garden,
+  onPress,
   onFavoritePress,
 }: GardenCardProps) {
+  const imageSource = garden.image_url
+    ? { uri: garden.image_url }
+    : undefined;
+
   return (
     <Card
-      elevation={2}
-      margin="$2"
-      overflow="hidden"
-      width={260}
-      backgroundColor="$canvas"
-      borderColor="$borderColor"
+      width={276}
+      backgroundColor="#F0F3EC"
+      borderColor="#E3ECD7"
       borderWidth={1}
-      padding="$2"
+      borderRadius={16}
+      padding={12}
+      gap={6}
+      overflow="hidden"
     >
-      <Card.Header>
-        <ExpoImage
-          source={image}
-          style={{ width: "100%", height: 150, borderRadius: 8 }}
-          contentFit="cover"
-        />
-      </Card.Header>
+      <ExpoImage
+        source={(imageSource) as any}
+        style={{ width: "100%", height: 168, borderRadius: 8 }}
+        contentFit="cover"
+      />
 
-      <YStack padding="$3" gap="$2">
+      <YStack gap={4}>
         <XStack justifyContent="space-between" alignItems="center">
-          <Text fontSize="$3" fontWeight="500" flex={1}>
-            {name}
+          <Text fontSize={14} fontWeight="400" color="#000000" flex={1}>
+            {garden.name}
           </Text>
-          <XStack gap="$1" alignItems="center">
-            <MaterialCommunityIcons name="star" size={14} color="#FFB800" />
-            <Text fontSize="$2">{rating}</Text>
+          <XStack gap={4} alignItems="center">
+            <MaterialCommunityIcons name="star" size={16} color="#C9A52E" />
+            <Text fontSize={14} fontWeight="400" color="#000000">
+              {(garden.rating ?? 0).toFixed(1)}
+            </Text>
           </XStack>
         </XStack>
 
-        <XStack gap="$2" alignItems="center">
+        <XStack gap={4} alignItems="center">
           <MaterialCommunityIcons
             name="map-marker"
-            size={14}
-            color="$primary"
+            size={16}
+            color="#000000"
           />
-          <Text fontSize="$2" color="$text_dark">
-            {location}
+          <Text fontSize={14} color="#000000">
+            {garden.location ?? "Onbekend"}
           </Text>
         </XStack>
 
-        <XStack gap="$2" marginTop="$2">
+        <XStack gap={6} marginTop={2}>
           <Button
             label="Details"
             flex={1}
-            backgroundColor="$background"
-            color="$white"
-            onPress={onDetailsPress || (() => {})}
-            paddingVertical="$2"
+            backgroundColor="#173300"
+            color="#F5FFF3"
+            borderRadius={64}
+            paddingVertical={12}
+            paddingHorizontal={16}
+            fontSize={16}
+            fontWeight="700"
+            onPress={onPress || (() => {})}
           />
           <Card
-            width={40}
-            height={40}
-            borderRadius={20}
-            backgroundColor="$background"
-            padding="$2"
+            borderRadius={24}
+            backgroundColor="#173300"
+            borderColor="#FAFAFA"
+            borderWidth={1}
+            padding={12}
             onPress={onFavoritePress || (() => {})}
             justifyContent="center"
             alignItems="center"
           >
-            <MaterialCommunityIcons name="heart" size={20} color="white" />
+            <MaterialCommunityIcons name="heart" size={20} color="#FAFAFA" />
           </Card>
         </XStack>
       </YStack>
