@@ -6,13 +6,13 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { RefreshControl, ScrollView } from "react-native";
-import { Card, Spinner, Text, XStack, YStack } from "tamagui";
+import { Card, Circle, Spinner, Text, XStack, YStack } from "tamagui";
 import { type Garden } from "@/types/garden";
 
 type ApprovedGardener = {
   id: string;
   garden_id: string;
-  user_id: string;
+  gardener_id: string;
   first_name: string;
   last_name: string;
   profile_image: string | null;
@@ -26,18 +26,26 @@ type GardenRequest = {
   motivation: string;
   status: "pending" | "approved" | "rejected";
   created_at: string;
+  days: string[];
+  start_date: string | null;
+  collaboration_type: string | null;
+  profiles: {
+    first_name: string;
+    last_name: string;
+    profile_image: string | null;
+  };
 };
 
 const DAY_LETTERS = ["M", "D", "W", "D", "V", "Z", "Z"];
 
 const DAY_KEY_TO_INDEX: Record<string, number> = {
-  M: 0,   // maandag
-  D: 1,   // dinsdag
-  W: 2,   // woensdag
-  Do: 3,  // donderdag
-  V: 4,   // vrijdag
-  Za: 5,  // zaterdag
-  Zo: 6,  // zondag
+  M: 0,
+  D: 1,
+  W: 2,
+  Do: 3,
+  V: 4,
+  Za: 5,
+  Zo: 6,
 };
 
 function getActiveDayIndices(days: string[]): Set<number> {
@@ -88,19 +96,17 @@ export default function OwnerView() {
         return;
       }
 
-      const [gardenersRes, requestsRes] = await Promise.all([
+      const [collaborationsRes, requestsRes] = await Promise.all([
         supabase
-          .from("garden_requests")
-          .select(
-            `id, garden_id, user_id, days, profiles(first_name, last_name, profile_image)`
-          )
-          .eq("status", "approved")
+          .from("collaborations")
+          .select(`id, garden_id, gardener_id, days, profiles(first_name, last_name, profile_image)`)
+          .eq("status", "active")
           .in("garden_id", gardenIds)
           .limit(20),
         supabase
           .from("garden_requests")
           .select(
-            `id, garden_id, user_id, motivation, status, created_at, profiles(first_name, last_name, profile_image)`
+            `id, garden_id, user_id, motivation, status, created_at, days, start_date, collaboration_type, profiles(first_name, last_name, profile_image)`
           )
           .eq("status", "pending")
           .in("garden_id", gardenIds)
@@ -108,11 +114,11 @@ export default function OwnerView() {
           .limit(10),
       ]);
 
-      if (gardenersRes.data) {
-        const mappedGardeners = (gardenersRes.data as any[]).map((r) => ({
+      if (collaborationsRes.data) {
+        const mappedGardeners = (collaborationsRes.data as any[]).map((r) => ({
           id: r.id,
           garden_id: r.garden_id,
-          user_id: r.user_id,
+          gardener_id: r.gardener_id,
           first_name: r.profiles?.first_name ?? "Tuinzoeker",
           last_name: r.profiles?.last_name ?? "",
           profile_image: r.profiles?.profile_image ?? null,

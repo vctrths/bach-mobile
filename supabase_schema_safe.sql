@@ -97,8 +97,14 @@ CREATE POLICY "Users can create requests"
   ON public.garden_requests FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 DROP POLICY IF EXISTS "Users can update own requests" ON public.garden_requests;
-CREATE POLICY "Users can update own requests" 
+CREATE POLICY "Users can update own requests"
   ON public.garden_requests FOR UPDATE USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Garden owners can update requests for their gardens" ON public.garden_requests;
+CREATE POLICY "Garden owners can update requests for their gardens"
+  ON public.garden_requests FOR UPDATE USING (
+    auth.uid() IN (SELECT owner_id FROM public.gardens WHERE id = garden_id)
+  );
 
 -- Trigger: auto-create notification for garden owner when request is received
 -- Uses SECURITY DEFINER to bypass RLS and run with service role privileges
