@@ -41,7 +41,6 @@ const requestSchema = z.object({
 export default function GardenRequestScreen() {
   const { id } = useLocalSearchParams();
   const [gardenName, setGardenName] = useState("Aanvraag");
-  const [ownerId, setOwnerId] = useState<string | null>(null);
   const [motivation, setMotivation] = useState("");
   const [collabType, setCollabType] = useState("");
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
@@ -58,12 +57,11 @@ export default function GardenRequestScreen() {
       try {
         const { data, error } = await supabase
           .from("gardens")
-          .select("name, owner_id")
+          .select("name")
           .eq("id", id)
           .single();
         if (data && !error) {
           setGardenName((data as any).name);
-          setOwnerId((data as any).owner_id);
         }
       } catch {
         // fallback: keep default "Aanvraag"
@@ -168,34 +166,6 @@ export default function GardenRequestScreen() {
       if (error) {
         Alert.alert("Fout", error.message);
       } else {
-        // Send notification to garden owner
-        if (ownerId) {
-          try {
-            const { data: profile } = await supabase
-              .from("profiles")
-              .select("first_name, last_name")
-              .eq("id", user.id)
-              .single();
-
-            const requesterName = profile
-              ? `${profile.first_name || ""} ${profile.last_name || ""}`.trim()
-              : "Iemand";
-
-            const { error: notifError } = await supabase.from("notifications").insert({
-              user_id: ownerId,
-              type: "request_received",
-              title: "Nieuwe aanvraag",
-              body: `${requesterName} wil je tuin "${gardenName}" beheren`,
-              related_id: id as string,
-            });
-
-            if (notifError) {
-              console.error("Failed to send notification:", notifError);
-            }
-          } catch (notifErr) {
-            console.error("Notification error:", notifErr);
-          }
-        }
         router.push("/succesverzoek");
       }
     } catch (error) {

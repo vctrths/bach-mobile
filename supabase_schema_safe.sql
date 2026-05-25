@@ -100,6 +100,49 @@ DROP POLICY IF EXISTS "Users can update own requests" ON public.garden_requests;
 CREATE POLICY "Users can update own requests" 
   ON public.garden_requests FOR UPDATE USING (auth.uid() = user_id);
 
+-- Trigger: auto-create notification for garden owner when request is received
+CREATE OR REPLACE FUNCTION notify_garden_owner_on_request()
+RETURNS TRIGGER AS $$
+DECLARE
+  garden_record RECORD;
+  requester_record RECORD;
+  requester_name text;
+BEGIN
+  -- Get garden owner and name
+  SELECT owner_id, name INTO garden_record
+  FROM public.gardens WHERE id = NEW.garden_id;
+
+  -- Get requester name
+  SELECT first_name, last_name INTO requester_record
+  FROM public.profiles WHERE id = NEW.user_id;
+
+  requester_name := COALESCE(
+    NULLIF(TRIM(requester_record.first_name || ' ' || COALESCE(requester_record.last_name, '')), ''),
+    'Iemand'
+  );
+
+  -- Insert notification for owner
+  IF garden_record.owner_id IS NOT NULL THEN
+    INSERT INTO public.notifications (user_id, type, title, body, related_id)
+    VALUES (
+      garden_record.owner_id,
+      'request_received',
+      'Nieuwe aanvraag',
+      requester_name || ' wil je tuin "' || garden_record.name || '" beheren',
+      NEW.garden_id
+    );
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trigger_notify_owner_on_request ON public.garden_requests;
+CREATE TRIGGER trigger_notify_owner_on_request
+  AFTER INSERT ON public.garden_requests
+  FOR EACH ROW
+  EXECUTE FUNCTION notify_garden_owner_on_request();
+
 -- ============================================================
 -- 5. CONVERSATIONS
 -- ============================================================
