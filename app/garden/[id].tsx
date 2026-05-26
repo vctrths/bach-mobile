@@ -9,6 +9,7 @@ import React, { useEffect, useState } from "react";
 import { Card, H1, H2, Spinner, Text, XStack, YStack, Circle } from "tamagui";
 import { supabase } from "@/utils/supabase";
 import { type Garden, type Review } from "@/types/garden";
+import ApplianceBadges from "@/components/ui/ApplianceBadges";
 
 export default function GardenDetailsScreen() {
   const { id } = useLocalSearchParams();
@@ -128,6 +129,8 @@ export default function GardenDetailsScreen() {
               </Text>
             </XStack>
           </XStack>
+
+          <ApplianceBadges appliances={garden.appliances} detailMode />
         </YStack>
 
         <Card

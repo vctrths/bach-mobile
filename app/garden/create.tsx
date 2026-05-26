@@ -2,6 +2,7 @@ import PageContainer from "@/components/ui/PageContainer";
 import Button from "@/components/ui/Button";
 import ScreenContent from "@/components/ui/ScreenContent";
 import { supabase } from "@/utils/supabase";
+import { APPLIANCE_MAP } from "@/components/ui/ApplianceBadges";
 import * as ImagePicker from "expo-image-picker";
 import { Image as ExpoImage } from "@/lib/image";
 import { Ionicons } from "@expo/vector-icons";
@@ -33,8 +34,15 @@ export default function GardenCreateScreen() {
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
+  const [appliances, setAppliances] = useState<string[]>([]);
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  const toggleAppliance = (key: string) => {
+    setAppliances((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
+  };
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -114,6 +122,7 @@ export default function GardenCreateScreen() {
         name: name.trim(),
         location: location.trim(),
         description: description.trim(),
+        appliances: appliances,
         ...(imageUrl && { image_url: imageUrl }),
         ...(coords && {
           latitude: coords.latitude,
@@ -204,6 +213,41 @@ export default function GardenCreateScreen() {
               minHeight={110}
               focusStyle={{ borderColor: "$primary" }}
             />
+          </YStack>
+
+          <YStack gap="$1.5">
+            <Text color="$secondary" fontSize="$3" fontWeight="500">
+              Voorzieningen
+            </Text>
+            <XStack gap="$2" flexWrap="wrap">
+              {Object.entries(APPLIANCE_MAP).map(([key, { label, icon }]) => {
+                const isActive = appliances.includes(key);
+                return (
+                  <XStack
+                    key={key}
+                    onPress={() => toggleAppliance(key)}
+                    backgroundColor={isActive ? "$primary" : "white"}
+                    borderColor={isActive ? "$primary" : "$borderColor"}
+                    borderWidth={1}
+                    borderRadius={32}
+                    paddingHorizontal="$3"
+                    paddingVertical="$2"
+                    gap="$2"
+                    alignItems="center"
+                    pressStyle={{ opacity: 0.7 }}
+                  >
+                    <MaterialCommunityIcons
+                      name={icon}
+                      size={16}
+                      color={isActive ? "white" : "#172211"}
+                    />
+                    <Text fontSize="$3" color={isActive ? "white" : "#172211"} fontWeight="500">
+                      {label}
+                    </Text>
+                  </XStack>
+                );
+              })}
+            </XStack>
           </YStack>
 
           {/* Garden Image Upload */}

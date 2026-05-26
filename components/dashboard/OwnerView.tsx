@@ -89,7 +89,7 @@ export default function OwnerView() {
       if (gardensRes.data) setGardens(gardensRes.data as Garden[]);
 
       const gardenIds = ((gardensRes.data as unknown as Garden[]) ?? []).map(
-        (g) => g.id,
+        (g) => g.id
       );
 
       if (gardenIds.length === 0) {
@@ -102,7 +102,7 @@ export default function OwnerView() {
         supabase
           .from("collaborations")
           .select(
-            `id, garden_id, gardener_id, days, profiles:gardener_id(first_name, last_name, profile_image), gardens(name)`,
+            `id, garden_id, gardener_id, days, profiles:gardener_id(first_name, last_name, profile_image), gardens(name)`
           )
           .eq("status", "active")
           .eq("owner_id", user.id)
@@ -154,13 +154,13 @@ export default function OwnerView() {
 
   const findOrCreateConversation = async (
     ownerId: string,
-    gardenerId: string,
+    gardenerId: string
   ) => {
     const { data: existing } = await supabase
       .from("conversations")
       .select("id")
       .or(
-        `and(user1_id.eq.${ownerId},user2_id.eq.${gardenerId}),and(user1_id.eq.${gardenerId},user2_id.eq.${ownerId})`,
+        `and(user1_id.eq.${ownerId},user2_id.eq.${gardenerId}),and(user1_id.eq.${gardenerId},user2_id.eq.${ownerId})`
       )
       .maybeSingle();
 
@@ -183,7 +183,7 @@ export default function OwnerView() {
 
     const conversationId = await findOrCreateConversation(
       user.id,
-      request.user_id,
+      request.user_id
     );
     if (conversationId) {
       router.push(`/messages/${conversationId}` as any);
@@ -286,6 +286,86 @@ export default function OwnerView() {
                 </XStack>
               </ScrollView>
             </YStack>
+
+            {/* Actieve samenwerkingen Section */}
+            {gardeners.length > 0 && (
+              <YStack gap="$2">
+                <Text fontSize={24} fontWeight="900" color="$text_dark">
+                  Actieve samenwerkingen
+                </Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <XStack gap="$4" paddingVertical="$2">
+                    {gardeners.map((gardener) => (
+                      <Card
+                        key={gardener.id}
+                        width={240}
+                        backgroundColor="white"
+                        borderColor="#E3ECD7"
+                        borderWidth={1}
+                        borderRadius={16}
+                        padding="$3"
+                        onPress={() =>
+                          router.push(("/collaboration/" + gardener.id) as any)
+                        }
+                        pressStyle={{ scale: 0.98, opacity: 0.9 }}
+                      >
+                        <XStack gap="$3" alignItems="center">
+                          <Circle
+                            size={48}
+                            backgroundColor="rgba(23, 51, 0, 0.08)"
+                            overflow="hidden"
+                          >
+                            {gardener.profile_image ? (
+                              <XStack width="100%" height="100%">
+                                <img
+                                  src={gardener.profile_image}
+                                  style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "cover",
+                                    borderRadius: 24,
+                                  }}
+                                />
+                              </XStack>
+                            ) : (
+                              <MaterialCommunityIcons
+                                name="account-outline"
+                                size={22}
+                                color="#173300"
+                              />
+                            )}
+                          </Circle>
+                          <YStack flex={1}>
+                            <Text
+                              fontSize="$4"
+                              fontWeight="bold"
+                              color="$text_dark"
+                              numberOfLines={1}
+                            >
+                              {gardener.first_name} {gardener.last_name}
+                            </Text>
+                            <XStack alignItems="center" gap="$1">
+                              <Ionicons
+                                name="leaf"
+                                size={12}
+                                color="$primary"
+                              />
+                              <Text
+                                fontSize="$2"
+                                color="#56594D"
+                                numberOfLines={1}
+                              >
+                                {gardener.garden_name}
+                              </Text>
+                            </XStack>
+                          </YStack>
+                        </XStack>
+                      </Card>
+                    ))}
+                  </XStack>
+                </ScrollView>
+              </YStack>
+            )}
 
             {/* Jouw Planning Section */}
             {gardeners.length > 0 && (
@@ -391,6 +471,8 @@ export default function OwnerView() {
                 </YStack>
               </YStack>
             )}
+
+            {/* Openstaande aanvragen */}
             {requests.length > 0 && (
               <YStack gap="$2">
                 <Text fontSize={24} fontWeight="900" color="$text_dark">
