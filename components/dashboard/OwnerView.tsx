@@ -1,6 +1,5 @@
 import Button from "@/components/ui/Button";
 import GardenCard from "@/components/ui/GardenCard";
-import PageContainer from "@/components/ui/PageContainer";
 import { supabase } from "@/utils/supabase";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -224,8 +223,8 @@ export default function OwnerView() {
   };
 
   return (
-    <PageContainer
-      scrollable
+    <ScrollView
+      showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
@@ -519,6 +518,6 @@ export default function OwnerView() {
           </>
         )}
       </YStack>
-    </PageContainer>
+    </ScrollView>
   );
 }

@@ -1,7 +1,6 @@
 import Button from "@/components/ui/Button";
 import GardenCard from "@/components/ui/GardenCard";
 import { LogCard, type GardenLog } from "@/components/ui/LogCard";
-import PageContainer from "@/components/ui/PageContainer";
 import { supabase } from "@/utils/supabase";
 import { Image as ExpoImage } from "@/lib/image";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -70,8 +69,8 @@ export default function SeekerView({
   };
 
   return (
-    <PageContainer
-      scrollable
+    <ScrollView
+      showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
@@ -198,6 +197,6 @@ export default function SeekerView({
           </>
         )}
       </YStack>
-    </PageContainer>
+    </ScrollView>
   );
 }
