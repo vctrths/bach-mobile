@@ -48,7 +48,6 @@ export default function RootLayout() {
             <Stack.Screen name="messages" />
             <Stack.Screen name="messages/[id]" />
             <Stack.Screen name="problock" />
-            <Stack.Screen name="succesverzoek" />
             <Stack.Screen name="succesabo" />
             <Stack.Screen name="dashboard" />
             <Stack.Screen name="saved" />

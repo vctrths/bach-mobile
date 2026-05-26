@@ -39,6 +39,7 @@ const requestSchema = z.object({
 export default function GardenRequestScreen() {
   const { id } = useLocalSearchParams();
   const [gardenName, setGardenName] = useState("Aanvraag");
+  const [ownerId, setOwnerId] = useState<string | null>(null);
   const [motivation, setMotivation] = useState("");
   const [collabType, setCollabType] = useState("");
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
@@ -48,18 +49,23 @@ export default function GardenRequestScreen() {
   const [showPicker, setShowPicker] = useState(false);
   const [hasExistingRequest, setHasExistingRequest] = useState(false);
   const [checkingRequest, setCheckingRequest] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchGarden() {
       if (!id) return;
       try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) setCurrentUserId(user.id);
+
         const { data, error } = await supabase
           .from("gardens")
-          .select("name")
+          .select("name, owner_id")
           .eq("id", id)
           .single();
         if (data && !error) {
           setGardenName((data as any).name);
+          setOwnerId((data as any).owner_id);
         }
       } catch {
         // fallback: keep default "Aanvraag"
@@ -125,6 +131,14 @@ export default function GardenRequestScreen() {
       return;
     }
 
+    if (ownerId && currentUserId && ownerId === currentUserId) {
+      Alert.alert(
+        "Dit is je eigen tuin",
+        "Je kan geen aanvraag sturen voor je eigen tuin."
+      );
+      return;
+    }
+
     const result = requestSchema.safeParse({
       motivation,
       collaborationType: collabType,
@@ -163,15 +177,57 @@ export default function GardenRequestScreen() {
 
       if (error) {
         Alert.alert("Fout", error.message);
-      } else {
-        router.push("/succesverzoek");
+        return;
       }
+
+      const partnerId = ownerId;
+      if (!partnerId) {
+        router.push("/dashboard");
+        return;
+      }
+
+      const user1 = user.id < partnerId ? user.id : partnerId;
+      const user2 = user.id < partnerId ? partnerId : user.id;
+
+      const { data: existingConv } = await supabase
+        .from("conversations")
+        .select("id")
+        .eq("user1_id", user1)
+        .eq("user2_id", user2)
+        .maybeSingle();
+
+      let conversationId = existingConv?.id;
+
+      if (!conversationId) {
+        const { data: newConv, error: convError } = await supabase
+          .from("conversations")
+          .insert({ user1_id: user1, user2_id: user2 })
+          .select("id")
+          .single();
+
+        if (convError || !newConv) {
+          router.push("/dashboard");
+          return;
+        }
+        conversationId = newConv.id;
+      }
+
+      await supabase.from("messages").insert({
+        conversation_id: conversationId,
+        sender_id: user.id,
+        content: `Hallo! Ik heb zojuist een aanvraag gestuurd voor je tuin ${gardenName}.`,
+      });
+
+      router.push(`/messages/${conversationId}`);
     } catch (error) {
       Alert.alert("Fout", "Er is iets misgegaan. Probeer het opnieuw.");
     } finally {
       setLoading(false);
     }
   };
+
+  const isOwnGarden = ownerId && currentUserId && ownerId === currentUserId;
+  const isDisabled = loading || hasExistingRequest || checkingRequest || !!isOwnGarden;
 
   return (
     <PageContainer
@@ -180,7 +236,24 @@ export default function GardenRequestScreen() {
       activeTab="home"
     >
       <YStack paddingHorizontal={16} paddingTop="$6" gap={32} paddingBottom={200}>
-        {/* Existing Request Warning */}
+        {isOwnGarden && (
+          <YStack
+            backgroundColor="rgba(239, 68, 68, 0.1)"
+            borderColor="#ef4444"
+            borderWidth={1}
+            borderRadius={12}
+            padding={16}
+            gap={8}
+          >
+            <Text color="#ef4444" fontSize={16} fontWeight="600">
+              Dit is je eigen tuin
+            </Text>
+            <Text color="#ef4444" fontSize={14}>
+              Je kan geen aanvraag sturen voor je eigen tuin.
+            </Text>
+          </YStack>
+        )}
+
         {hasExistingRequest && (
           <YStack
             backgroundColor="rgba(239, 68, 68, 0.1)"
@@ -199,9 +272,7 @@ export default function GardenRequestScreen() {
           </YStack>
         )}
 
-        {/* Form Fields */}
         <YStack gap={16}>
-          {/* Motivation Section */}
           <YStack gap={16}>
             <Text color="#000000" fontSize={16} fontWeight="400">
               Motivatie (max 300 tekens):
@@ -236,7 +307,6 @@ export default function GardenRequestScreen() {
             )}
           </YStack>
 
-          {/* Collaboration Type Section */}
           <YStack gap={16}>
             <Text color="#000000" fontSize={16} fontWeight="400">
               Type samenwerking:
@@ -278,10 +348,8 @@ export default function GardenRequestScreen() {
             )}
           </YStack>
 
-          {/* Days Selection Section */}
           <YStack gap={8}>
             <XStack gap={4} alignItems="flex-start" padding={10}>
-              {/* Labels column */}
               <YStack width={56} gap={12} alignItems="flex-start">
                 <Text color="#56594D" fontSize={16} fontWeight="500" opacity={0.4}>
                   Dag
@@ -291,7 +359,6 @@ export default function GardenRequestScreen() {
                 </Text>
               </YStack>
 
-              {/* Day columns */}
               {DAYS.map((day) => (
                 <YStack
                   key={day.key}
@@ -326,7 +393,6 @@ export default function GardenRequestScreen() {
             )}
           </YStack>
 
-          {/* Start Date Section */}
           <YStack gap={16}>
             <Text color="#000000" fontSize={16} fontWeight="400">
               Gewenste start datum:
@@ -445,24 +511,25 @@ export default function GardenRequestScreen() {
           />
         )}
 
-        {/* Submit Button */}
         <Button
           label={
             checkingRequest
               ? "Laden..."
               : hasExistingRequest
               ? "Aanvraag al verstuurd"
+              : isOwnGarden
+              ? "Dit is je eigen tuin"
               : loading
               ? "Bezig..."
               : "Verzoek sturen"
           }
-          backgroundColor={hasExistingRequest ? "#d1d5db" : "#EAF0D8"}
-          color={hasExistingRequest ? "#6b7280" : "#172211"}
+          backgroundColor={isDisabled ? "#d1d5db" : "#EAF0D8"}
+          color={isDisabled ? "#6b7280" : "#172211"}
           borderWidth={1}
-          borderColor={hasExistingRequest ? "#9ca3af" : "#D4E1AE"}
+          borderColor={isDisabled ? "#9ca3af" : "#D4E1AE"}
           onPress={handleSubmit}
-          disabled={loading || hasExistingRequest || checkingRequest}
-          opacity={loading || hasExistingRequest || checkingRequest ? 0.7 : 1}
+          disabled={isDisabled}
+          opacity={isDisabled ? 0.7 : 1}
         />
       </YStack>
     </PageContainer>
