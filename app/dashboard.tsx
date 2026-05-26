@@ -1,479 +1,137 @@
 import PageContainer from "@/components/ui/PageContainer";
-import Button from "@/components/ui/Button";
-import NotificationBell from "@/components/ui/NotificationBell";
+import TopNavPill from "@/components/ui/TopNavPill";
 import SearchBar from "@/components/ui/SearchBar";
-import GardenCard from "@/components/ui/GardenCard";
-import { LogCard, type GardenLog } from "@/components/ui/LogCard";
-import { supabase } from "@/utils/supabase";
-import { Image as ExpoImage } from "@/lib/image";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import NotificationBell from "@/components/ui/NotificationBell";
 import { useAuth } from "@/context/AuthContext";
 import { OnboardingContext } from "@/context/OnboardingContext";
-import React, { useCallback, useContext, useEffect, useState } from "react";
-import { RefreshControl, ScrollView } from "react-native";
-import { Card, Circle, Spinner, Text, XStack, YStack } from "tamagui";
+import { UserRole } from "@/utils/role";
+import SeekerView from "@/components/dashboard/SeekerView";
+import OwnerView from "@/components/dashboard/OwnerView";
+import GardenerView from "@/components/dashboard/GardenerView";
+import React, { useCallback, useContext, useState } from "react";
+import { Circle, Spinner, Text, XStack, YStack } from "tamagui";
+import { supabase } from "@/utils/supabase";
+import { Image as ExpoImage } from "@/lib/image";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { type Garden } from "@/types/garden";
 
-type UserProfile = {
-  first_name: string;
-  profile_image: string | null;
-};
-
 export default function Dashboard() {
+  const { profile, loading } = useAuth();
   const { data: onboardingData } = useContext(OnboardingContext);
-  const { profile: authProfile } = useAuth();
-  const [gardens, setGardens] = useState<Garden[]>([]);
-  const [logs, setLogs] = useState<GardenLog[]>([]);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Garden[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
-  const fetchData = async () => {
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      const [gardensRes, logsRes, profileRes] = await Promise.all([
-        supabase
-          .from("gardens")
-          .select("id, name, rating, location, image_url")
-          .limit(5),
-        supabase.from("garden_logs").select("id, title, status").limit(5),
-        user
-          ? supabase
-              .from("profiles")
-              .select("first_name, profile_image")
-              .eq("id", user.id)
-              .single()
-          : Promise.resolve({ data: null }),
-      ]);
-
-      if (gardensRes.data) setGardens(gardensRes.data as Garden[]);
-      if (logsRes.data) setLogs(logsRes.data as GardenLog[]);
-      if (profileRes.data) setUserProfile(profileRes.data as UserProfile);
-    } catch (error) {
-      console.error("Error fetching dashboard data:", error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
-  useEffect(() => {
-    const effectiveRole = authProfile?.role || onboardingData.role;
-    if (effectiveRole === "tuineigenaar") {
-      router.replace("/owner/dashboard");
+  const handleSearch = useCallback(async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([]);
       return;
     }
-    if (effectiveRole === "tuinzoeker (met tuin)") {
-      router.replace("/gardener/dashboard");
-      return;
-    }
-    fetchData();
-  }, [authProfile?.role, onboardingData.role]);
 
-  const onRefresh = () => {
-    setRefreshing(true);
-    fetchData();
-  };
-
-  const fetchGardens = useCallback(async (query: string) => {
     setSearchLoading(true);
     try {
-      let supabaseQuery = supabase
+      const { data } = await supabase
         .from("gardens")
-        .select("id, name, rating, location, image_url, description");
+        .select("id, name, rating, location, image_url")
+        .or(`name.ilike.%${query}%,location.ilike.%${query}%,description.ilike.%${query}%`)
+        .limit(10);
 
-      if (query.trim()) {
-        supabaseQuery = supabaseQuery.or(
-          `name.ilike.%${query}%,location.ilike.%${query}%,description.ilike.%${query}%`
-        );
-      }
-
-      const { data, error } = await supabaseQuery.limit(20);
-
-      if (data && !error) {
-        setSearchResults(data as Garden[]);
-      } else if (error) {
-        console.error("Supabase error:", error.message);
-        setSearchResults([]);
-      }
+      if (data) setSearchResults(data as Garden[]);
     } catch (error) {
-      console.error("Error searching gardens:", error);
-      setSearchResults([]);
+      console.error("Search error:", error);
     } finally {
       setSearchLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      fetchGardens(searchQuery);
-    }, 300);
+  const onSearchChange = (text: string) => {
+    setSearchQuery(text);
+    handleSearch(text);
+  };
 
-    return () => clearTimeout(timeoutId);
-  }, [searchQuery, fetchGardens]);
+  if (loading) {
+    return (
+      <PageContainer showTopNav={false}>
+        <YStack flex={1} justifyContent="center" alignItems="center" gap="$4">
+          <Spinner size="large" color="$primary" />
+          <Text color="$secondary" fontSize="$4">Laden...</Text>
+        </YStack>
+      </PageContainer>
+    );
+  }
+
+  const role = (profile?.role ?? onboardingData.role)?.toLowerCase() ?? null;
+
+  const showingSearch = !!(searchQuery.trim() || isSearchFocused);
+
+  console.log("[Dashboard] render:", {
+    loading,
+    hasProfile: !!profile,
+    dbRole: profile?.role,
+    ctxRole: onboardingData.role,
+    resolvedRole: role,
+  });
 
   return (
-    <PageContainer
-      topNavHeight={140}
-      topNavTitle={
-        <XStack gap="$2" alignItems="center">
-          <MaterialCommunityIcons
-            name="map-marker"
-            size={18}
-            color="$primary"
-          />
-          <Text fontSize="$4" fontWeight="600" color="$text_dark">
-            Leuven, BE
-          </Text>
-          <MaterialCommunityIcons
-            name="chevron-down"
-            size={16}
-            color="$text_dark"
-          />
-        </XStack>
-      }
-      rightElement={
-        <XStack gap="$3" alignItems="center">
-          <NotificationBell />
-          {userProfile?.profile_image ? (
-            <Circle
-              size={50}
-              onPress={() => router.push("/profile")}
-              overflow="hidden"
-            >
-              <ExpoImage
-                source={{ uri: userProfile.profile_image }}
-                style={{ width: "100%", height: "100%" }}
-                contentFit="cover"
-              />
-            </Circle>
-          ) : (
-            <Ionicons
-              name="person-circle"
-              size={50}
-              color="$borderColor"
-              onPress={() => router.push("/profile")}
-              suppressHighlighting
-            />
-          )}
-        </XStack>
-      }
-      topNavChildren={
-        <SearchBar
-          active
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          onFocus={() => setIsSearchFocused(true)}
-          onBlur={() => setIsSearchFocused(false)}
-          placeholder="Zoeken naar een tuin"
-        />
-      }
-    >
-      <ScrollView
-        flex={1}
-        showsVerticalScrollIndicator={false}
-        scrollEventThrottle={16}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+    <>
+      <TopNavPill
+        title={
+          <XStack alignItems="center" gap="$2">
+            <Ionicons name="location" size={20} color="$primary" />
+            <Text color="$text_dark" fontWeight="600">Groene Vingers</Text>
+          </XStack>
         }
-      >
-        <YStack flex={1} paddingHorizontal="$4" paddingVertical="$4" gap="$6">
-          {searchQuery.trim() || isSearchFocused ? (
-          <YStack gap="$3">
-            <Text fontSize="$4" fontWeight="bold" color="$text_dark">
-              {searchQuery.trim()
-                ? `Resultaten voor "${searchQuery}"`
-                : "Alle tuinen"}
-            </Text>
-
-            {searchLoading ? (
-              <XStack padding="$10" justifyContent="center">
-                <Spinner size="large" color="$primary" />
-              </XStack>
-            ) : searchResults.length === 0 ? (
-              <YStack
-                padding="$10"
-                justifyContent="center"
-                alignItems="center"
-                gap="$3"
-              >
-                <MaterialCommunityIcons
-                  name="tree-outline"
-                  size={48}
-                  color="$text_light"
-                />
-                <Text fontSize="$4" color="$text_dark" textAlign="center">
-                  Geen tuinen gevonden
-                </Text>
-                <Text fontSize="$3" color="$text_light" textAlign="center">
-                  Probeer een andere zoekopdracht
-                </Text>
-              </YStack>
-            ) : (
-              searchResults.map((garden) => (
-                <Card
-                  key={garden.id}
-                  elevation={2}
-                  backgroundColor="$canvas"
-                  borderColor="$borderColor"
-                  borderWidth={1}
-                  borderRadius="$6"
-                  overflow="hidden"
-                  padding="$3"
-                  onPress={() => router.push(("/garden/" + garden.id) as any)}
-                  pressStyle={{ scale: 0.98, opacity: 0.9 }}
-                >
-                  <XStack gap="$3" height={150}>
-                    <ExpoImage
-                      source={
-                        garden.image_url
-                          ? { uri: garden.image_url }
-                          : require("@/assets/images/hero.png")
-                      }
-                      style={{
-                        width: 150,
-                        height: "100%",
-                        borderRadius: 8,
-                      }}
-                      contentFit="cover"
-                    />
-
-                    <YStack flex={1} justifyContent="space-between" gap="$2">
-                      <YStack gap="$1">
-                        <XStack
-                          justifyContent="space-between"
-                          alignItems="center"
-                        >
-                          <Text
-                            fontSize="$4"
-                            fontWeight="bold"
-                            color="$text_dark"
-                            flex={1}
-                          >
-                            {garden.name}
-                          </Text>
-                          <XStack gap="$1" alignItems="center">
-                            <MaterialCommunityIcons
-                              name="star"
-                              size={16}
-                              color="#FFB800"
-                            />
-                            <Text
-                              fontSize="$3"
-                              fontWeight="bold"
-                              color="$text_dark"
-                            >
-                              {garden.rating?.toFixed(1) ?? "N/A"}
-                            </Text>
-                          </XStack>
-                        </XStack>
-
-                        <XStack gap="$2" alignItems="center">
-                          <MaterialCommunityIcons
-                            name="map-marker"
-                            size={14}
-                            color="$primary"
-                          />
-                          <Text fontSize="$3" color="$text_dark">
-                            {garden.location || "Onbekende locatie"}
-                          </Text>
-                        </XStack>
-
-                        {garden.description && (
-                          <Text
-                            fontSize="$2"
-                            color="$text_light"
-                            numberOfLines={2}
-                            lineHeight="$3"
-                          >
-                            {garden.description}
-                          </Text>
-                        )}
-                      </YStack>
-
-                      <XStack gap="$2">
-                        <Button
-                          label="Details"
-                          flex={1}
-                          backgroundColor="$background"
-                          color="$white"
-                          onPress={() =>
-                            router.push(("/garden/" + garden.id) as any)
-                          }
-                          paddingVertical="$2"
-                        />
-                        <Card
-                          width={40}
-                          height={40}
-                          borderRadius={20}
-                          backgroundColor="$background"
-                          padding="$2"
-                          justifyContent="center"
-                          alignItems="center"
-                          onPress={() => {}}
-                        >
-                          <MaterialCommunityIcons
-                            name="heart"
-                            size={20}
-                            color="white"
-                          />
-                        </Card>
-                      </XStack>
-                    </YStack>
-                  </XStack>
-                </Card>
-              ))
-            )}
-          </YStack>
-        ) : (
-          <>
-            <Card
-              elevation={2}
-              backgroundColor="#f0f3ec"
-              borderColor="#e3ecd7"
-              borderWidth={1}
-              padding="$4"
-              gap="$3"
-            >
-              <Text fontSize="$3" color="$primary">
-                Om meer aanvragen te sturen heb je een pro account nodig
-              </Text>
-              <Button
-                label="Probeer pro | €7 /maand"
-                backgroundColor="$background"
-                color="$white"
-                onPress={() => router.push("/pro")}
-              />
-            </Card>
-
-            <YStack gap="$3">
-              <XStack justifyContent="space-between" alignItems="center">
-                <Text fontSize="$5" fontWeight="bold" color="$text_dark">
-                  Aanbevolen tuinen
-                </Text>
-                <Text
-                  fontSize="$3"
-                  fontWeight="600"
-                  color="$text_dark"
-                  textDecorationLine="underline"
-                  onPress={() => router.push("/explore")}
-                >
-                  meer info →
-                </Text>
-              </XStack>
-
-              {loading ? (
-                <XStack padding="$10" justifyContent="center">
-                  <Spinner size="large" color="$primary" />
-                </XStack>
-              ) : (
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  scrollEventThrottle={16}
-                >
-                  <XStack gap="$2" paddingHorizontal="$0">
-                    {gardens.map((garden) => (
-                      <GardenCard
-                        key={garden.id}
-                        garden={garden}
-                        onPress={() =>
-                          router.push(("/garden/" + garden.id) as any)
-                        }
-                      />
-                    ))}
-                  </XStack>
-                </ScrollView>
-              )}
-            </YStack>
-
-            <YStack gap="$3">
-              <Text fontSize="$5" fontWeight="bold" color="$text_dark">
-                op basis van locatie:
-              </Text>
-              <Card
-                elevation={2}
-                backgroundColor="$canvas"
-                borderColor="$borderColor"
-                borderWidth={1}
-                borderRadius="$6"
-                overflow="hidden"
-                height={200}
-                position="relative"
-                pressStyle={{ opacity: 0.9, scale: 0.98 }}
-                onPress={() => router.push("/map")}
-              >
+        rightElement={
+          <XStack gap="$3" alignItems="center">
+            <NotificationBell />
+            {profile?.profile_image ? (
+              <Circle size={50} onPress={() => router.push("/profile")} overflow="hidden">
                 <ExpoImage
-                  source={require("@/assets/images/hero.png")}
+                  source={{ uri: profile.profile_image }}
                   style={{ width: "100%", height: "100%" }}
                   contentFit="cover"
                 />
-                <YStack
-                  position="absolute"
-                  bottom={0}
-                  left={0}
-                  right={0}
-                  backgroundColor="rgba(23, 51, 0, 0.75)"
-                  paddingHorizontal="$4"
-                  paddingVertical="$3"
-                >
-                  <Text color="white" fontWeight="bold" fontSize="$4">
-                    Tuinen in jouw buurt
-                  </Text>
-                  <Text color="rgba(255, 255, 255, 0.8)" fontSize="$2">
-                    Ontdek dichtstbijzijnde groene oases
-                  </Text>
-                </YStack>
-              </Card>
-            </YStack>
+              </Circle>
+            ) : (
+              <Ionicons
+                name="person-circle"
+                size={50}
+                color="$borderColor"
+                onPress={() => router.push("/profile")}
+                suppressHighlighting
+              />
+            )}
+          </XStack>
+        }
+        hideBack
+      >
+        <SearchBar
+          active
+          value={searchQuery}
+          onChangeText={onSearchChange}
+          placeholder="Zoeken naar een tuin"
+        />
+      </TopNavPill>
 
-            <YStack gap="$3" paddingBottom="$5">
-              <XStack justifyContent="space-between" alignItems="center">
-                <Text fontSize="$5" fontWeight="bold" color="$text_dark">
-                  Tuinlogboek
-                </Text>
-                <Text
-                  fontSize="$3"
-                  fontWeight="600"
-                  color="$text_dark"
-                  textDecorationLine="underline"
-                  onPress={() => router.push("/logbook")}
-                >
-                  meer info →
-                </Text>
-              </XStack>
-
-              {loading ? (
-                <XStack padding="$10" justifyContent="center">
-                  <Spinner size="large" color="$primary" />
-                </XStack>
-              ) : (
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  scrollEventThrottle={16}
-                >
-                  <XStack gap="$2" paddingHorizontal="$0">
-                    {logs.map((log) => (
-                      <LogCard key={log.id} log={log} />
-                    ))}
-                  </XStack>
-                </ScrollView>
-              )}
-            </YStack>
-          </>
+      <PageContainer showTopNav={false}>
+        {role === UserRole.TUIN_EIGENAAR && <OwnerView />}
+        {role === UserRole.TUIN_ZOEKER_MET_TUIN && <GardenerView />}
+        {(role === UserRole.TUIN_ZOEKER || !role) && (
+          <SeekerView
+            searchQuery={searchQuery}
+            searchResults={searchResults}
+            searchLoading={searchLoading}
+            isSearchFocused={isSearchFocused}
+            showingSearch={showingSearch}
+            onSearchChange={onSearchChange}
+            onSearchFocus={() => setIsSearchFocused(true)}
+            onSearchBlur={() => setIsSearchFocused(false)}
+          />
         )}
-        </YStack>
-      </ScrollView>
-    </PageContainer>
+      </PageContainer>
+    </>
   );
 }
