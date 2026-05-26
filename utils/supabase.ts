@@ -5,36 +5,39 @@ import { Database } from '@/types/supabase'
 const fallbackStorage: Record<string, string> = {}
 
 function getAsyncStorage() {
+  if (Platform.OS === 'web') return null
   try {
-    return require('@react-native-async-storage/async-storage').default
+    const storage = require('@react-native-async-storage/async-storage').default
+    // If we're on native but the module is null/undefined (e.g. not linked)
+    if (!storage) return null
+    return storage
   } catch (e) {
-    console.warn('Failed to import @react-native-async-storage/async-storage lazily:', e)
+    // Silent catch as we have fallbackStorage
     return null
   }
 }
 
 const safeStorage = {
   getItem: async (key: string): Promise<string | null> => {
+    if (Platform.OS === 'web') {
+      return typeof window !== 'undefined' ? window.localStorage.getItem(key) : null
+    }
     try {
-      if (Platform.OS === 'web') {
-        return typeof window !== 'undefined' ? window.localStorage.getItem(key) : null
-      }
       const storage = getAsyncStorage()
       if (!storage) return fallbackStorage[key] || null
       return await storage.getItem(key)
     } catch (e) {
-      console.warn('Supabase: AsyncStorage getItem failed, falling back to in-memory', e)
       return fallbackStorage[key] || null
     }
   },
   setItem: async (key: string, value: string): Promise<void> => {
-    try {
-      if (Platform.OS === 'web') {
-        if (typeof window !== 'undefined') {
-          window.localStorage.setItem(key, value)
-        }
-        return
+    if (Platform.OS === 'web') {
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(key, value)
       }
+      return
+    }
+    try {
       const storage = getAsyncStorage()
       if (!storage) {
         fallbackStorage[key] = value
@@ -42,18 +45,17 @@ const safeStorage = {
       }
       await storage.setItem(key, value)
     } catch (e) {
-      console.warn('Supabase: AsyncStorage setItem failed, falling back to in-memory', e)
       fallbackStorage[key] = value
     }
   },
   removeItem: async (key: string): Promise<void> => {
-    try {
-      if (Platform.OS === 'web') {
-        if (typeof window !== 'undefined') {
-          window.localStorage.removeItem(key)
-        }
-        return
+    if (Platform.OS === 'web') {
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem(key)
       }
+      return
+    }
+    try {
       const storage = getAsyncStorage()
       if (!storage) {
         delete fallbackStorage[key]
@@ -61,7 +63,6 @@ const safeStorage = {
       }
       await storage.removeItem(key)
     } catch (e) {
-      console.warn('Supabase: AsyncStorage removeItem failed, falling back to in-memory', e)
       delete fallbackStorage[key]
     }
   }
