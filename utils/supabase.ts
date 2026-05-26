@@ -1,5 +1,6 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { Platform } from 'react-native'
+import { Database } from '@/types/supabase'
 
 const fallbackStorage: Record<string, string> = {}
 
@@ -66,9 +67,9 @@ const safeStorage = {
   }
 }
 
-let _client: ReturnType<typeof createClient> | null = null
+let _client: SupabaseClient<Database> | null = null
 
-function getSupabase() {
+function getSupabase(): SupabaseClient<Database> {
   if (_client) return _client
 
   const url = process.env.EXPO_PUBLIC_SUPABASE_URL
@@ -80,7 +81,7 @@ function getSupabase() {
     )
   }
 
-  _client = createClient(url, key, {
+  _client = createClient<Database>(url, key, {
     auth: {
       storage: safeStorage,
       autoRefreshToken: true,
@@ -92,9 +93,11 @@ function getSupabase() {
   return _client
 }
 
-export const supabase = new Proxy({} as ReturnType<typeof createClient>, {
+export const supabase = new Proxy({} as SupabaseClient<Database>, {
   get(_target, prop) {
-    return (getSupabase() as Record<string | symbol, unknown>)[prop]
+    const client = getSupabase()
+    const value = (client as any)[prop]
+    return typeof value === 'function' ? value.bind(client) : value
   },
 })
 

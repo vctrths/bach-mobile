@@ -4,7 +4,8 @@ import { supabase } from "@/utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { Alert, Card, Circle, Spinner, Text, XStack, YStack } from "tamagui";
+import { Alert } from "react-native";
+import { Card, Circle, Spinner, Text, XStack, YStack } from "tamagui";
 
 export default function SettingsScreen() {
   const { signOut } = useAuth();

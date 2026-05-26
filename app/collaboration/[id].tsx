@@ -31,7 +31,7 @@ export default function CollaborationDetailScreen() {
           gardens(*),
           profiles:gardener_id(first_name, last_name, profile_image)
         `)
-        .eq("id", id)
+        .eq("id", id as string)
         .single();
 
       if (data) {
@@ -41,8 +41,8 @@ export default function CollaborationDetailScreen() {
         const { data: reviewData } = await supabase
           .from("reviews")
           .select("id")
-          .eq("collaboration_id", id)
-          .eq("reviewer_id", user?.id)
+          .eq("collaboration_id", id as string)
+          .eq("reviewer_id", user!.id)
           .maybeSingle();
         
         if (reviewData) setHasReviewed(true);
@@ -69,7 +69,7 @@ export default function CollaborationDetailScreen() {
           ended_at: new Date().toISOString(),
           ended_by: user?.id
         })
-        .eq("id", id);
+        .eq("id", id as string);
 
       if (!error) {
         // Create notification for the other party
@@ -77,13 +77,15 @@ export default function CollaborationDetailScreen() {
           ? collaboration.gardener_id 
           : collaboration.owner_id;
         
-        await supabase.from("notifications").insert({
-          user_id: otherPartyId,
-          type: "reminder",
-          title: "Samenwerking beëindigd",
-          body: "Laat een beoordeling achter over je ervaring!",
-          related_id: id
-        });
+        if (otherPartyId) {
+          await supabase.from("notifications").insert({
+            user_id: otherPartyId,
+            type: "reminder",
+            title: "Samenwerking beëindigd",
+            body: "Laat een beoordeling achter over je ervaring!",
+            related_id: id as string
+          });
+        }
 
         await fetchCollaboration();
       }
@@ -103,8 +105,8 @@ export default function CollaborationDetailScreen() {
       const targetType = isOwner ? "user" : "garden";
 
       const { error } = await supabase.from("reviews").insert({
-        collaboration_id: id,
-        reviewer_id: user?.id,
+        collaboration_id: id as string,
+        reviewer_id: user!.id,
         target_id: targetId,
         target_type: targetType,
         rating: userRating,

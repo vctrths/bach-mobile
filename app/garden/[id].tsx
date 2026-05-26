@@ -1,11 +1,12 @@
 import PageContainer from "@/components/ui/PageContainer";
 import Button from "@/components/ui/Button";
+import ApplianceBadges from "@/components/ui/ApplianceBadges";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { Image as ExpoImage } from "@/lib/image";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Card, H1, H2, Spinner, Text, XStack, YStack } from "tamagui";
+import { Card, H1, H2, Spinner, Text, XStack, YStack, Circle } from "tamagui";
 import { supabase } from "@/utils/supabase";
 import { type Garden, type Review } from "@/types/garden";
 
@@ -22,12 +23,12 @@ export default function GardenDetailsScreen() {
           supabase
             .from("gardens")
             .select("*")
-            .eq("id", id)
+            .eq("id", id as string)
             .single(),
           supabase
             .from("reviews")
             .select("*, profiles:reviewer_id(first_name, last_name, profile_image)")
-            .eq("target_id", id)
+            .eq("target_id", id as string)
             .eq("target_type", "garden")
             .order("created_at", { ascending: false })
         ]);
@@ -168,6 +169,15 @@ export default function GardenDetailsScreen() {
             {garden.description ?? ""}
           </Text>
         </YStack>
+
+        {garden.appliances && garden.appliances.length > 0 && (
+          <YStack gap="$3">
+            <H2 color="$text_dark" fontWeight="bold">
+              Voorzieningen
+            </H2>
+            <ApplianceBadges appliances={garden.appliances} detailMode />
+          </YStack>
+        )}
 
         <Card
           elevation={2}

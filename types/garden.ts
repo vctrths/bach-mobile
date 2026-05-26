@@ -7,6 +7,7 @@ export interface Garden {
   longitude: number | null;
   description: string | null;
   image_url: string | null;
+  appliances: string[] | null;
 }
 
 export interface Review {
