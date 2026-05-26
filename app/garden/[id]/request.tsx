@@ -51,6 +51,9 @@ export default function GardenRequestScreen() {
   const [checkingRequest, setCheckingRequest] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
+  const minDate = new Date();
+  minDate.setHours(0, 0, 0, 0);
+
   useEffect(() => {
     async function fetchGarden() {
       if (!id) return;
@@ -61,7 +64,7 @@ export default function GardenRequestScreen() {
         const { data, error } = await supabase
           .from("gardens")
           .select("name, owner_id")
-          .eq("id", id)
+          .eq("id", id as string)
           .single();
         if (data && !error) {
           setGardenName((data as any).name);
@@ -89,7 +92,7 @@ export default function GardenRequestScreen() {
         const { data, error } = await supabase
           .from("garden_requests")
           .select("id")
-          .eq("garden_id", id)
+          .eq("garden_id", id as string)
           .eq("user_id", user.id)
           .maybeSingle();
 
@@ -117,7 +120,11 @@ export default function GardenRequestScreen() {
   const handleDateChange = (_: any, selectedDate?: Date) => {
     setShowPicker(Platform.OS === "ios");
     if (selectedDate) {
-      setStartDate(selectedDate);
+      if (selectedDate < minDate) {
+        setStartDate(minDate);
+      } else {
+        setStartDate(selectedDate);
+      }
       setErrors((e) => ({ ...e, startDate: "" }));
     }
   };
@@ -167,12 +174,12 @@ export default function GardenRequestScreen() {
       }
 
       const { error } = await supabase.from("garden_requests").insert({
-        garden_id: id,
+        garden_id: id as string,
         user_id: user.id,
         motivation,
         collaboration_type: collabType,
         days: selectedDays,
-        start_date: startDate?.toISOString().split("T")[0],
+        start_date: startDate ? `${startDate.getFullYear()}-${(startDate.getMonth() + 1).toString().padStart(2, "0")}-${startDate.getDate().toString().padStart(2, "0")}` : null,
       });
 
       if (error) {
@@ -501,14 +508,37 @@ export default function GardenRequestScreen() {
           </YStack>
         </YStack>
 
-        {showPicker && (
+        {showPicker && Platform.OS !== "web" && (
           <DateTimePicker
             value={startDate || new Date()}
             mode="date"
             display={Platform.OS === "ios" ? "spinner" : "default"}
-            minimumDate={new Date()}
+            minimumDate={minDate}
             onChange={handleDateChange}
           />
+        )}
+
+        {Platform.OS === "web" && showPicker && (
+          <YStack gap={8} backgroundColor="#F1F1F1" padding={16} borderRadius={12}>
+            <Text fontSize={14} color="#929292">Selecteer een datum:</Text>
+            <input
+              type="date"
+              min={minDate.toISOString().split("T")[0]}
+              value={startDate ? `${startDate.getFullYear()}-${(startDate.getMonth() + 1).toString().padStart(2, "0")}-${startDate.getDate().toString().padStart(2, "0")}` : ""}
+              onChange={(e) => {
+                const date = new Date(e.target.value);
+                if (!isNaN(date.getTime())) {
+                  handleDateChange(null, date);
+                }
+              }}
+              style={{
+                padding: "8px",
+                borderRadius: "8px",
+                border: "1px solid #E3E3E3",
+                fontSize: "16px",
+              }}
+            />
+          </YStack>
         )}
 
         <Button
