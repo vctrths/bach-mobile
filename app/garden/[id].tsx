@@ -7,33 +7,45 @@ import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Card, H1, H2, Spinner, Text, XStack, YStack } from "tamagui";
 import { supabase } from "@/utils/supabase";
-import { type Garden } from "@/types/garden";
+import { type Garden, type Review } from "@/types/garden";
 
 export default function GardenDetailsScreen() {
   const { id } = useLocalSearchParams();
   const [garden, setGarden] = useState<Garden | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchGarden() {
+    async function fetchData() {
       try {
-        const { data, error } = await supabase
-          .from("gardens")
-          .select("*")
-          .eq("id", id)
-          .single();
+        const [gardenRes, reviewsRes] = await Promise.all([
+          supabase
+            .from("gardens")
+            .select("*")
+            .eq("id", id)
+            .single(),
+          supabase
+            .from("reviews")
+            .select("*, profiles:reviewer_id(first_name, last_name, profile_image)")
+            .eq("target_id", id)
+            .eq("target_type", "garden")
+            .order("created_at", { ascending: false })
+        ]);
 
-        if (data && !error) {
-          setGarden(data as Garden);
+        if (gardenRes.data) {
+          setGarden(gardenRes.data as Garden);
+        }
+        if (reviewsRes.data) {
+          setReviews(reviewsRes.data as any[]);
         }
       } catch (err) {
-        console.error("Error fetching garden:", err);
+        console.error("Error fetching data:", err);
       } finally {
         setLoading(false);
       }
     }
 
-    if (id) fetchGarden();
+    if (id) fetchData();
   }, [id]);
 
   if (loading) {
@@ -179,6 +191,79 @@ export default function GardenDetailsScreen() {
             onPress={() => router.push(`/garden/${id}/request` as any)}
           />
         </Card>
+
+        {/* Reviews Section */}
+        <YStack gap="$4" paddingBottom="$10">
+          <XStack justifyContent="space-between" alignItems="center">
+            <H2 color="$text_dark" fontWeight="bold">Beoordelingen</H2>
+            <XStack gap="$1" alignItems="center">
+              <MaterialCommunityIcons name="star" size={20} color="#FFB800" />
+              <Text fontSize="$4" fontWeight="bold">{garden.rating ?? 0}</Text>
+              <Text color="$secondary" fontSize="$3">({reviews.length})</Text>
+            </XStack>
+          </XStack>
+
+          {reviews.length === 0 ? (
+            <YStack
+              padding="$6"
+              backgroundColor="$background_secondary"
+              borderRadius="$6"
+              alignItems="center"
+              gap="$2"
+            >
+              <Ionicons name="chatbubble-outline" size={32} color="$text_light" />
+              <Text color="$secondary">Nog geen beoordelingen</Text>
+            </YStack>
+          ) : (
+            reviews.map((review) => (
+              <Card
+                key={review.id}
+                padding="$4"
+                backgroundColor="white"
+                borderRadius="$6"
+                borderWidth={1}
+                borderColor="$borderColor"
+                gap="$2"
+              >
+                <XStack justifyContent="space-between" alignItems="center">
+                  <XStack gap="$2" alignItems="center">
+                    <Circle size={32} overflow="hidden" backgroundColor="$background_secondary">
+                      {review.profiles?.profile_image ? (
+                        <ExpoImage
+                          source={{ uri: review.profiles.profile_image }}
+                          style={{ width: "100%", height: "100%" }}
+                        />
+                      ) : (
+                        <Ionicons name="person" size={16} color="$text_light" />
+                      )}
+                    </Circle>
+                    <Text fontWeight="bold" fontSize="$3">
+                      {review.profiles?.first_name} {review.profiles?.last_name}
+                    </Text>
+                  </XStack>
+                  <XStack gap="$1">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <MaterialCommunityIcons
+                        key={s}
+                        name="star"
+                        size={14}
+                        color={s <= review.rating ? "#FFB800" : "#E3ECD7"}
+                      />
+                    ))}
+                  </XStack>
+                </XStack>
+                {review.comment && (
+                  <Text color="$text_dark" fontSize="$3" lineHeight="$4">
+                    {review.comment}
+                  </Text>
+                )}
+                <Text color="$secondary" fontSize="$1">
+                  {new Date(review.created_at).toLocaleDateString('nl-BE')}
+                </Text>
+              </Card>
+            ))
+          )}
+        </YStack>
       </YStack>
     </PageContainer>
   );
