@@ -54,6 +54,7 @@ export default function RootLayout() {
             <Stack.Screen name="pro/payment" />
             <Stack.Screen name="garden/create" />
             <Stack.Screen name="garden/[id]/request" />
+            <Stack.Screen name="collaboration/[id]" />
             <Stack.Screen name="logbook/new" />
             <Stack.Screen name="logbook/calendar" />
             <Stack.Screen name="logbook/[id]" />
