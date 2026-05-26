@@ -1,5 +1,6 @@
 import { pages } from "@/types/app";
 import { ReactNode } from "react";
+import { RefreshControlProps } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScrollView, YStack } from "tamagui";
 import BottomNav from "./BottomNav";
@@ -20,7 +21,7 @@ interface PageContainerProps {
   bottomNavExtraMargin?: number;
   contentPaddingBottom?: number;
   scrollable?: boolean;
-  refreshControl?: React.ReactElement;
+  refreshControl?: React.ReactElement<RefreshControlProps>;
 }
 
 const DEFAULT_TOP_NAV_HEIGHT = 76;

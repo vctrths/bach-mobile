@@ -1,10 +1,11 @@
 import GardenCard from "@/components/ui/GardenCard";
 import { LogCard, type GardenLog } from "@/components/ui/LogCard";
+import PageContainer from "@/components/ui/PageContainer";
 import { supabase } from "@/utils/supabase";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { RefreshControl, ScrollView } from "react-native";
+import { RefreshControl } from "react-native";
 import { Card, Circle, Spinner, Text, XStack, YStack } from "tamagui";
 import { type Garden } from "@/types/garden";
 
@@ -97,8 +98,8 @@ export default function GardenerView() {
   const weekDays = getWeekDays();
 
   return (
-    <ScrollView
-      showsVerticalScrollIndicator={false}
+    <PageContainer
+      scrollable
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
@@ -226,6 +227,6 @@ export default function GardenerView() {
           </>
         )}
       </YStack>
-    </ScrollView>
+    </PageContainer>
   );
 }
