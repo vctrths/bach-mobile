@@ -4,6 +4,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
 import { Card, Text, XStack, YStack } from "tamagui";
 import Button from "./Button";
+import ApplianceBadges from "./ApplianceBadges";
 
 interface GardenCardProps {
   garden: Garden;
@@ -54,6 +55,8 @@ export default function GardenCard({
             {garden.location ?? "Onbekend"}
           </Text>
         </XStack>
+
+        <ApplianceBadges appliances={garden.appliances} />
 
         <XStack gap={6} marginTop={2}>
           <Button

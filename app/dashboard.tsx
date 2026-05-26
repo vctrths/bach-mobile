@@ -35,7 +35,7 @@ export default function Dashboard() {
     try {
       const { data } = await supabase
         .from("gardens")
-        .select("id, name, rating, location, image_url")
+        .select("id, name, rating, location, image_url, appliances")
         .or(`name.ilike.%${query}%,location.ilike.%${query}%,description.ilike.%${query}%`)
         .limit(10);
 

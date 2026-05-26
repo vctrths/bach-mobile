@@ -1,5 +1,6 @@
 import Button from "@/components/ui/Button";
 import GardenCard from "@/components/ui/GardenCard";
+import ApplianceBadges from "@/components/ui/ApplianceBadges";
 import { LogCard, type GardenLog } from "@/components/ui/LogCard";
 import { supabase } from "@/utils/supabase";
 import { Image as ExpoImage } from "@/lib/image";
@@ -41,7 +42,7 @@ export default function SeekerView({
       const [gardensRes, logsRes] = await Promise.all([
         supabase
           .from("gardens")
-          .select("id, name, rating, location, image_url")
+          .select("id, name, rating, location, image_url, appliances")
           .limit(5),
         supabase
           .from("garden_logs")
@@ -135,6 +136,9 @@ export default function SeekerView({
                         <Text fontSize="$3" color="$text_light">
                           {garden.location}
                         </Text>
+                      </XStack>
+                      <XStack marginTop="$2">
+                        <ApplianceBadges appliances={garden.appliances} />
                       </XStack>
                     </YStack>
                   </XStack>

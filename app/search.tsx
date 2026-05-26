@@ -1,5 +1,6 @@
 import PageContainer from "@/components/ui/PageContainer";
 import Button from "@/components/ui/Button";
+import ApplianceBadges from "@/components/ui/ApplianceBadges";
 import NotificationBell from "@/components/ui/NotificationBell";
 import SearchBar from "@/components/ui/SearchBar";
 import { supabase } from "@/utils/supabase";
@@ -21,7 +22,7 @@ export default function SearchScreen() {
     try {
       let supabaseQuery = supabase
         .from("gardens")
-        .select("id, name, rating, location, description, image_url");
+        .select("id, name, rating, location, description, image_url, appliances");
 
       if (query.trim()) {
         supabaseQuery = supabaseQuery.or(
@@ -185,6 +186,8 @@ export default function SearchScreen() {
                         {formatLocation(garden)}
                       </Text>
                     </XStack>
+
+                    <ApplianceBadges appliances={garden.appliances} />
 
                     {garden.description && (
                       <Text
