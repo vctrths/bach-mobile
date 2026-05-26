@@ -1,3 +1,4 @@
+import { pages } from "@/types/app";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { router } from "expo-router";
@@ -5,7 +6,7 @@ import React from "react";
 import { Circle, XStack } from "tamagui";
 
 interface BottomNavProps {
-  activeTab?: "home" | "map" | "message" | "profile";
+  activeTab?: pages;
   onHomePress?: () => void;
   onMapPress?: () => void;
   onMessagePress?: () => void;
@@ -93,36 +94,45 @@ export default function BottomNav({
           justifyContent="space-around"
           alignItems="center"
         >
-        {navItems.map((item) => (
-          <XStack key={item.key} position="relative" justifyContent="center" alignItems="center">
-            <Circle
-              size={46}
-              backgroundColor="rgba(255, 255, 255, 0.92)"
-              borderWidth={1}
-              borderColor="rgba(255, 255, 255, 0.6)"
+          {navItems.map((item) => (
+            <XStack
+              key={item.key}
+              position="relative"
               justifyContent="center"
               alignItems="center"
-              onPress={item.onPress || (() => {})}
-              pressStyle={{ scale: 0.94, opacity: 0.85 }}
             >
-              <MaterialCommunityIcons
-                name={item.icon as any}
-                size={24}
-                color={activeTab === item.key ? "$primary" : "rgba(23, 51, 0, 0.45)"}
-              />
-            </Circle>
-            {item.badge && (
               <Circle
-                size={16}
-                backgroundColor="#E74C3C"
-                position="absolute"
-                top={-2}
-                right={-2}
-              />
-            )}
-          </XStack>
-        ))}
-      </XStack>
+                size={46}
+                backgroundColor="rgba(255, 255, 255, 0.92)"
+                borderWidth={1}
+                borderColor="rgba(255, 255, 255, 0.6)"
+                justifyContent="center"
+                alignItems="center"
+                onPress={item.onPress || (() => {})}
+                pressStyle={{ scale: 0.94, opacity: 0.85 }}
+              >
+                <MaterialCommunityIcons
+                  name={item.icon as any}
+                  size={24}
+                  color={
+                    activeTab === item.key
+                      ? "$primary"
+                      : "rgba(23, 51, 0, 0.45)"
+                  }
+                />
+              </Circle>
+              {item.badge && (
+                <Circle
+                  size={16}
+                  backgroundColor="#E74C3C"
+                  position="absolute"
+                  top={-2}
+                  right={-2}
+                />
+              )}
+            </XStack>
+          ))}
+        </XStack>
       </XStack>
     </XStack>
   );

@@ -1,8 +1,9 @@
+import { pages } from "@/types/app";
 import { ReactNode } from "react";
 import { YStack } from "tamagui";
 import BottomNav from "./BottomNav";
-import TopNavPill from "./TopNavPill";
 import ThemedSafeArea from "./ThemedSafeArea";
+import TopNavPill from "./TopNavPill";
 
 interface PageContainerProps {
   children: ReactNode;
@@ -12,7 +13,7 @@ interface PageContainerProps {
   onBackPress?: () => void;
   rightElement?: React.ReactNode;
   topNavChildren?: React.ReactNode;
-  activeTab?: "home" | "map" | "message" | "profile";
+  activeTab?: pages;
   showBottomNav?: boolean;
 }
 
@@ -40,7 +41,7 @@ export default function PageContainer({
         </TopNavPill>
       )}
 
-      <YStack flex={1} paddingTop="$14" paddingHorizontal="$4">
+      <YStack flex={1} paddingVertical={"$14"} paddingHorizontal="$4">
         {children}
       </YStack>
 

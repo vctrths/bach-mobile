@@ -84,10 +84,8 @@ export default function TopNavPill({
                   title
                 )}
               </XStack>
-
               {rightElement && rightElement}
             </XStack>
-
             {children}
           </YStack>
         </YStack>
