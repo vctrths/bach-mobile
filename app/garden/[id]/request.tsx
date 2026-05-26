@@ -219,7 +219,7 @@ export default function GardenRequestScreen() {
       });
 
       router.push(`/messages/${conversationId}`);
-    } catch (error) {
+    } catch {
       Alert.alert("Fout", "Er is iets misgegaan. Probeer het opnieuw.");
     } finally {
       setLoading(false);
