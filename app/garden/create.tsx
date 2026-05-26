@@ -127,7 +127,7 @@ export default function GardenCreateScreen() {
         Alert.alert("Fout", error.message);
       } else {
         Alert.alert("Succes", "Tuin aangemaakt!", [
-          { text: "OK", onPress: () => router.push("/owner/dashboard") },
+          { text: "OK", onPress: () => router.push("/dashboard") },
         ]);
       }
     } catch {
