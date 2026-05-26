@@ -1,13 +1,13 @@
 import PageContainer from "@/components/ui/PageContainer";
 import Button from "@/components/ui/Button";
+import NotificationBell from "@/components/ui/NotificationBell";
 import SearchBar from "@/components/ui/SearchBar";
 import { supabase } from "@/utils/supabase";
 import { Image as ExpoImage } from "@/lib/image";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { ScrollView } from "react-native";
-import { Card, Spinner, Text, XStack, YStack } from "tamagui";
+import { Card, Circle, Spinner, Text, XStack, YStack } from "tamagui";
 import { type Garden } from "@/types/garden";
 
 export default function SearchScreen() {
@@ -79,6 +79,38 @@ export default function SearchScreen() {
 
   return (
     <PageContainer
+      topNavHeight={140}
+      topNavTitle={
+        <XStack gap="$2" alignItems="center">
+          <MaterialCommunityIcons name="map-marker" size={18} color="$primary" />
+          <Text fontSize="$4" fontWeight="600" color="$text_dark">
+            Leuven, BE
+          </Text>
+          <MaterialCommunityIcons name="chevron-down" size={16} color="$text_dark" />
+        </XStack>
+      }
+      rightElement={
+        <XStack gap="$3" alignItems="center">
+          <NotificationBell />
+          {profile?.profile_image ? (
+            <Circle size={50} onPress={() => router.push("/profile")} overflow="hidden">
+              <ExpoImage
+                source={{ uri: profile.profile_image }}
+                style={{ width: "100%", height: "100%" }}
+                contentFit="cover"
+              />
+            </Circle>
+          ) : (
+            <Ionicons
+              name="person-circle"
+              size={50}
+              color="$borderColor"
+              onPress={() => router.push("/profile")}
+              suppressHighlighting
+            />
+          )}
+        </XStack>
+      }
       topNavChildren={
         <SearchBar
           active
@@ -87,107 +119,113 @@ export default function SearchScreen() {
           placeholder="Zoeken naar een tuin"
         />
       }
+      activeTab="home"
     >
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <YStack gap="$6">
-          <YStack gap="$3">
-            <Text fontSize="$4" fontWeight="bold" color="$text_dark">
-              {searchQuery ? `Resultaten voor "${searchQuery}"` : "Alle tuinen"}
-            </Text>
+      <YStack gap="$3" paddingHorizontal="$4">
+        <Text fontSize="$4" fontWeight="bold" color="$text_dark">
+          {searchQuery ? `Resultaten voor "${searchQuery}"` : "Alle tuinen"}
+        </Text>
 
-            {loading ? (
-              <XStack padding="$10" justifyContent="center">
-                <Spinner size="large" color="$primary" />
-              </XStack>
-            ) : searchResults.length === 0 ? (
-              <YStack padding="$10" justifyContent="center" alignItems="center" gap="$3">
-                <MaterialCommunityIcons name="tree-outline" size={48} color="$text_light" />
-                <Text fontSize="$4" color="$text_dark" textAlign="center">
-                  Geen tuinen gevonden
-                </Text>
-                <Text fontSize="$3" color="$text_light" textAlign="center">
-                  Probeer een andere zoekopdracht
-                </Text>
-              </YStack>
-            ) : (
-              searchResults.map((garden) => (
-                <Card
-                  key={garden.id}
-                  elevation={2}
-                  backgroundColor="$canvas"
-                  borderColor="$borderColor"
-                  borderWidth={1}
-                  borderRadius="$6"
-                  overflow="hidden"
-                  padding="$3"
-                  onPress={() => router.push(("/garden/" + garden.id) as any)}
-                  pressStyle={{ scale: 0.98, opacity: 0.9 }}
-                >
-                  <XStack gap="$3" height={150}>
-                    <ExpoImage
-                      source={
-                        garden.image_url
-                          ? { uri: garden.image_url }
-                          : require("@/assets/images/hero.png")
-                      }
-                      style={{ width: 150, height: "100%", borderRadius: 8 }}
-                      contentFit="cover"
-                    />
-                    <YStack flex={1} justifyContent="space-between" gap="$2">
-                      <YStack gap="$1">
-                        <XStack justifyContent="space-between" alignItems="center">
-                          <Text fontSize="$4" fontWeight="bold" color="$text_dark" flex={1}>
-                            {garden.name}
-                          </Text>
-                          <XStack gap="$1" alignItems="center">
-                            <MaterialCommunityIcons name="star" size={16} color="#FFB800" />
-                            <Text fontSize="$3" fontWeight="bold" color="$text_dark">
-                              {garden.rating?.toFixed(1) ?? "N/A"}
-                            </Text>
-                          </XStack>
-                        </XStack>
-                        <XStack gap="$2" alignItems="center">
-                          <MaterialCommunityIcons name="map-marker" size={14} color="$primary" />
-                          <Text fontSize="$3" color="$text_dark">
-                            {formatLocation(garden)}
-                          </Text>
-                        </XStack>
-                        {garden.description && (
-                          <Text fontSize="$2" color="$text_light" numberOfLines={2} lineHeight="$3">
-                            {garden.description}
-                          </Text>
-                        )}
-                      </YStack>
-                      <XStack gap="$2">
-                        <Button
-                          label="Details"
-                          flex={1}
-                          backgroundColor="$background"
-                          color="$white"
-                          onPress={() => router.push(("/garden/" + garden.id) as any)}
-                          paddingVertical="$2"
-                        />
-                        <Card
-                          width={40}
-                          height={40}
-                          borderRadius={20}
-                          backgroundColor="$background"
-                          padding="$2"
-                          justifyContent="center"
-                          alignItems="center"
-                          onPress={() => {}}
-                        >
-                          <MaterialCommunityIcons name="heart" size={20} color="white" />
-                        </Card>
-                      </XStack>
-                    </YStack>
-                  </XStack>
-                </Card>
-              ))
-            )}
+        {loading ? (
+          <XStack padding="$10" justifyContent="center">
+            <Spinner size="large" color="$primary" />
+          </XStack>
+        ) : searchResults.length === 0 ? (
+          <YStack padding="$10" justifyContent="center" alignItems="center" gap="$3">
+            <MaterialCommunityIcons name="tree-outline" size={48} color="$text_light" />
+            <Text fontSize="$4" color="$text_dark" textAlign="center">
+              Geen tuinen gevonden
+            </Text>
+            <Text fontSize="$3" color="$text_light" textAlign="center">
+              Probeer een andere zoekopdracht
+            </Text>
           </YStack>
-        </YStack>
-      </ScrollView>
+        ) : (
+          searchResults.map((garden) => (
+            <Card
+              key={garden.id}
+              elevation={2}
+              backgroundColor="$canvas"
+              borderColor="$borderColor"
+              borderWidth={1}
+              borderRadius="$6"
+              overflow="hidden"
+              padding="$3"
+              onPress={() => router.push(("/garden/" + garden.id) as any)}
+              pressStyle={{ scale: 0.98, opacity: 0.9 }}
+            >
+              <XStack gap="$3" height={150}>
+                <ExpoImage
+                  source={
+                    garden.image_url
+                      ? { uri: garden.image_url }
+                      : require("@/assets/images/hero.png")
+                  }
+                  style={{ width: 150, height: "100%", borderRadius: 8 }}
+                  contentFit="cover"
+                />
+
+                <YStack flex={1} justifyContent="space-between" gap="$2">
+                  <YStack gap="$1">
+                    <XStack justifyContent="space-between" alignItems="center">
+                      <Text fontSize="$4" fontWeight="bold" color="$text_dark" flex={1}>
+                        {garden.name}
+                      </Text>
+                      <XStack gap="$1" alignItems="center">
+                        <MaterialCommunityIcons name="star" size={16} color="#FFB800" />
+                        <Text fontSize="$3" fontWeight="bold" color="$text_dark">
+                          {garden.rating?.toFixed(1) ?? "N/A"}
+                        </Text>
+                      </XStack>
+                    </XStack>
+
+                    <XStack gap="$2" alignItems="center">
+                      <MaterialCommunityIcons name="map-marker" size={14} color="$primary" />
+                      <Text fontSize="$3" color="$text_dark">
+                        {formatLocation(garden)}
+                      </Text>
+                    </XStack>
+
+                    {garden.description && (
+                      <Text
+                        fontSize="$2"
+                        color="$text_light"
+                        numberOfLines={2}
+                        lineHeight="$3"
+                      >
+                        {garden.description}
+                      </Text>
+                    )}
+                  </YStack>
+
+                  <XStack gap="$2">
+                    <Button
+                      label="Details"
+                      flex={1}
+                      backgroundColor="$background"
+                      color="$white"
+                      onPress={() => router.push(("/garden/" + garden.id) as any)}
+                      paddingVertical="$2"
+                    />
+                    <Card
+                      width={40}
+                      height={40}
+                      borderRadius={20}
+                      backgroundColor="$background"
+                      padding="$2"
+                      justifyContent="center"
+                      alignItems="center"
+                      onPress={() => {}}
+                    >
+                      <MaterialCommunityIcons name="heart" size={20} color="white" />
+                    </Card>
+                  </XStack>
+                </YStack>
+              </XStack>
+            </Card>
+          ))
+        )}
+      </YStack>
     </PageContainer>
   );
 }

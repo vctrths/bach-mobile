@@ -1,19 +1,19 @@
 import PageContainer from "@/components/ui/PageContainer";
-import Button from "@/components/ui/Button";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { Alert, ScrollView } from "react-native";
-import { Card, Circle, Spinner, Text, XStack, YStack } from "tamagui";
+import { Alert, Card, Circle, Spinner, Text, XStack, YStack } from "tamagui";
 
 export default function SettingsScreen() {
   const { signOut } = useAuth();
   const [deleting, setDeleting] = useState(false);
 
   const handleVerify = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       Alert.alert("Fout", "Je bent niet ingelogd.");
       return;
@@ -28,7 +28,10 @@ export default function SettingsScreen() {
       if (error) {
         Alert.alert("Fout", error.message);
       } else {
-        Alert.alert("Verificatie verstuurd", "Check je e-mail om je account te verifiëren.");
+        Alert.alert(
+          "Verificatie verstuurd",
+          "Check je e-mail om je account te verifiëren."
+        );
       }
     }
   };
@@ -36,10 +39,15 @@ export default function SettingsScreen() {
   const handleDeleteAccount = async () => {
     setDeleting(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { error } = await supabase.from("profiles").delete().eq("id", user.id);
+      const { error } = await supabase
+        .from("profiles")
+        .delete()
+        .eq("id", user.id);
       if (error) {
         Alert.alert("Fout", "Kon account niet verwijderen.");
         setDeleting(false);
@@ -137,80 +145,93 @@ export default function SettingsScreen() {
 
   return (
     <PageContainer topNavTitle="Instellingen" activeTab="profile">
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <YStack gap="$5">
-          <Card
-            backgroundColor="rgba(227, 236, 215, 0.5)"
-            borderColor="rgba(227, 236, 215, 0.85)"
-            borderWidth={1}
-            borderRadius="$10"
-            paddingVertical="$3.5"
-            paddingHorizontal="$4"
-            alignItems="center"
-            justifyContent="center"
-            onPress={() => router.push("/pro")}
-            pressStyle={{ scale: 0.98, opacity: 0.9 }}
+      <YStack paddingHorizontal="$5" gap="$5">
+        <Card
+          backgroundColor="rgba(227, 236, 215, 0.5)"
+          borderColor="rgba(227, 236, 215, 0.85)"
+          borderWidth={1}
+          borderRadius="$10"
+          paddingVertical="$3.5"
+          paddingHorizontal="$4"
+          alignItems="center"
+          justifyContent="center"
+          onPress={() => router.push("/pro")}
+          pressStyle={{ scale: 0.98, opacity: 0.9 }}
+        >
+          <Text
+            fontSize="$4"
+            color="$text_dark"
+            fontWeight="500"
+            opacity={0.85}
           >
-            <Text fontSize="$4" color="$text_dark" fontWeight="500" opacity={0.85}>
-              Upgrade naar Pro voor onbeperkte aanvragen
-            </Text>
-          </Card>
+            Upgrade naar Pro voor onbeperkte aanvragen
+          </Text>
+        </Card>
 
-          <YStack gap="$2.5">
-            <Text color="$secondary" fontSize="$3" fontWeight="500" marginLeft="$1">
-              Account
-            </Text>
-            {accountItems.map((item) => (
-              <Card
-                key={item.id}
-                flexDirection="row"
-                backgroundColor="white"
-                borderColor="$borderColor"
-                borderWidth={1}
-                borderRadius="$6"
-                paddingHorizontal="$4"
-                paddingVertical="$3.5"
-                justifyContent="space-between"
-                alignItems="center"
-                onPress={item.onPress}
-                pressStyle={{ scale: 0.98, opacity: 0.85 }}
-              >
-                <Text color="$text_dark" fontSize="$4" fontWeight="500">
-                  {item.label}
-                </Text>
-                <Ionicons name="chevron-forward" size={18} color="#57594D" />
-              </Card>
-            ))}
-          </YStack>
-
-          <YStack gap="$2.5">
-            <Text color="$secondary" fontSize="$3" fontWeight="500" marginLeft="$1">
-              Meer
-            </Text>
-            {meerItems.map((item) => (
-              <Card
-                key={item.id}
-                flexDirection="row"
-                backgroundColor="white"
-                borderColor="$borderColor"
-                borderWidth={1}
-                borderRadius="$6"
-                paddingHorizontal="$4"
-                paddingVertical="$3"
-                justifyContent="space-between"
-                alignItems="center"
-                onPress={item.onPress}
-                pressStyle={{ scale: 0.98, opacity: 0.85 }}
-              >
-                <Text color="$text_dark" fontSize="$4" fontWeight="500">
-                  {item.label}
-                </Text>
-                {item.icon}
-              </Card>
-            ))}
-          </YStack>
+        <YStack gap="$2.5">
+          <Text
+            color="$secondary"
+            fontSize="$3"
+            fontWeight="500"
+            marginLeft="$1"
+          >
+            Account
+          </Text>
+          {accountItems.map((item) => (
+            <Card
+              key={item.id}
+              flexDirection="row"
+              backgroundColor="white"
+              borderColor="$borderColor"
+              borderWidth={1}
+              borderRadius="$6"
+              paddingHorizontal="$4"
+              paddingVertical="$3.5"
+              justifyContent="space-between"
+              alignItems="center"
+              onPress={item.onPress}
+              pressStyle={{ scale: 0.98, opacity: 0.85 }}
+            >
+              <Text color="$text_dark" fontSize="$4" fontWeight="500">
+                {item.label}
+              </Text>
+              <Ionicons name="chevron-forward" size={18} color="#57594D" />
+            </Card>
+          ))}
         </YStack>
-      </ScrollView>
+
+        <YStack gap="$2.5">
+          <Text
+            color="$secondary"
+            fontSize="$3"
+            fontWeight="500"
+            marginLeft="$1"
+          >
+            Meer
+          </Text>
+          {meerItems.map((item) => (
+            <Card
+              key={item.id}
+              flexDirection="row"
+              backgroundColor="white"
+              borderColor="$borderColor"
+              borderWidth={1}
+              borderRadius="$6"
+              paddingHorizontal="$4"
+              paddingVertical="$3"
+              justifyContent="space-between"
+              alignItems="center"
+              onPress={item.onPress}
+              pressStyle={{ scale: 0.98, opacity: 0.85 }}
+            >
+              <Text color="$text_dark" fontSize="$4" fontWeight="500">
+                {item.label}
+              </Text>
+              {item.icon}
+            </Card>
+          ))}
+        </YStack>
+      </YStack>
     </PageContainer>
   );
 }
