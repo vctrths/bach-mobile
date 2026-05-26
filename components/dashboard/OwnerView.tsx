@@ -1,12 +1,12 @@
 import Button from "@/components/ui/Button";
 import GardenCard from "@/components/ui/GardenCard";
+import { type Garden } from "@/types/garden";
 import { supabase } from "@/utils/supabase";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { RefreshControl, ScrollView } from "react-native";
 import { Card, Circle, Spinner, Text, XStack, YStack } from "tamagui";
-import { type Garden } from "@/types/garden";
 
 type ApprovedGardener = {
   id: string;
@@ -16,6 +16,7 @@ type ApprovedGardener = {
   last_name: string;
   profile_image: string | null;
   days: string[];
+  garden_name?: string;
 };
 
 type GardenRequest = {
@@ -81,13 +82,15 @@ export default function OwnerView() {
 
       const gardensRes = await supabase
         .from("gardens")
-        .select("id, name, rating, location, image_url")
+        .select("id, name, rating, location, image_url, appliances")
         .eq("owner_id", user.id)
         .limit(10);
 
       if (gardensRes.data) setGardens(gardensRes.data as Garden[]);
 
-      const gardenIds = (gardensRes.data as unknown as Garden[] ?? []).map((g) => g.id);
+      const gardenIds = ((gardensRes.data as unknown as Garden[]) ?? []).map(
+        (g) => g.id
+      );
 
       if (gardenIds.length === 0) {
         setGardeners([]);
@@ -98,9 +101,11 @@ export default function OwnerView() {
       const [collaborationsRes, requestsRes] = await Promise.all([
         supabase
           .from("collaborations")
-          .select(`id, garden_id, gardener_id, days, profiles(first_name, last_name, profile_image)`)
+          .select(
+            `id, garden_id, gardener_id, days, profiles:gardener_id(first_name, last_name, profile_image), gardens(name)`
+          )
           .eq("status", "active")
-          .in("garden_id", gardenIds)
+          .eq("owner_id", user.id)
           .limit(20),
         supabase
           .from("garden_requests")
@@ -122,6 +127,7 @@ export default function OwnerView() {
           last_name: r.profiles?.last_name ?? "",
           profile_image: r.profiles?.profile_image ?? null,
           days: r.days ?? [],
+          garden_name: r.gardens?.name ?? "Onbekende tuin",
         }));
         setGardeners(mappedGardeners);
       }
@@ -146,11 +152,16 @@ export default function OwnerView() {
     fetchData();
   };
 
-  const findOrCreateConversation = async (ownerId: string, gardenerId: string) => {
+  const findOrCreateConversation = async (
+    ownerId: string,
+    gardenerId: string
+  ) => {
     const { data: existing } = await supabase
       .from("conversations")
       .select("id")
-      .or(`and(user1_id.eq.${ownerId},user2_id.eq.${gardenerId}),and(user1_id.eq.${gardenerId},user2_id.eq.${ownerId})`)
+      .or(
+        `and(user1_id.eq.${ownerId},user2_id.eq.${gardenerId}),and(user1_id.eq.${gardenerId},user2_id.eq.${ownerId})`
+      )
       .maybeSingle();
 
     if (existing) return existing.id;
@@ -165,10 +176,15 @@ export default function OwnerView() {
   };
 
   const handleChat = async (request: GardenRequest) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return;
 
-    const conversationId = await findOrCreateConversation(user.id, request.user_id);
+    const conversationId = await findOrCreateConversation(
+      user.id,
+      request.user_id
+    );
     if (conversationId) {
       router.push(`/messages/${conversationId}` as any);
     }
@@ -271,6 +287,86 @@ export default function OwnerView() {
               </ScrollView>
             </YStack>
 
+            {/* Actieve samenwerkingen Section */}
+            {gardeners.length > 0 && (
+              <YStack gap="$2">
+                <Text fontSize={24} fontWeight="900" color="$text_dark">
+                  Actieve samenwerkingen
+                </Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <XStack gap="$4" paddingVertical="$2">
+                    {gardeners.map((gardener) => (
+                      <Card
+                        key={gardener.id}
+                        width={240}
+                        backgroundColor="white"
+                        borderColor="#E3ECD7"
+                        borderWidth={1}
+                        borderRadius={16}
+                        padding="$3"
+                        onPress={() =>
+                          router.push(("/collaboration/" + gardener.id) as any)
+                        }
+                        pressStyle={{ scale: 0.98, opacity: 0.9 }}
+                      >
+                        <XStack gap="$3" alignItems="center">
+                          <Circle
+                            size={48}
+                            backgroundColor="rgba(23, 51, 0, 0.08)"
+                            overflow="hidden"
+                          >
+                            {gardener.profile_image ? (
+                              <XStack width="100%" height="100%">
+                                <img
+                                  src={gardener.profile_image}
+                                  style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "cover",
+                                    borderRadius: 24,
+                                  }}
+                                />
+                              </XStack>
+                            ) : (
+                              <MaterialCommunityIcons
+                                name="account-outline"
+                                size={22}
+                                color="#173300"
+                              />
+                            )}
+                          </Circle>
+                          <YStack flex={1}>
+                            <Text
+                              fontSize="$4"
+                              fontWeight="bold"
+                              color="$text_dark"
+                              numberOfLines={1}
+                            >
+                              {gardener.first_name} {gardener.last_name}
+                            </Text>
+                            <XStack alignItems="center" gap="$1">
+                              <Ionicons
+                                name="leaf"
+                                size={12}
+                                color="$primary"
+                              />
+                              <Text
+                                fontSize="$2"
+                                color="#56594D"
+                                numberOfLines={1}
+                              >
+                                {gardener.garden_name}
+                              </Text>
+                            </XStack>
+                          </YStack>
+                        </XStack>
+                      </Card>
+                    ))}
+                  </XStack>
+                </ScrollView>
+              </YStack>
+            )}
+
             {/* Jouw Planning Section */}
             {gardeners.length > 0 && (
               <YStack gap="$2">
@@ -317,13 +413,64 @@ export default function OwnerView() {
 
                   {/* Gardener rows */}
                   {gardeners.map((gardener) => (
-                    <XStack 
-                      key={gardener.id} 
-                      alignItems="center" 
+                    <XStack
+                      key={gardener.id}
+                      alignItems="center"
                       gap="$1"
-                      onPress={() => router.push(("/collaboration/" + gardener.id) as any)}
+                      onPress={() =>
+                        router.push(("/collaboration/" + gardener.id) as any)
+                      }
                     >
                       <Text
+                        width={56}
+                        color="#56594D"
+                        fontSize={16}
+                        fontWeight="500"
+                        numberOfLines={1}
+                      >
+                        {gardener.first_name}
+                      </Text>
+                      {[0, 1, 2, 3, 4, 5, 6].map((i) => {
+                        const activeDays = getActiveDayIndices(gardener.days);
+                        const isActive = activeDays.has(i);
+                        return (
+                          <YStack
+                            key={i}
+                            flex={1}
+                            alignItems="center"
+                            justifyContent="center"
+                            height={32}
+                          >
+                            {isActive ? (
+                              <YStack
+                                width={32}
+                                height={32}
+                                borderRadius={16}
+                                backgroundColor="#FFEDB3"
+                                style={{
+                                  shadowColor: "#FFE696",
+                                  shadowOffset: { width: 0, height: 0 },
+                                  shadowOpacity: 1,
+                                  shadowRadius: 2,
+                                  elevation: 2,
+                                }}
+                              />
+                            ) : (
+                              <YStack
+                                width={32}
+                                height={32}
+                                borderRadius={16}
+                                backgroundColor="transparent"
+                              />
+                            )}
+                          </YStack>
+                        );
+                      })}
+                    </XStack>
+                  ))}
+                </YStack>
+              </YStack>
+            )}
 
             {/* Openstaande aanvragen */}
             {requests.length > 0 && (
