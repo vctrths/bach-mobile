@@ -385,15 +385,8 @@ export default function Dashboard() {
                     {gardens.map((garden) => (
                       <GardenCard
                         key={garden.id}
-                        name={garden.name}
-                        rating={garden.rating ?? 0}
-                        location={garden.location ?? "Onbekende locatie"}
-                        image={
-                          garden.image_url
-                            ? { uri: garden.image_url }
-                            : require("@/assets/images/hero.png")
-                        }
-                        onDetailsPress={() =>
+                        garden={garden}
+                        onPress={() =>
                           router.push(("/garden/" + garden.id) as any)
                         }
                       />

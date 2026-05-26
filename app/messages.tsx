@@ -1,6 +1,7 @@
 import PageContainer from "@/components/ui/PageContainer";
 import MessageItem from "@/components/ui/MessageItem";
 import { supabase } from "@/utils/supabase";
+import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { FlatList } from "react-native";
 import { Spinner, Text, YStack } from "tamagui";
@@ -124,7 +125,11 @@ export default function Messages() {
   };
 
   return (
-    <PageContainer topNavTitle="Chats" activeTab="message">
+    <PageContainer
+      topNavTitle="Chats"
+      activeTab="message"
+      scrollable={false}
+    >
       {loading ? (
         <YStack flex={1} justifyContent="center" alignItems="center">
           <Spinner size="large" color="$primary" />
@@ -156,6 +161,7 @@ export default function Messages() {
           ItemSeparatorComponent={() => (
             <YStack height={1} backgroundColor="$divider" />
           )}
+          contentContainerStyle={{ paddingBottom: 100 }}
         />
       )}
     </PageContainer>

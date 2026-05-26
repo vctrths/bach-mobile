@@ -1,9 +1,9 @@
 import { Image as ExpoImage } from "@/lib/image";
+import { type Garden } from "@/types/garden";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
 import { Card, Text, XStack, YStack } from "tamagui";
 import Button from "./Button";
-import { type Garden } from "@/types/garden";
 
 interface GardenCardProps {
   garden: Garden;
@@ -16,9 +16,7 @@ export default function GardenCard({
   onPress,
   onFavoritePress,
 }: GardenCardProps) {
-  const imageSource = garden.image_url
-    ? { uri: garden.image_url }
-    : undefined;
+  const imageSource = garden.image_url ? { uri: garden.image_url } : require("@/assets/images/hero.png");
 
   return (
     <Card
@@ -32,7 +30,7 @@ export default function GardenCard({
       overflow="hidden"
     >
       <ExpoImage
-        source={(imageSource) as any}
+        source={imageSource as any}
         style={{ width: "100%", height: 168, borderRadius: 8 }}
         contentFit="cover"
       />
@@ -51,11 +49,7 @@ export default function GardenCard({
         </XStack>
 
         <XStack gap={4} alignItems="center">
-          <MaterialCommunityIcons
-            name="map-marker"
-            size={16}
-            color="#000000"
-          />
+          <MaterialCommunityIcons name="map-marker" size={16} color="#000000" />
           <Text fontSize={14} color="#000000">
             {garden.location ?? "Onbekend"}
           </Text>
