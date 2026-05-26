@@ -15,7 +15,9 @@ export default function ProfileScreen() {
     description: string;
     role: string;
     profile_image: string | null;
+    rating: number | null;
   } | null>(null);
+  const [reviews, setReviews] = useState<any[]>([]);
   const [savedGardens, setSavedGardens] = useState<
     {
       id: string;
@@ -39,11 +41,21 @@ export default function ProfileScreen() {
 
       const { data: profileData } = await supabase
         .from("profiles")
-        .select("first_name, last_name, description, role, profile_image")
+        .select("first_name, last_name, description, role, profile_image, rating")
         .eq("id", user.id)
         .single();
 
       setProfile(profileData);
+
+      // Fetch reviews for this user
+      const { data: reviewData } = await supabase
+        .from("reviews")
+        .select("*, profiles:reviewer_id(first_name, last_name, profile_image)")
+        .eq("target_id", user.id)
+        .eq("target_type", "user")
+        .order("created_at", { ascending: false });
+      
+      if (reviewData) setReviews(reviewData);
 
       // Fetch real saved gardens
       const { data: savedData } = await supabase
@@ -178,6 +190,10 @@ export default function ProfileScreen() {
 
           {/* Right Column */}
           <YStack gap="$1.5" alignItems="flex-end">
+            <XStack gap="$1" alignItems="center" backgroundColor="rgba(255, 184, 0, 0.1)" paddingHorizontal="$3" paddingVertical="$1" borderRadius="$10" marginBottom="$2">
+               <Ionicons name="star" size={16} color="#FFB800" />
+               <Text fontWeight="bold" color="#172211">{profile?.rating ?? 5.0}</Text>
+            </XStack>
             <Circle
               size={36}
               backgroundColor="white"
@@ -295,6 +311,78 @@ export default function ProfileScreen() {
                 ))}
               </XStack>
             </ScrollView>
+          )}
+        </YStack>
+
+        {/* Reviews Section */}
+        <YStack gap="$3" marginTop="$2" paddingBottom="$10">
+          <H1 color="$text_dark" fontSize="$5" fontWeight="bold">
+            Beoordelingen ({reviews.length})
+          </H1>
+
+          {reviews.length === 0 ? (
+            <YStack
+              padding="$6"
+              justifyContent="center"
+              alignItems="center"
+              gap="$2"
+              backgroundColor="rgba(23, 51, 0, 0.03)"
+              borderRadius="$4"
+            >
+              <Ionicons name="chatbubble-outline" size={32} color="#57594D" />
+              <Text color="$secondary" fontSize="$3" textAlign="center">
+                Je hebt nog geen beoordelingen ontvangen.
+              </Text>
+            </YStack>
+          ) : (
+            reviews.map((review) => (
+              <Card
+                key={review.id}
+                elevation={1}
+                backgroundColor="white"
+                borderColor="rgba(23, 51, 0, 0.1)"
+                borderWidth={1}
+                borderRadius="$4"
+                padding="$4"
+                gap="$2"
+              >
+                <XStack justifyContent="space-between" alignItems="center">
+                  <XStack gap="$2" alignItems="center">
+                    <Circle size={24} overflow="hidden" backgroundColor="$borderColor">
+                       {review.profiles?.profile_image ? (
+                         <ExpoImage 
+                           source={{ uri: review.profiles.profile_image }}
+                           style={{ width: "100%", height: "100%" }}
+                         />
+                       ) : (
+                         <Ionicons name="person" size={12} color="$text_light" />
+                       )}
+                    </Circle>
+                    <Text fontWeight="bold" fontSize="$3">
+                      {review.profiles?.first_name}
+                    </Text>
+                  </XStack>
+                  <XStack gap="$0.5">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Ionicons 
+                        key={s} 
+                        name="star" 
+                        size={12} 
+                        color={s <= review.rating ? "#FFB800" : "#E3ECD7"} 
+                      />
+                    ))}
+                  </XStack>
+                </XStack>
+                {review.comment && (
+                  <Text color="$text_dark" fontSize="$3">
+                    {review.comment}
+                  </Text>
+                )}
+                <Text color="$secondary" fontSize="$1">
+                  {new Date(review.created_at).toLocaleDateString('nl-BE')}
+                </Text>
+              </Card>
+            ))
           )}
         </YStack>
       </YStack>
