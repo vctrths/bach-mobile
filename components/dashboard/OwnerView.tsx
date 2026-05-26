@@ -317,57 +317,13 @@ export default function OwnerView() {
 
                   {/* Gardener rows */}
                   {gardeners.map((gardener) => (
-                    <XStack key={gardener.id} alignItems="center" gap="$1">
+                    <XStack 
+                      key={gardener.id} 
+                      alignItems="center" 
+                      gap="$1"
+                      onPress={() => router.push(("/collaboration/" + gardener.id) as any)}
+                    >
                       <Text
-                        width={56}
-                        color="#56594D"
-                        fontSize={16}
-                        fontWeight="500"
-                        numberOfLines={1}
-                      >
-                        {gardener.first_name}
-                      </Text>
-                      {[0, 1, 2, 3, 4, 5, 6].map((i) => {
-                        const activeDays = getActiveDayIndices(gardener.days);
-                        const isActive = activeDays.has(i);
-                        return (
-                          <YStack
-                            key={i}
-                            flex={1}
-                            alignItems="center"
-                            justifyContent="center"
-                            height={32}
-                          >
-                            {isActive ? (
-                              <YStack
-                                width={32}
-                                height={32}
-                                borderRadius={16}
-                                backgroundColor="#FFEDB3"
-                                style={{
-                                  shadowColor: "#FFE696",
-                                  shadowOffset: { width: 0, height: 0 },
-                                  shadowOpacity: 1,
-                                  shadowRadius: 2,
-                                  elevation: 2,
-                                }}
-                              />
-                            ) : (
-                              <YStack
-                                width={32}
-                                height={32}
-                                borderRadius={16}
-                                backgroundColor="transparent"
-                              />
-                            )}
-                          </YStack>
-                        );
-                      })}
-                    </XStack>
-                  ))}
-                </YStack>
-              </YStack>
-            )}
 
             {/* Openstaande aanvragen */}
             {requests.length > 0 && (
