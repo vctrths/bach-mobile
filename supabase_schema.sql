@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS public.gardens (
   rating float DEFAULT 5.0,
   image_url text,
   description text,
+  appliances text[],
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
