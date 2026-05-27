@@ -11,7 +11,7 @@ import { useContext, useState } from "react";
 import { Circle, H1, Text, YStack } from "tamagui";
 
 export default function Photo() {
-  const { data, reset } = useContext(OnboardingContext);
+  const { data: onboardingData, reset } = useContext(OnboardingContext);
   const [image, setImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +26,7 @@ export default function Photo() {
     }
 
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
@@ -44,8 +44,8 @@ export default function Photo() {
     try {
       // 1. Create user with Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
+        email: onboardingData.email,
+        password: onboardingData.password,
       });
 
       if (authError) {
@@ -96,13 +96,12 @@ export default function Photo() {
       // 3. Save user profile to Supabase
       const { error: profileError } = await supabase.from("profiles").insert({
         id: userId,
-        first_name: data.firstName,
-        last_name: data.lastName,
-        email: data.email,
-        description: data.description,
-        role: data.role,
+        first_name: onboardingData.firstName,
+        last_name: onboardingData.lastName,
+        email: onboardingData.email,
+        description: onboardingData.description,
+        role: onboardingData.role || "tuinzoeker",
         profile_image: profileImageUrl,
-        created_at: new Date(),
       });
 
       if (profileError) {
@@ -113,7 +112,9 @@ export default function Photo() {
 
       // 4. Clear onboarding context and navigate to dashboard
       reset();
-      router.replace("/dashboard");
+      setTimeout(() => {
+        router.replace("/dashboard");
+      }, 0);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "An unexpected error occurred",

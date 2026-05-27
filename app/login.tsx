@@ -30,7 +30,10 @@ export default function Login() {
             return;
         }
 
-        router.replace("/splash");
+        // Give auth state change a moment to propagate
+        setTimeout(() => {
+            router.replace("/splash");
+        }, 0);
     };
 
     const handleOAuth = async (provider: "google" | "facebook") => {
