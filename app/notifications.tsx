@@ -278,22 +278,8 @@ export default function NotificationsScreen() {
                   </React.Fragment>
                 ))}
               </YStack>
-
-              {/* Promotional text */}
-              <XStack gap="$2" alignItems="center" padding="$3">
-                <YStack
-                  width={8}
-                  height={8}
-                  borderRadius={4}
-                  backgroundColor="rgba(23, 51, 0, 0.3)"
-                />
-                <Text fontSize="$3" color="$secondary" fontStyle="italic">
-                  Misschien zijn deze tuinen in jouw buurt iets voor jou!
-                </Text>
-              </XStack>
             </YStack>
           )}
-
           {/* Last 30 days */}
           {last30Days.length > 0 && (
             <YStack gap="$3">
