@@ -1,12 +1,49 @@
 import { useFonts } from "@/lib/font-hooks";
-import { AuthProvider } from "@/context/AuthContext";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { OnboardingProvider } from "@/context/OnboardingContext";
 import tamaConfig from "@/tamagui.config";
 import { SplashScreen, Stack } from "expo-router";
 import { useEffect } from "react";
 import { TamaguiProvider } from "tamagui";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 
 SplashScreen.preventAutoHideAsync();
+
+function AppContent() {
+  const { user } = useAuth();
+  usePushNotifications(user?.id);
+
+  return (
+    <Stack screenOptions={{ headerShown: false, animation: "none" }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen name="explore" />
+      <Stack.Screen name="pro" />
+      <Stack.Screen name="profile" />
+      <Stack.Screen name="settings" />
+      <Stack.Screen name="personal-details" />
+      <Stack.Screen name="logbook" />
+      <Stack.Screen name="splash" />
+      <Stack.Screen name="login" />
+      <Stack.Screen name="search" />
+      <Stack.Screen name="owner/request-accepted" />
+      <Stack.Screen name="owner/request-rejected" />
+      <Stack.Screen name="messages" />
+      <Stack.Screen name="messages/[id]" />
+      <Stack.Screen name="succesabo" />
+      <Stack.Screen name="dashboard" />
+      <Stack.Screen name="saved" />
+      <Stack.Screen name="pro/payment" />
+      <Stack.Screen name="garden/create" />
+      <Stack.Screen name="garden/[id]" />
+      <Stack.Screen name="garden/[id]/request" />
+      <Stack.Screen name="collaboration/[id]" />
+      <Stack.Screen name="logbook/new" />
+      <Stack.Screen name="logbook/[id]" />
+      <Stack.Screen name="notifications" />
+      <Stack.Screen name="map" />
+    </Stack>
+  );
+}
 
 export default function RootLayout() {
   const [loaded] = useFonts({
@@ -29,39 +66,7 @@ export default function RootLayout() {
     <TamaguiProvider config={tamaConfig} defaultTheme="groenevingers">
       <AuthProvider>
         <OnboardingProvider>
-          <Stack screenOptions={{ headerShown: false, animation: "none" }}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="explore" />
-            <Stack.Screen name="pro" />
-            <Stack.Screen name="profile" />
-            <Stack.Screen name="settings" />
-            <Stack.Screen name="personal-details" />
-            <Stack.Screen name="logbook" />
-            <Stack.Screen name="splash" />
-            <Stack.Screen name="login" />
-            <Stack.Screen name="login-succes" />
-            <Stack.Screen name="search" />
-            <Stack.Screen name="mail" />
-            <Stack.Screen name="owner/request-accepted" />
-            <Stack.Screen name="owner/request-rejected" />
-            <Stack.Screen name="logbook/calendar/day/[id]" />
-            <Stack.Screen name="messages" />
-            <Stack.Screen name="messages/[id]" />
-            <Stack.Screen name="problock" />
-            <Stack.Screen name="succesabo" />
-            <Stack.Screen name="dashboard" />
-            <Stack.Screen name="saved" />
-            <Stack.Screen name="pro/payment" />
-            <Stack.Screen name="garden/create" />
-            <Stack.Screen name="garden/[id]/request" />
-            <Stack.Screen name="collaboration/[id]" />
-            <Stack.Screen name="logbook/new" />
-            <Stack.Screen name="logbook/calendar" />
-            <Stack.Screen name="logbook/[id]" />
-            <Stack.Screen name="logbook/opvolgingen" />
-            <Stack.Screen name="notifications" />
-            <Stack.Screen name="map" />
-          </Stack>
+          <AppContent />
         </OnboardingProvider>
       </AuthProvider>
     </TamaguiProvider>

@@ -235,6 +235,7 @@ export type Database = {
       }
       gardens: {
         Row: {
+          appliances: string[] | null
           created_at: string
           description: string | null
           id: string
@@ -247,6 +248,7 @@ export type Database = {
           rating: number | null
         }
         Insert: {
+          appliances?: string[] | null
           created_at?: string
           description?: string | null
           id?: string
@@ -259,6 +261,7 @@ export type Database = {
           rating?: number | null
         }
         Update: {
+          appliances?: string[] | null
           created_at?: string
           description?: string | null
           id?: string
@@ -438,6 +441,42 @@ export type Database = {
           {
             foreignKeyName: "reviews_reviewer_id_fkey"
             columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_gardens: {
+        Row: {
+          created_at: string | null
+          garden_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          garden_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          garden_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_gardens_garden_id_fkey"
+            columns: ["garden_id"]
+            isOneToOne: false
+            referencedRelation: "gardens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_gardens_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]

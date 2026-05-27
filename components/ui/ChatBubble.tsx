@@ -18,13 +18,13 @@ export default function ChatBubble({
       paddingHorizontal="$4"
       paddingVertical="$3"
       borderRadius={5000}
-      backgroundColor={isOwn ? "#173300" : "#F0F0F0"}
+      backgroundColor={isOwn ? "#F0F3EC" : "#EAF0D8"}
     >
-      <Text fontSize="$4" color={isOwn ? "$white" : "$text_dark"}>
+      <Text fontSize="$4" color="#172211" textAlign={isOwn ? "right" : "left"}>
         {content}
       </Text>
       {timestamp && (
-        <Text fontSize="$1" color="$secondary" marginTop="$1" textAlign="right">
+        <Text fontSize="$1" color="#172211" opacity={0.5} marginTop="$1" textAlign={isOwn ? "right" : "left"}>
           {timestamp}
         </Text>
       )}

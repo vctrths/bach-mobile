@@ -7,7 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "groen",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.vthys.groen"

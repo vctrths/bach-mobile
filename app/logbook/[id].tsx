@@ -1,6 +1,6 @@
 import PageContainer from "@/components/ui/PageContainer";
 import ScreenContent from "@/components/ui/ScreenContent";
-import { supabase } from "@/utils/supabase";
+import { supabase, toCamelCase } from "@/utils/supabase";
 import { Image as ExpoImage } from "@/lib/image";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
@@ -44,7 +44,7 @@ export default function LogDetailScreen() {
         const { data, error } = await supabase
           .from("garden_logs")
           .select("id, title, status, created_at")
-          .eq("id", id)
+          .eq("id", id as string)
           .single();
 
         if (error) {
@@ -52,10 +52,11 @@ export default function LogDetailScreen() {
           return;
         }
 
-        const status = (data.status as any) || {};
+        const camelData = toCamelCase<any>(data);
+        const status = camelData.status || {};
         setLog({
-          title: data.title,
-          date: new Date(data.created_at).toLocaleDateString("nl-BE"),
+          title: camelData.title,
+          date: new Date(camelData.createdAt).toLocaleDateString("nl-BE"),
           tasks: status.tasks || DEFAULT_FALLBACK.tasks,
           observations: status.observations || DEFAULT_FALLBACK.observations,
           followUps: status.followUps || DEFAULT_FALLBACK.followUps,
@@ -69,7 +70,7 @@ export default function LogDetailScreen() {
 
     if (typeof id === "string" && id.length > 5) {
       fetchLog();
-    } else {
+    } else if (typeof id === "string") {
       setLog({
         title: `Log van dag ${id}`,
         date: `${id}/01/2025`,

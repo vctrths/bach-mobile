@@ -27,10 +27,11 @@ export default function AuthCallbackScreen() {
       } else {
         const { error } = await supabase.from("profiles").insert({
           id: session.user.id,
-          email: session.user.email,
+          email: session.user.email || "",
           first_name: session.user.user_metadata?.full_name?.split(" ")[0] || "",
           last_name: session.user.user_metadata?.full_name?.split(" ").slice(1).join(" ") || "",
           profile_image: session.user.user_metadata?.avatar_url || null,
+          role: "gardener", // Default role for OAuth users, can be changed in onboarding
         });
 
         if (error) {

@@ -80,14 +80,46 @@ export default function ChatDetail() {
   const partnerName = partner ? `${partner.first_name} ${partner.last_name}` : "Chat";
 
   return (
-    <PageContainer topNavTitle={partnerName} showBottomNav={false} scrollable={false} contentPaddingBottom={0}>
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined} keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}>
+    <PageContainer
+      topNavTitle={partnerName}
+      showBottomNav={true}
+      activeTab="message"
+      scrollable={false}
+      contentPaddingBottom={0}
+    >
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 0}
+      >
         {loading ? (
-          <YStack flex={1} justifyContent="center" alignItems="center"><Spinner size="large" color="$primary" /></YStack>
+          <YStack flex={1} justifyContent="center" alignItems="center">
+            <Spinner size="large" color="$primary" />
+          </YStack>
         ) : (
-          <FlatList ref={flatListRef} data={messages} keyExtractor={(item) => item.id} renderItem={({ item }) => <ChatBubble content={item.content} isOwn={item.sender_id === currentUserId} timestamp={formatTime(item.created_at)} />} contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 100 }} style={{ flex: 1 }} onContentSizeChange={() => scrollToBottom(false)} />
+          <FlatList
+            ref={flatListRef}
+            data={messages}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <ChatBubble
+                content={item.content}
+                isOwn={item.sender_id === currentUserId}
+                timestamp={formatTime(item.created_at)}
+              />
+            )}
+            contentContainerStyle={{
+              padding: 16,
+              gap: 12,
+              paddingBottom: 100,
+            }}
+            style={{ flex: 1 }}
+            onContentSizeChange={() => scrollToBottom(false)}
+          />
         )}
-        <YStack paddingHorizontal="$4" paddingBottom="$4"><ChatInput onSend={handleSend} /></YStack>
+        <YStack paddingHorizontal="$4" paddingBottom={Platform.OS === "ios" ? 100 : 20}>
+          <ChatInput onSend={handleSend} />
+        </YStack>
       </KeyboardAvoidingView>
     </PageContainer>
   );

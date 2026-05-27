@@ -1,6 +1,7 @@
 import PageContainer from "@/components/ui/PageContainer";
 import Button from "@/components/ui/Button";
-import { supabase } from "@/utils/supabase";
+import { supabase, toCamelCase } from "@/utils/supabase";
+import { Image as ExpoImage } from "@/lib/image";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -23,9 +24,9 @@ type NotificationItem = {
   body: string;
   type: string;
   read: boolean;
-  created_at: string;
-  sender_name?: string;
-  sender_image?: string | null;
+  createdAt: string;
+  senderName?: string;
+  senderImage?: string | null;
 };
 
 function isWithinDays(dateStr: string, days: number) {
@@ -64,18 +65,16 @@ function NotificationRow({
           backgroundColor="rgba(23, 51, 0, 0.08)"
           overflow="hidden"
         >
-          {notif.sender_image ? (
-            <XStack width="100%" height="100%">
-              <img
-                src={notif.sender_image}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  borderRadius: 24,
-                }}
-              />
-            </XStack>
+          {notif.senderImage ? (
+            <ExpoImage
+              source={{ uri: notif.senderImage }}
+              style={{
+                width: "100%",
+                height: "100%",
+                borderRadius: 24,
+              }}
+              contentFit="cover"
+            />
           ) : (
             <MaterialCommunityIcons
               name={(NOTIF_ICONS[notif.type] || "bell-outline") as any}
@@ -109,7 +108,7 @@ function NotificationRow({
           {notif.body || notif.title}
         </Text>
         <Text fontSize="$2" color="$secondary">
-          {formatTime(notif.created_at)}
+          {formatTime(notif.createdAt)}
         </Text>
       </YStack>
     </XStack>
@@ -136,18 +135,20 @@ export default function NotificationsScreen() {
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
-      setNotifications(data || []);
+      if (data) {
+        setNotifications(data.map((n) => toCamelCase(n)) as NotificationItem[]);
+      }
       setLoading(false);
     };
 
     fetchNotifications();
   }, []);
 
-  const last7Days = notifications.filter((n) => isWithinDays(n.created_at, 7));
+  const last7Days = notifications.filter((n) => isWithinDays(n.createdAt, 7));
   const last30Days = notifications.filter(
-    (n) => !isWithinDays(n.created_at, 7) && isWithinDays(n.created_at, 30)
+    (n) => !isWithinDays(n.createdAt, 7) && isWithinDays(n.createdAt, 30)
   );
-  const older = notifications.filter((n) => !isWithinDays(n.created_at, 30));
+  const older = notifications.filter((n) => !isWithinDays(n.createdAt, 30));
 
   return (
     <PageContainer

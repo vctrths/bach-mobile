@@ -14,10 +14,10 @@ export function useRequireRole(allowedRoles: UserRole[]) {
       return;
     }
 
-    if (!profile.role || !allowedRoles.includes(profile.role)) {
+    if (!profile.role || !allowedRoles.includes(profile.role as UserRole)) {
       router.replace("/dashboard");
     }
   }, [profile, loading, allowedRoles]);
 
-  return { profile, loading, hasAccess: !!(profile?.role && allowedRoles.includes(profile.role)) };
+  return { profile, loading, hasAccess: !!(profile?.role && allowedRoles.includes(profile.role as UserRole)) };
 }

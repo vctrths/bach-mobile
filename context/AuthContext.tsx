@@ -1,4 +1,4 @@
-import { supabase } from "@/utils/supabase";
+import { supabase, toCamelCase } from "@/utils/supabase";
 import { Session, User } from "@supabase/supabase-js";
 import {
   createContext,
@@ -8,13 +8,13 @@ import {
   ReactNode,
 } from "react";
 
-interface Profile {
+export interface Profile {
   id: string;
-  first_name: string | null;
-  last_name: string | null;
+  firstName: string | null;
+  lastName: string | null;
   email: string | null;
   role: string | null;
-  profile_image: string | null;
+  profileImage: string | null;
   description: string | null;
 }
 
@@ -48,14 +48,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .select("*")
       .eq("id", userId)
       .single();
+    
     console.log("[AuthContext] fetchProfile:", {
       userId,
       hasData: !!data,
       error: error?.message,
-      role: (data as any)?.role,
       fullData: JSON.stringify(data),
     });
-    setProfile(data ?? null);
+
+    if (data) {
+      setProfile(toCamelCase<Profile>(data));
+    } else {
+      setProfile(null);
+    }
   }
 
   useEffect(() => {

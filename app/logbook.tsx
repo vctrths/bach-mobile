@@ -1,5 +1,5 @@
 import PageContainer from "@/components/ui/PageContainer";
-import { supabase } from "@/utils/supabase";
+import { supabase, toCamelCase } from "@/utils/supabase";
 import { Image as ExpoImage } from "@/lib/image";
 import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
@@ -20,7 +20,7 @@ type RecentLog = {
   id: string;
   date: string;
   description: string;
-  image_url?: string | null;
+  imageUrl?: string | null;
 };
 
 const DAY_LABELS = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
@@ -153,19 +153,21 @@ export default function LogbookScreen() {
         return;
       }
 
-      const formattedLogs = (data || []).map((log) => ({
+      const camelData = (data || []).map((log) => toCamelCase(log)) as any[];
+
+      const formattedLogs = camelData.map((log) => ({
         id: log.id,
-        date: new Date(log.created_at).toLocaleDateString("nl-BE"),
+        date: new Date(log.createdAt).toLocaleDateString("nl-BE"),
         description: log.title || "",
-        image_url: null,
+        imageUrl: null,
       }));
 
       setLogs(formattedLogs);
 
       // Build active dates set
       const actives = new Set<string>();
-      (data || []).forEach((log) => {
-        actives.add(formatDateKey(new Date(log.created_at)));
+      camelData.forEach((log) => {
+        actives.add(formatDateKey(new Date(log.createdAt)));
       });
       setActiveDates(actives);
 
@@ -177,8 +179,8 @@ export default function LogbookScreen() {
       startOfWeek.setDate(now.getDate() + mondayOffset);
       startOfWeek.setHours(0, 0, 0, 0);
 
-      const weekLogs = (data || []).filter(
-        (log) => new Date(log.created_at) >= startOfWeek
+      const weekLogs = camelData.filter(
+        (log) => new Date(log.createdAt) >= startOfWeek
       );
       setWeeklyCount(Math.min(weekLogs.length, 4));
     } catch (error) {
@@ -206,9 +208,9 @@ export default function LogbookScreen() {
       topNavTitle={
         <XStack alignItems="center" gap="$3">
           <Circle size={50} overflow="hidden">
-            {profile?.profile_image ? (
+            {profile?.profileImage ? (
               <ExpoImage
-                source={{ uri: profile.profile_image }}
+                source={{ uri: profile.profileImage }}
                 style={{ width: 50, height: 50 }}
                 contentFit="cover"
               />
@@ -230,8 +232,8 @@ export default function LogbookScreen() {
             color="#000000"
             fontFamily="Inter"
           >
-            {profile?.first_name
-              ? `${profile.first_name} ${profile.last_name || ""}`.trim()
+            {profile?.firstName
+              ? `${profile.firstName} ${profile.lastName || ""}`.trim()
               : "Victor Thys"}
           </Text>
         </XStack>

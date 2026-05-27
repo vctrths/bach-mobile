@@ -102,3 +102,21 @@ export const supabase = new Proxy({} as SupabaseClient<Database>, {
   },
 })
 
+/**
+ * Maps snake_case database object to camelCase frontend object
+ */
+export function toCamelCase<T>(obj: any): T {
+  if (Array.isArray(obj)) {
+    return obj.map((v) => toCamelCase<any>(v)) as any;
+  } else if (obj !== null && obj.constructor === Object) {
+    return Object.keys(obj).reduce((result, key) => {
+      const camelKey = key.replace(/([-_][a-z])/gi, ($1) =>
+        $1.toUpperCase().replace("-", "").replace("_", "")
+      );
+      (result as any)[camelKey] = toCamelCase(obj[key]);
+      return result;
+    }, {} as T);
+  }
+  return obj;
+}
+

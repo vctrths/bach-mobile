@@ -29,7 +29,7 @@ export default function RequestAcceptedScreen() {
         const { data: profileData } = await supabase
           .from("profiles")
           .select("first_name, last_name")
-          .eq("id", data.user_id)
+          .eq("id", data.user_id || "")
           .single();
         if (profileData) {
           setRequesterName(
