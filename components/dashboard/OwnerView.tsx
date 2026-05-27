@@ -250,6 +250,62 @@ export default function OwnerView() {
     }
   };
 
+  const CollaborationsPlaceholder = () => (
+    <Card
+      backgroundColor="white"
+      borderColor="#E3ECD7"
+      borderWidth={1}
+      borderRadius={16}
+      padding="$6"
+      alignItems="center"
+      justifyContent="center"
+      gap="$3"
+    >
+      <Ionicons name="people-outline" size={40} color="#173300" />
+      <Text color="$text_dark" fontSize="$4" fontWeight="600" textAlign="center">
+        Geen actieve samenwerkingen
+      </Text>
+    </Card>
+  );
+
+  const PlanningPlaceholder = () => (
+    <Card
+      backgroundColor="white"
+      borderColor="#E3ECD7"
+      borderWidth={1}
+      borderRadius={16}
+      padding="$6"
+      alignItems="center"
+      justifyContent="center"
+      gap="$3"
+    >
+      <Ionicons name="calendar-outline" size={40} color="#173300" />
+      <Text color="$text_dark" fontSize="$4" fontWeight="600" textAlign="center">
+        Bekijk je logboek voor planning
+      </Text>
+    </Card>
+  );
+
+  const RequestsPlaceholder = () => (
+    <Card
+      backgroundColor="white"
+      borderColor="#E3ECD7"
+      borderWidth={1}
+      borderRadius={16}
+      padding="$6"
+      alignItems="center"
+      justifyContent="center"
+      onPress={() => router.push("/notifications")}
+      pressStyle={{ scale: 0.98, opacity: 0.9 }}
+      gap="$3"
+    >
+      <Ionicons name="copy-outline" size={40} color="#173300" />
+      <Text color="$text_dark" fontSize="$4" fontWeight="600" textAlign="center">
+        Geen nieuwe aanvragen
+      </Text>
+    </Card>
+  );
+
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
@@ -300,11 +356,11 @@ export default function OwnerView() {
             </YStack>
 
             {/* Actieve samenwerkingen Section */}
-            {gardeners.length > 0 && (
-              <YStack gap="$2">
-                <Text fontSize={24} fontWeight="900" color="$text_dark">
-                  Actieve samenwerkingen
-                </Text>
+            <YStack gap="$2">
+              <Text fontSize={24} fontWeight="900" color="$text_dark">
+                Actieve samenwerkingen
+              </Text>
+              {gardeners.length > 0 ? (
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   <XStack gap="$4" paddingVertical="$2">
                     {gardeners.map((gardener) => (
@@ -376,16 +432,18 @@ export default function OwnerView() {
                     ))}
                   </XStack>
                 </ScrollView>
-              </YStack>
-            )}
+              ) : (
+                <CollaborationsPlaceholder />
+              )}
+            </YStack>
 
             {/* Jouw Planning Section */}
-            {gardeners.length > 0 && (
-              <YStack gap="$2">
-                <Text fontSize={24} fontWeight="900" color="$text_dark">
-                  Jouw planning
-                </Text>
+            <YStack gap="$2">
+              <Text fontSize={24} fontWeight="900" color="$text_dark">
+                Jouw planning
+              </Text>
 
+              {gardeners.length > 0 ? (
                 <YStack gap="$3" padding="$2">
                   {/* Day header row */}
                   <XStack alignItems="center" gap="$1">
@@ -481,16 +539,18 @@ export default function OwnerView() {
                     </XStack>
                   ))}
                 </YStack>
-              </YStack>
-            )}
+              ) : (
+                <PlanningPlaceholder />
+              )}
+            </YStack>
 
             {/* Openstaande aanvragen */}
-            {requests.length > 0 && (
-              <YStack gap="$2">
-                <Text fontSize={24} fontWeight="900" color="$text_dark">
-                  Openstaande aanvragen ({requests.length})
-                </Text>
-                {requests.map((request) => (
+            <YStack gap="$2">
+              <Text fontSize={24} fontWeight="900" color="$text_dark">
+                Openstaande aanvragen {requests.length > 0 ? `(${requests.length})` : ""}
+              </Text>
+              {requests.length > 0 ? (
+                requests.map((request) => (
                   <Card
                     key={request.id}
                     backgroundColor="white"
@@ -607,29 +667,11 @@ export default function OwnerView() {
                       </XStack>
                     </YStack>
                   </Card>
-                ))}
-              </YStack>
-            )}
-
-            {/* Empty state */}
-            {gardens.length === 0 && (
-              <YStack padding="$10" alignItems="center" gap="$4">
-                <MaterialCommunityIcons
-                  name="tree-outline"
-                  size={64}
-                  color="#56594D"
-                />
-                <Text fontSize="$4" color="$text_dark" textAlign="center">
-                  Je hebt nog geen tuinen
-                </Text>
-                <Button
-                  label="Tuin toevoegen"
-                  size="$4"
-                  backgroundColor="#173300"
-                  onPress={() => router.push("/garden/create")}
-                />
-              </YStack>
-            )}
+                ))
+              ) : (
+                <RequestsPlaceholder />
+              )}
+            </YStack>
           </>
         )}
       </YStack>
