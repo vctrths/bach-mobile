@@ -131,18 +131,26 @@ export default function GardenRequestScreen() {
 
   const handleSubmit = async () => {
     if (hasExistingRequest) {
-      Alert.alert(
-        "Aanvraag bestaat al",
-        "Je hebt al een aanvraag verstuurd voor deze tuin."
-      );
+      if (Platform.OS === 'web') {
+        window.alert("Je hebt al een aanvraag verstuurd voor deze tuin.");
+      } else {
+        Alert.alert(
+          "Aanvraag bestaat al",
+          "Je hebt al een aanvraag verstuurd voor deze tuin."
+        );
+      }
       return;
     }
 
     if (ownerId && currentUserId && ownerId === currentUserId) {
-      Alert.alert(
-        "Dit is je eigen tuin",
-        "Je kan geen aanvraag sturen voor je eigen tuin."
-      );
+      if (Platform.OS === 'web') {
+        window.alert("Je kan geen aanvraag sturen voor je eigen tuin.");
+      } else {
+        Alert.alert(
+          "Dit is je eigen tuin",
+          "Je kan geen aanvraag sturen voor je eigen tuin."
+        );
+      }
       return;
     }
 
@@ -169,7 +177,11 @@ export default function GardenRequestScreen() {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        Alert.alert("Fout", "Log eerst in om een aanvraag te sturen");
+        if (Platform.OS === 'web') {
+          window.alert("Log eerst in om een aanvraag te sturen");
+        } else {
+          Alert.alert("Fout", "Log eerst in om een aanvraag te sturen");
+        }
         return;
       }
 
@@ -183,7 +195,11 @@ export default function GardenRequestScreen() {
       });
 
       if (error) {
-        Alert.alert("Fout", error.message);
+        if (Platform.OS === 'web') {
+          window.alert(error.message);
+        } else {
+          Alert.alert("Fout", error.message);
+        }
         return;
       }
 
@@ -227,7 +243,11 @@ export default function GardenRequestScreen() {
 
       router.push(`/messages/${conversationId}`);
     } catch {
-      Alert.alert("Fout", "Er is iets misgegaan. Probeer het opnieuw.");
+      if (Platform.OS === 'web') {
+        window.alert("Er is iets misgegaan. Probeer het opnieuw.");
+      } else {
+        Alert.alert("Fout", "Er is iets misgegaan. Probeer het opnieuw.");
+      }
     } finally {
       setLoading(false);
     }

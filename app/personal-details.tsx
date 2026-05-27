@@ -4,7 +4,7 @@ import { supabase } from "@/utils/supabase";
 import { OnboardingContext } from "@/context/OnboardingContext";
 import { router } from "expo-router";
 import React, { useContext, useEffect, useState } from "react";
-import { Alert } from "react-native";
+import { Alert, Platform } from "react-native";
 import { Input, Spinner, Text, TextArea, XStack, YStack } from "tamagui";
 
 export default function PersonalDetailsScreen() {
@@ -44,7 +44,11 @@ export default function PersonalDetailsScreen() {
 
   const handleSave = async () => {
     if (!firstName.trim() || !lastName.trim()) {
-      Alert.alert("Fout", "Vul je voornaam en achternaam in.");
+      if (Platform.OS === 'web') {
+        window.alert("Vul je voornaam en achternaam in.");
+      } else {
+        Alert.alert("Fout", "Vul je voornaam en achternaam in.");
+      }
       return;
     }
 
@@ -54,7 +58,11 @@ export default function PersonalDetailsScreen() {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) {
-        Alert.alert("Fout", "Log eerst in om wijzigingen op te slaan");
+        if (Platform.OS === 'web') {
+          window.alert("Log eerst in om wijzigingen op te slaan");
+        } else {
+          Alert.alert("Fout", "Log eerst in om wijzigingen op te slaan");
+        }
         return;
       }
 
@@ -69,16 +77,29 @@ export default function PersonalDetailsScreen() {
         .eq("id", user.id);
 
       if (error) {
-        Alert.alert("Fout", error.message);
+        if (Platform.OS === 'web') {
+          window.alert(error.message);
+        } else {
+          Alert.alert("Fout", error.message);
+        }
         return;
       }
 
       updateData({ firstName, lastName, email, description });
-      Alert.alert("Succes", "Je persoonlijke gegevens zijn bijgewerkt!", [
-        { text: "OK", onPress: () => router.back() },
-      ]);
+      if (Platform.OS === 'web') {
+        window.alert("Je persoonlijke gegevens zijn bijgewerkt!");
+        router.back();
+      } else {
+        Alert.alert("Succes", "Je persoonlijke gegevens zijn bijgewerkt!", [
+          { text: "OK", onPress: () => router.back() },
+        ]);
+      }
     } catch {
-      Alert.alert("Fout", "Er is iets misgegaan. Probeer het opnieuw.");
+      if (Platform.OS === 'web') {
+        window.alert("Er is iets misgegaan. Probeer het opnieuw.");
+      } else {
+        Alert.alert("Fout", "Er is iets misgegaan. Probeer het opnieuw.");
+      }
     } finally {
       setSaving(false);
     }

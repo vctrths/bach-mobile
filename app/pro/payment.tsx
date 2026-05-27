@@ -3,7 +3,7 @@ import Button from "@/components/ui/Button";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { ScrollView, Alert } from "react-native";
+import { ScrollView, Alert, Platform } from "react-native";
 import { Card, H1, Input, Text, XStack, YStack } from "tamagui";
 
 export default function PaymentScreen() {
@@ -25,10 +25,26 @@ export default function PaymentScreen() {
   };
 
   const handlePayment = () => {
-    if (!cardNumber.replace(/\s/g, "").match(/^\d{16}$/)) { Alert.alert("Fout", "Vul een geldig kaartnummer in (16 cijfers)."); return; }
-    if (!cardHolder.trim()) { Alert.alert("Fout", "Vul de naam van de kaarthouder in."); return; }
-    if (!expiryDate.match(/^\d{2}\/\d{2}$/)) { Alert.alert("Fout", "Vul een geldige vervaldatum in (MM/JJ)."); return; }
-    if (!cvv.match(/^\d{3}$/)) { Alert.alert("Fout", "Vul een geldige CVV in (3 cijfers)."); return; }
+    if (!cardNumber.replace(/\s/g, "").match(/^\d{16}$/)) { 
+      if (Platform.OS === 'web') window.alert("Vul een geldig kaartnummer in (16 cijfers).");
+      else Alert.alert("Fout", "Vul een geldig kaartnummer in (16 cijfers)."); 
+      return; 
+    }
+    if (!cardHolder.trim()) { 
+      if (Platform.OS === 'web') window.alert("Vul de naam van de kaarthouder in.");
+      else Alert.alert("Fout", "Vul de naam van de kaarthouder in."); 
+      return; 
+    }
+    if (!expiryDate.match(/^\d{2}\/\d{2}$/)) { 
+      if (Platform.OS === 'web') window.alert("Vul een geldige vervaldatum in (MM/JJ).");
+      else Alert.alert("Fout", "Vul een geldige vervaldatum in (MM/JJ)."); 
+      return; 
+    }
+    if (!cvv.match(/^\d{3}$/)) { 
+      if (Platform.OS === 'web') window.alert("Vul een geldige CVV in (3 cijfers).");
+      else Alert.alert("Fout", "Vul een geldige CVV in (3 cijfers)."); 
+      return; 
+    }
     setLoading(true);
     setTimeout(() => { setLoading(false); router.push("/succesabo"); }, 2000);
   };

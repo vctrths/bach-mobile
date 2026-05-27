@@ -4,7 +4,7 @@ import { supabase } from "@/utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { Alert } from "react-native";
+import { Alert, Platform } from "react-native";
 import { Card, Input, Spinner, Text, TextArea, XStack, YStack } from "tamagui";
 
 export default function NewLogScreen() {
@@ -18,7 +18,11 @@ export default function NewLogScreen() {
 
   const handleSave = async () => {
     if (!tasks.trim()) {
-      Alert.alert("Fout", "Vul ten minste één uitgevoerde taak in.");
+      if (Platform.OS === 'web') {
+        window.alert("Vul ten minste één uitgevoerde taak in.");
+      } else {
+        Alert.alert("Fout", "Vul ten minste één uitgevoerde taak in.");
+      }
       return;
     }
 
@@ -28,7 +32,11 @@ export default function NewLogScreen() {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) {
-        Alert.alert("Fout", "Log eerst in om een log op te slaan");
+        if (Platform.OS === 'web') {
+          window.alert("Log eerst in om een log op te slaan");
+        } else {
+          Alert.alert("Fout", "Log eerst in om een log op te slaan");
+        }
         return;
       }
 
@@ -53,14 +61,27 @@ export default function NewLogScreen() {
       });
 
       if (error) {
-        Alert.alert("Fout", error.message);
+        if (Platform.OS === 'web') {
+          window.alert(error.message);
+        } else {
+          Alert.alert("Fout", error.message);
+        }
       } else {
-        Alert.alert("Succes", "Log opgeslagen!", [
-          { text: "OK", onPress: () => router.back() },
-        ]);
+        if (Platform.OS === 'web') {
+          window.alert("Log opgeslagen!");
+          router.back();
+        } else {
+          Alert.alert("Succes", "Log opgeslagen!", [
+            { text: "OK", onPress: () => router.back() },
+          ]);
+        }
       }
     } catch {
-      Alert.alert("Fout", "Er is iets misgegaan. Probeer het opnieuw.");
+      if (Platform.OS === 'web') {
+        window.alert("Er is iets misgegaan. Probeer het opnieuw.");
+      } else {
+        Alert.alert("Fout", "Er is iets misgegaan. Probeer het opnieuw.");
+      }
     } finally {
       setSaving(false);
     }
@@ -145,7 +166,10 @@ export default function NewLogScreen() {
             justifyContent="center"
             alignItems="center"
             gap="$2"
-            onPress={() => Alert.alert("Upload", "Foto uploaden (placeholder)")}
+            onPress={() => {
+              if (Platform.OS === 'web') window.alert("Foto uploaden (placeholder)");
+              else Alert.alert("Upload", "Foto uploaden (placeholder)");
+            }}
             pressStyle={{ scale: 0.96, opacity: 0.8 }}
           >
             <Ionicons name="camera-outline" size={20} color="#173300" />
