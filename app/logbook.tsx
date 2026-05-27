@@ -122,7 +122,11 @@ function CircularProgress({
   );
 }
 
-export default function LogbookScreen() {
+interface LogbookScreenProps {
+  standalone?: boolean;
+}
+
+export default function LogbookScreen({ standalone = true }: LogbookScreenProps) {
   const { profile } = useAuth();
   const [logs, setLogs] = useState<RecentLog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -202,47 +206,8 @@ export default function LogbookScreen() {
 
   const hasLogs = logs.length > 0;
 
-  return (
-    <PageContainer
-      hideBack
-      topNavTitle={
-        <XStack alignItems="center" gap="$3">
-          <Circle size={50} overflow="hidden">
-            {profile?.profileImage ? (
-              <ExpoImage
-                source={{ uri: profile.profileImage }}
-                style={{ width: 50, height: 50 }}
-                contentFit="cover"
-              />
-            ) : (
-              <XStack
-                width={50}
-                height={50}
-                backgroundColor="#E3ECD7"
-                justifyContent="center"
-                alignItems="center"
-              >
-                <Ionicons name="person" size={22} color="#57594D" />
-              </XStack>
-            )}
-          </Circle>
-          <Text
-            fontSize={16}
-            fontWeight="700"
-            color="#000000"
-            fontFamily="Inter"
-          >
-            {profile?.firstName
-              ? `${profile.firstName} ${profile.lastName || ""}`.trim()
-              : "Victor Thys"}
-          </Text>
-        </XStack>
-      }
-      activeTab="home"
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
+  const content = (
+    <YStack gap="$4" paddingBottom="$4">
       {/* Weekly Progress Card */}
       <Card
         backgroundColor="#F0F3EC"
@@ -426,7 +391,7 @@ export default function LogbookScreen() {
             justifyContent="center"
             alignItems="center"
           >
-            <Spinner size="large" color="primary" />
+            <Spinner size="large" color="$primary" />
           </YStack>
         ) : !hasLogs ? (
           <YStack
@@ -437,7 +402,7 @@ export default function LogbookScreen() {
             borderRadius="$6"
           >
             <Ionicons name="leaf-outline" size={48} color="#57594D" />
-            <Text color="secondary" fontSize="$3" textAlign="center">
+            <Text color="$secondary" fontSize="$3" textAlign="center">
               het is hier nog heel stil...
             </Text>
           </YStack>
@@ -517,6 +482,55 @@ export default function LogbookScreen() {
           </YStack>
         )}
       </YStack>
+    </YStack>
+  );
+
+  if (!standalone) {
+    return content;
+  }
+
+  return (
+    <PageContainer
+      hideBack
+      topNavTitle={
+        <XStack alignItems="center" gap="$3">
+          <Circle size={50} overflow="hidden">
+            {profile?.profileImage ? (
+              <ExpoImage
+                source={{ uri: profile.profileImage }}
+                style={{ width: 50, height: 50 }}
+                contentFit="cover"
+              />
+            ) : (
+              <XStack
+                width={50}
+                height={50}
+                backgroundColor="#E3ECD7"
+                justifyContent="center"
+                alignItems="center"
+              >
+                <Ionicons name="person" size={22} color="#57594D" />
+              </XStack>
+            )}
+          </Circle>
+          <Text
+            fontSize={16}
+            fontWeight="700"
+            color="#000000"
+            fontFamily="Inter"
+          >
+            {profile?.firstName
+              ? `${profile.firstName} ${profile.lastName || ""}`.trim()
+              : "Victor Thys"}
+          </Text>
+        </XStack>
+      }
+      activeTab="home"
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
+      {content}
     </PageContainer>
   );
 }

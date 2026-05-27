@@ -76,62 +76,60 @@ export default function Dashboard() {
   });
 
   return (
-    <>
-      <TopNavPill
-        title={
-          <XStack alignItems="center" gap="$2">
-            <Ionicons name="location" size={20} color="$primary" />
-            <Text color="$text_dark" fontWeight="600">Groene Vingers</Text>
-          </XStack>
-        }
-        rightElement={
-          <XStack gap="$3" alignItems="center">
-            <NotificationBell />
-            {profile?.profileImage ? (
-              <Circle size={50} onPress={() => router.push("/profile")} overflow="hidden">
-                <ExpoImage
-                  source={{ uri: profile.profileImage }}
-                  style={{ width: "100%", height: "100%" }}
-                  contentFit="cover"
-                />
-              </Circle>
-            ) : (
-              <Ionicons
-                name="person-circle"
-                size={50}
-                color="$borderColor"
-                onPress={() => router.push("/profile")}
-                suppressHighlighting
+    <PageContainer
+      showTopNav={true}
+      topNavTitle={
+        <XStack alignItems="center" gap="$2">
+          <Ionicons name="location" size={20} color="$primary" />
+          <Text color="$text_dark" fontWeight="600">Groene Vingers</Text>
+        </XStack>
+      }
+      rightElement={
+        <XStack gap="$3" alignItems="center">
+          <NotificationBell />
+          {profile?.profileImage ? (
+            <Circle size={50} onPress={() => router.push("/profile")} overflow="hidden">
+              <ExpoImage
+                source={{ uri: profile.profileImage }}
+                style={{ width: "100%", height: "100%" }}
+                contentFit="cover"
               />
-            )}
-          </XStack>
-        }
-        hideBack
-      >
+            </Circle>
+          ) : (
+            <Ionicons
+              name="person-circle"
+              size={50}
+              color="$borderColor"
+              onPress={() => router.push("/profile")}
+              suppressHighlighting
+            />
+          )}
+        </XStack>
+      }
+      topNavChildren={
         <SearchBar
           active
           value={searchQuery}
           onChangeText={onSearchChange}
           placeholder="Zoeken naar een tuin"
         />
-      </TopNavPill>
-
-      <PageContainer showTopNav={false}>
-        {role === UserRole.TUIN_EIGENAAR && <OwnerView />}
-        {role === UserRole.TUIN_ZOEKER_MET_TUIN && <GardenerView />}
-        {(role === UserRole.TUIN_ZOEKER || !role) && (
-          <SeekerView
-            searchQuery={searchQuery}
-            searchResults={searchResults}
-            searchLoading={searchLoading}
-            isSearchFocused={isSearchFocused}
-            showingSearch={showingSearch}
-            onSearchChange={onSearchChange}
-            onSearchFocus={() => setIsSearchFocused(true)}
-            onSearchBlur={() => setIsSearchFocused(false)}
-          />
-        )}
-      </PageContainer>
-    </>
+      }
+      hideBack
+    >
+      {role === UserRole.TUIN_EIGENAAR && <OwnerView />}
+      {role === UserRole.TUIN_ZOEKER_MET_TUIN && <GardenerView />}
+      {(role === UserRole.TUIN_ZOEKER || !role) && (
+        <SeekerView
+          searchQuery={searchQuery}
+          searchResults={searchResults}
+          searchLoading={searchLoading}
+          isSearchFocused={isSearchFocused}
+          showingSearch={showingSearch}
+          onSearchChange={onSearchChange}
+          onSearchFocus={() => setIsSearchFocused(true)}
+          onSearchBlur={() => setIsSearchFocused(false)}
+        />
+      )}
+    </PageContainer>
   );
 }

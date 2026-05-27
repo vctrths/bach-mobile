@@ -26,7 +26,7 @@ interface PageContainerProps {
 
 const DEFAULT_TOP_NAV_HEIGHT = 76;
 const DEFAULT_BOTTOM_NAV_HEIGHT = 82;
-const GAP = 12;
+const GAP = 20;
 
 export default function PageContainer({
   children,

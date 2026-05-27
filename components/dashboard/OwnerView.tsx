@@ -307,271 +307,80 @@ export default function OwnerView() {
   );
 
   return (
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
-      <YStack paddingHorizontal="$4" paddingBottom="$4" gap="$6">
-        {loading ? (
-          <XStack padding="$10" justifyContent="center">
-            <Spinner size="large" color="$primary" />
-          </XStack>
-        ) : (
-          <>
-            {/* Tuinen Section */}
-            <YStack gap="$2">
-              <Text fontSize={24} fontWeight="900" color="$text_dark">
-                Tuinen
-              </Text>
+    <YStack paddingHorizontal="$4" paddingBottom="$4" gap="$6">
+      {loading ? (
+        <XStack padding="$10" justifyContent="center">
+          <Spinner size="large" color="$primary" />
+        </XStack>
+      ) : (
+        <>
+          {/* Tuinen Section */}
+          <YStack gap="$2">
+            <Text fontSize={24} fontWeight="900" color="$text_dark">
+              Tuinen
+            </Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <XStack gap="$4">
+                {gardens.map((garden) => (
+                  <GardenCard
+                    key={garden.id}
+                    garden={garden}
+                    onPress={() =>
+                      router.push(("/garden/" + garden.id) as any)
+                    }
+                  />
+                ))}
+                <Card
+                  width={160}
+                  height={180}
+                  backgroundColor="$primary"
+                  borderRadius="$6"
+                  justifyContent="center"
+                  alignItems="center"
+                  onPress={() => router.push("/garden/create")}
+                  pressStyle={{ scale: 0.98, opacity: 0.8 }}
+                >
+                  <Ionicons name="add" size={40} color="white" />
+                  <Text color="white" fontSize="$3" marginTop="$2">
+                    Tuin toevoegen
+                  </Text>
+                </Card>
+              </XStack>
+            </ScrollView>
+          </YStack>
+
+          {/* Actieve samenwerkingen Section */}
+          <YStack gap="$2">
+            <Text fontSize={24} fontWeight="900" color="$text_dark">
+              Actieve samenwerkingen
+            </Text>
+            {gardeners.length > 0 ? (
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <XStack gap="$4">
-                  {gardens.map((garden) => (
-                    <GardenCard
-                      key={garden.id}
-                      garden={garden}
-                      onPress={() =>
-                        router.push(("/garden/" + garden.id) as any)
-                      }
-                    />
-                  ))}
-                  <Card
-                    width={160}
-                    height={180}
-                    backgroundColor="$primary"
-                    borderRadius="$6"
-                    justifyContent="center"
-                    alignItems="center"
-                    onPress={() => router.push("/garden/create")}
-                    pressStyle={{ scale: 0.98, opacity: 0.8 }}
-                  >
-                    <Ionicons name="add" size={40} color="white" />
-                    <Text color="white" fontSize="$3" marginTop="$2">
-                      Tuin toevoegen
-                    </Text>
-                  </Card>
-                </XStack>
-              </ScrollView>
-            </YStack>
-
-            {/* Actieve samenwerkingen Section */}
-            <YStack gap="$2">
-              <Text fontSize={24} fontWeight="900" color="$text_dark">
-                Actieve samenwerkingen
-              </Text>
-              {gardeners.length > 0 ? (
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  <XStack gap="$4" paddingVertical="$2">
-                    {gardeners.map((gardener) => (
-                      <Card
-                        key={gardener.id}
-                        width={240}
-                        backgroundColor="white"
-                        borderColor="#E3ECD7"
-                        borderWidth={1}
-                        borderRadius={16}
-                        padding="$3"
-                        onPress={() =>
-                          router.push(("/collaboration/" + gardener.id) as any)
-                        }
-                        pressStyle={{ scale: 0.98, opacity: 0.9 }}
-                      >
-                        <XStack gap="$3" alignItems="center">
-                          <Circle
-                            size={48}
-                            backgroundColor="rgba(23, 51, 0, 0.08)"
-                            overflow="hidden"
-                          >
-                            {gardener.profileImage ? (
-                              <XStack width="100%" height="100%">
-                                <img
-                                  src={gardener.profileImage}
-                                  style={{
-                                    width: "100%",
-                                    height: "100%",
-                                    objectFit: "cover",
-                                    borderRadius: 24,
-                                  }}
-                                />
-                              </XStack>
-                            ) : (
-                              <MaterialCommunityIcons
-                                name="account-outline"
-                                size={22}
-                                color="#173300"
-                              />
-                            )}
-                          </Circle>
-                          <YStack flex={1}>
-                            <Text
-                              fontSize="$4"
-                              fontWeight="bold"
-                              color="$text_dark"
-                              numberOfLines={1}
-                            >
-                              {gardener.firstName} {gardener.lastName}
-                            </Text>
-                            <XStack alignItems="center" gap="$1">
-                              <Ionicons
-                                name="leaf"
-                                size={12}
-                                color="$primary"
-                              />
-                              <Text
-                                fontSize="$2"
-                                color="#56594D"
-                                numberOfLines={1}
-                              >
-                                {gardener.gardenName}
-                              </Text>
-                            </XStack>
-                          </YStack>
-                        </XStack>
-                      </Card>
-                    ))}
-                  </XStack>
-                </ScrollView>
-              ) : (
-                <CollaborationsPlaceholder />
-              )}
-            </YStack>
-
-            {/* Jouw Planning Section */}
-            <YStack gap="$2">
-              <Text fontSize={24} fontWeight="900" color="$text_dark">
-                Jouw planning
-              </Text>
-
-              {gardeners.length > 0 ? (
-                <YStack gap="$3" padding="$2">
-                  {/* Day header row */}
-                  <XStack alignItems="center" gap="$1">
-                    <Text
-                      width={56}
-                      color="#56594D"
-                      fontSize={16}
-                      fontWeight="500"
-                    >
-                      Dag
-                    </Text>
-                    {DAY_LETTERS.map((letter, i) => (
-                      <YStack
-                        key={i}
-                        flex={1}
-                        alignItems="center"
-                        justifyContent="center"
-                        height={32}
-                        borderRadius={16}
-                        backgroundColor={
-                          i === adjustedTodayIndex ? "#173300" : "transparent"
-                        }
-                        opacity={i === adjustedTodayIndex ? 1 : 0.4}
-                      >
-                        <Text
-                          color={
-                            i === adjustedTodayIndex ? "#F5FFF3" : "#36392B"
-                          }
-                          fontSize={16}
-                          fontWeight={i === adjustedTodayIndex ? "900" : "500"}
-                        >
-                          {letter}
-                        </Text>
-                      </YStack>
-                    ))}
-                  </XStack>
-
-                  {/* Gardener rows */}
+                <XStack gap="$4" paddingVertical="$2">
                   {gardeners.map((gardener) => (
-                    <XStack
+                    <Card
                       key={gardener.id}
-                      alignItems="center"
-                      gap="$1"
+                      width={240}
+                      backgroundColor="white"
+                      borderColor="#E3ECD7"
+                      borderWidth={1}
+                      borderRadius={16}
+                      padding="$3"
                       onPress={() =>
                         router.push(("/collaboration/" + gardener.id) as any)
                       }
+                      pressStyle={{ scale: 0.98, opacity: 0.9 }}
                     >
-                      <Text
-                        width={56}
-                        color="#56594D"
-                        fontSize={16}
-                        fontWeight="500"
-                        numberOfLines={1}
-                      >
-                        {gardener.firstName}
-                      </Text>
-                      {[0, 1, 2, 3, 4, 5, 6].map((i) => {
-                        const activeDays = getActiveDayIndices(gardener.days);
-                        const isActive = activeDays.has(i);
-                        return (
-                          <YStack
-                            key={i}
-                            flex={1}
-                            alignItems="center"
-                            justifyContent="center"
-                            height={32}
-                          >
-                            {isActive ? (
-                              <YStack
-                                width={32}
-                                height={32}
-                                borderRadius={16}
-                                backgroundColor="#FFEDB3"
-                                style={{
-                                  shadowColor: "#FFE696",
-                                  shadowOffset: { width: 0, height: 0 },
-                                  shadowOpacity: 1,
-                                  shadowRadius: 2,
-                                  elevation: 2,
-                                }}
-                              />
-                            ) : (
-                              <YStack
-                                width={32}
-                                height={32}
-                                borderRadius={16}
-                                backgroundColor="transparent"
-                              />
-                            )}
-                          </YStack>
-                        );
-                      })}
-                    </XStack>
-                  ))}
-                </YStack>
-              ) : (
-                <PlanningPlaceholder />
-              )}
-            </YStack>
-
-            {/* Openstaande aanvragen */}
-            <YStack gap="$2">
-              <Text fontSize={24} fontWeight="900" color="$text_dark">
-                Openstaande aanvragen {requests.length > 0 ? `(${requests.length})` : ""}
-              </Text>
-              {requests.length > 0 ? (
-                requests.map((request) => (
-                  <Card
-                    key={request.id}
-                    backgroundColor="white"
-                    borderColor="#E3ECD7"
-                    borderWidth={1}
-                    borderRadius={16}
-                    padding="$3"
-                    marginBottom="$2"
-                  >
-                    <YStack gap="$3">
-                      {/* Requester info */}
                       <XStack gap="$3" alignItems="center">
                         <Circle
                           size={48}
                           backgroundColor="rgba(23, 51, 0, 0.08)"
                           overflow="hidden"
                         >
-                          {request.profiles?.profileImage ? (
+                          {gardener.profileImage ? (
                             <XStack width="100%" height="100%">
                               <img
-                                src={request.profiles.profileImage}
+                                src={gardener.profileImage}
                                 style={{
                                   width: "100%",
                                   height: "100%",
@@ -588,93 +397,277 @@ export default function OwnerView() {
                             />
                           )}
                         </Circle>
-                        <YStack flex={1} gap="$1">
+                        <YStack flex={1}>
                           <Text
                             fontSize="$4"
                             fontWeight="bold"
                             color="$text_dark"
+                            numberOfLines={1}
                           >
-                            {request.profiles?.firstName ?? "Tuinzoeker"}{" "}
-                            {request.profiles?.lastName ?? ""}
+                            {gardener.firstName} {gardener.lastName}
                           </Text>
-                          <Text fontSize="$2" color="#56594D">
-                            {new Date(request.createdAt).toLocaleDateString(
-                              "nl-NL",
-                            )}
-                          </Text>
+                          <XStack alignItems="center" gap="$1">
+                            <Ionicons
+                              name="leaf"
+                              size={12}
+                              color="$primary"
+                            />
+                            <Text
+                              fontSize="$2"
+                              color="#56594D"
+                              numberOfLines={1}
+                            >
+                              {gardener.gardenName}
+                            </Text>
+                          </XStack>
                         </YStack>
                       </XStack>
+                    </Card>
+                  ))}
+                </XStack>
+              </ScrollView>
+            ) : (
+              <CollaborationsPlaceholder />
+            )}
+          </YStack>
 
-                      {/* Motivation */}
-                      {request.motivation && (
-                        <Text fontSize="$3" color="#56594D" numberOfLines={3}>
-                          &ldquo;{request.motivation}&rdquo;
-                        </Text>
-                      )}
+          {/* Jouw Planning Section */}
+          <YStack gap="$2">
+            <Text fontSize={24} fontWeight="900" color="$text_dark">
+              Jouw planning
+            </Text>
 
-                      {/* Days and type info */}
-                      <XStack gap="$2" flexWrap="wrap">
-                        {request.collaborationType && (
-                          <YStack
-                            backgroundColor="rgba(23, 51, 0, 0.06)"
-                            borderRadius="$4"
-                            paddingHorizontal="$2"
-                            paddingVertical="$1"
-                          >
-                            <Text fontSize="$2" color="#173300">
-                              {request.collaborationType}
-                            </Text>
-                          </YStack>
-                        )}
-                        {request.days?.length > 0 && (
-                          <YStack
-                            backgroundColor="rgba(23, 51, 0, 0.06)"
-                            borderRadius="$4"
-                            paddingHorizontal="$2"
-                            paddingVertical="$1"
-                          >
-                            <Text fontSize="$2" color="#173300">
-                              {request.days.join(", ")}
-                            </Text>
-                          </YStack>
-                        )}
-                      </XStack>
-
-                      {/* Chat button */}
-                      <Button
-                        label="Chatten"
-                        backgroundColor="#173300"
-                        color="white"
-                        onPress={() => handleChat(request)}
-                      />
-
-                      {/* Action buttons */}
-                      <XStack gap="$2">
-                        <Button
-                          label="Afwijzen"
-                          flex={1}
-                          backgroundColor="transparent"
-                          color="#ef4444"
-                          onPress={() => handleReject(request.id)}
-                        />
-                        <Button
-                          label="Accepteren"
-                          flex={1}
-                          backgroundColor="#22c55e"
-                          color="white"
-                          onPress={() => handleAccept(request)}
-                        />
-                      </XStack>
+            {gardeners.length > 0 ? (
+              <YStack gap="$3" padding="$2">
+                {/* Day header row */}
+                <XStack alignItems="center" gap="$1">
+                  <Text
+                    width={56}
+                    color="#56594D"
+                    fontSize={16}
+                    fontWeight="500"
+                  >
+                    Dag
+                  </Text>
+                  {DAY_LETTERS.map((letter, i) => (
+                    <YStack
+                      key={i}
+                      flex={1}
+                      alignItems="center"
+                      justifyContent="center"
+                      height={32}
+                      borderRadius={16}
+                      backgroundColor={
+                        i === adjustedTodayIndex ? "#173300" : "transparent"
+                      }
+                      opacity={i === adjustedTodayIndex ? 1 : 0.4}
+                    >
+                      <Text
+                        color={
+                          i === adjustedTodayIndex ? "#F5FFF3" : "#36392B"
+                        }
+                        fontSize={16}
+                        fontWeight={i === adjustedTodayIndex ? "900" : "500"}
+                      >
+                        {letter}
+                      </Text>
                     </YStack>
-                  </Card>
-                ))
-              ) : (
-                <RequestsPlaceholder />
-              )}
-            </YStack>
-          </>
-        )}
-      </YStack>
-    </ScrollView>
+                  ))}
+                </XStack>
+
+                {/* Gardener rows */}
+                {gardeners.map((gardener) => (
+                  <XStack
+                    key={gardener.id}
+                    alignItems="center"
+                    gap="$1"
+                    onPress={() =>
+                      router.push(("/collaboration/" + gardener.id) as any)
+                    }
+                  >
+                    <Text
+                      width={56}
+                      color="#56594D"
+                      fontSize={16}
+                      fontWeight="500"
+                      numberOfLines={1}
+                    >
+                      {gardener.firstName}
+                    </Text>
+                    {[0, 1, 2, 3, 4, 5, 6].map((i) => {
+                      const activeDays = getActiveDayIndices(gardener.days);
+                      const isActive = activeDays.has(i);
+                      return (
+                        <YStack
+                          key={i}
+                          flex={1}
+                          alignItems="center"
+                          justifyContent="center"
+                          height={32}
+                        >
+                          {isActive ? (
+                            <YStack
+                              width={32}
+                              height={32}
+                              borderRadius={16}
+                              backgroundColor="#FFEDB3"
+                              style={{
+                                shadowColor: "#FFE696",
+                                shadowOffset: { width: 0, height: 0 },
+                                shadowOpacity: 1,
+                                shadowRadius: 2,
+                                elevation: 2,
+                              }}
+                            />
+                          ) : (
+                            <YStack
+                              width={32}
+                              height={32}
+                              borderRadius={16}
+                              backgroundColor="transparent"
+                            />
+                          )}
+                        </YStack>
+                      );
+                    })}
+                  </XStack>
+                ))}
+              </YStack>
+            ) : (
+              <PlanningPlaceholder />
+            )}
+          </YStack>
+
+          {/* Openstaande aanvragen */}
+          <YStack gap="$2">
+            <Text fontSize={24} fontWeight="900" color="$text_dark">
+              Openstaande aanvragen {requests.length > 0 ? `(${requests.length})` : ""}
+            </Text>
+            {requests.length > 0 ? (
+              requests.map((request) => (
+                <Card
+                  key={request.id}
+                  backgroundColor="white"
+                  borderColor="#E3ECD7"
+                  borderWidth={1}
+                  borderRadius={16}
+                  padding="$3"
+                  marginBottom="$2"
+                >
+                  <YStack gap="$3">
+                    {/* Requester info */}
+                    <XStack gap="$3" alignItems="center">
+                      <Circle
+                        size={48}
+                        backgroundColor="rgba(23, 51, 0, 0.08)"
+                        overflow="hidden"
+                      >
+                        {request.profiles?.profileImage ? (
+                          <XStack width="100%" height="100%">
+                            <img
+                              src={request.profiles.profileImage}
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                                borderRadius: 24,
+                              }}
+                            />
+                          </XStack>
+                        ) : (
+                          <MaterialCommunityIcons
+                            name="account-outline"
+                            size={22}
+                            color="#173300"
+                          />
+                        )}
+                      </Circle>
+                      <YStack flex={1} gap="$1">
+                        <Text
+                          fontSize="$4"
+                          fontWeight="bold"
+                          color="$text_dark"
+                        >
+                          {request.profiles?.firstName ?? "Tuinzoeker"}{" "}
+                          {request.profiles?.lastName ?? ""}
+                        </Text>
+                        <Text fontSize="$2" color="#56594D">
+                          {new Date(request.createdAt).toLocaleDateString(
+                            "nl-NL",
+                          )}
+                        </Text>
+                      </YStack>
+                    </XStack>
+
+                    {/* Motivation */}
+                    {request.motivation && (
+                      <Text fontSize="$3" color="#56594D" numberOfLines={3}>
+                        &ldquo;{request.motivation}&rdquo;
+                      </Text>
+                    )}
+
+                    {/* Days and type info */}
+                    <XStack gap="$2" flexWrap="wrap">
+                      {request.collaborationType && (
+                        <YStack
+                          backgroundColor="rgba(23, 51, 0, 0.06)"
+                          borderRadius="$4"
+                          paddingHorizontal="$2"
+                          paddingVertical="$1"
+                        >
+                          <Text fontSize="$2" color="#173300">
+                            {request.collaborationType}
+                          </Text>
+                        </YStack>
+                      )}
+                      {request.days?.length > 0 && (
+                        <YStack
+                          backgroundColor="rgba(23, 51, 0, 0.06)"
+                          borderRadius="$4"
+                          paddingHorizontal="$2"
+                          paddingVertical="$1"
+                        >
+                          <Text fontSize="$2" color="#173300">
+                            {request.days.join(", ")}
+                          </Text>
+                        </YStack>
+                      )}
+                    </XStack>
+
+                    {/* Chat button */}
+                    <Button
+                      label="Chatten"
+                      backgroundColor="#173300"
+                      color="white"
+                      onPress={() => handleChat(request)}
+                    />
+
+                    {/* Action buttons */}
+                    <XStack gap="$2">
+                      <Button
+                        label="Afwijzen"
+                        flex={1}
+                        backgroundColor="transparent"
+                        color="#ef4444"
+                        onPress={() => handleReject(request.id)}
+                      />
+                      <Button
+                        label="Accepteren"
+                        flex={1}
+                        backgroundColor="#22c55e"
+                        color="white"
+                        onPress={() => handleAccept(request)}
+                      />
+                    </XStack>
+                  </YStack>
+                </Card>
+              ))
+            ) : (
+              <RequestsPlaceholder />
+            )}
+          </YStack>
+        </>
+      )}
+    </YStack>
   );
 }
