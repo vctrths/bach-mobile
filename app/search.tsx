@@ -3,26 +3,27 @@ import Button from "@/components/ui/Button";
 import ApplianceBadges from "@/components/ui/ApplianceBadges";
 import NotificationBell from "@/components/ui/NotificationBell";
 import SearchBar from "@/components/ui/SearchBar";
-import { supabase } from "@/utils/supabase";
+import { supabase, toCamelCase } from "@/utils/supabase";
 import { Image as ExpoImage } from "@/lib/image";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { Card, Circle, Spinner, Text, XStack, YStack } from "tamagui";
 import { type Garden } from "@/types/garden";
+import { useAuth } from "@/context/AuthContext";
 
 export default function SearchScreen() {
+  const { profile } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Garden[]>([]);
   const [loading, setLoading] = useState(false);
-  const [profile, setProfile] = useState<{ profile_image: string | null } | null>(null);
 
   const fetchGardens = useCallback(async (query: string) => {
     setLoading(true);
     try {
       let supabaseQuery = supabase
         .from("gardens")
-        .select("id, name, rating, location, description, image_url, appliances");
+        .select("id, name, location, description, image_url, appliances, owner:profiles!owner_id(rating)");
 
       if (query.trim()) {
         supabaseQuery = supabaseQuery.or(
@@ -33,7 +34,7 @@ export default function SearchScreen() {
       const { data, error } = await supabaseQuery.limit(20);
 
       if (data && !error) {
-        setSearchResults(data);
+        setSearchResults(toCamelCase<Garden[]>(data));
       } else if (error) {
         console.error("Supabase error:", error.message);
         setSearchResults([]);
@@ -54,26 +55,6 @@ export default function SearchScreen() {
     return () => clearTimeout(timeoutId);
   }, [searchQuery, fetchGardens]);
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (user) {
-        const { data } = await supabase
-          .from("profiles")
-          .select("profile_image")
-          .eq("id", user.id)
-          .single();
-
-        if (data) setProfile(data);
-      }
-    };
-
-    fetchProfile();
-  }, []);
-
   const formatLocation = (garden: Garden) => {
     return garden.location || "Onbekende locatie";
   };
@@ -85,7 +66,7 @@ export default function SearchScreen() {
         <XStack gap="$2" alignItems="center">
           <MaterialCommunityIcons name="map-marker" size={18} color="$primary" />
           <Text fontSize="$4" fontWeight="600" color="$text_dark">
-            Leuven, BE
+            In de buurt
           </Text>
           <MaterialCommunityIcons name="chevron-down" size={16} color="$text_dark" />
         </XStack>
@@ -93,10 +74,10 @@ export default function SearchScreen() {
       rightElement={
         <XStack gap="$3" alignItems="center">
           <NotificationBell />
-          {profile?.profile_image ? (
+          {profile?.profileImage ? (
             <Circle size={50} onPress={() => router.push("/profile")} overflow="hidden">
               <ExpoImage
-                source={{ uri: profile.profile_image }}
+                source={{ uri: profile.profileImage }}
                 style={{ width: "100%", height: "100%" }}
                 contentFit="cover"
               />
@@ -158,8 +139,8 @@ export default function SearchScreen() {
               <XStack gap="$3" height={150}>
                 <ExpoImage
                   source={
-                    garden.image_url
-                      ? { uri: garden.image_url }
+                    garden.imageUrl
+                      ? { uri: garden.imageUrl }
                       : require("@/assets/images/hero.png")
                   }
                   style={{ width: 150, height: "100%", borderRadius: 8 }}
@@ -175,7 +156,7 @@ export default function SearchScreen() {
                       <XStack gap="$1" alignItems="center">
                         <MaterialCommunityIcons name="star" size={16} color="#FFB800" />
                         <Text fontSize="$3" fontWeight="bold" color="$text_dark">
-                          {garden.rating?.toFixed(1) ?? "N/A"}
+                          {garden.owner?.rating ? garden.owner.rating.toFixed(1) : "Nieuw"}
                         </Text>
                       </XStack>
                     </XStack>

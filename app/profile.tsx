@@ -1,32 +1,19 @@
 import PageContainer from "@/components/ui/PageContainer";
-import { supabase } from "@/utils/supabase";
+import { supabase, toCamelCase } from "@/utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useContext, useEffect, useState } from "react";
 import { Card, Circle, H1, ScrollView, Spinner, Text, XStack, YStack } from "tamagui";
 import { Image as ExpoImage } from "@/lib/image";
 import { OnboardingContext } from "@/context/OnboardingContext";
+import { Profile } from "@/context/AuthContext";
+import { Garden, Review } from "@/types/garden";
 
 export default function ProfileScreen() {
   const { data } = useContext(OnboardingContext);
-  const [profile, setProfile] = useState<{
-    first_name: string;
-    last_name: string;
-    description: string;
-    role: string;
-    profile_image: string | null;
-    rating: number | null;
-  } | null>(null);
-  const [reviews, setReviews] = useState<any[]>([]);
-  const [savedGardens, setSavedGardens] = useState<
-    {
-      id: string;
-      name: string;
-      rating: number | null;
-      location: string | null;
-      image_url: string | null;
-    }[]
-  >([]);
+  const [profile, setProfile] = useState<Profile & { rating?: number | null } | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [savedGardens, setSavedGardens] = useState<Garden[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -41,11 +28,11 @@ export default function ProfileScreen() {
 
       const { data: profileData } = await supabase
         .from("profiles")
-        .select("first_name, last_name, description, role, profile_image, rating")
+        .select("id, first_name, last_name, description, role, profile_image, rating")
         .eq("id", user.id)
         .single();
 
-      setProfile(profileData);
+      if (profileData) setProfile(toCamelCase<Profile & { rating?: number | null }>(profileData));
 
       // Fetch reviews for this user
       const { data: reviewData } = await supabase
@@ -55,21 +42,21 @@ export default function ProfileScreen() {
         .eq("target_type", "user")
         .order("created_at", { ascending: false });
       
-      if (reviewData) setReviews(reviewData);
+      if (reviewData) setReviews(toCamelCase<Review[]>(reviewData));
 
       // Fetch real saved gardens
       const { data: savedData } = await supabase
         .from("saved_gardens")
-        .select("garden_id, gardens(id, name, rating, location, image_url)")
+        .select("garden_id, gardens(id, name, location, image_url, owner:profiles!owner_id(rating))")
         .eq("user_id", user.id);
 
       const mapped =
-        savedData?.map((row: any) => ({
+        savedData?.map((row: any) => toCamelCase<Garden>({
           id: row.garden_id,
           name: row.gardens?.name ?? "Onbekende tuin",
-          rating: row.gardens?.rating ?? null,
           location: row.gardens?.location ?? null,
           image_url: row.gardens?.image_url ?? null,
+          owner: row.gardens?.owner ?? null,
         })) ?? [];
 
       setSavedGardens(mapped);
@@ -81,7 +68,7 @@ export default function ProfileScreen() {
 
   const ctxName = `${data.firstName} ${data.lastName}`.trim();
   const displayName = profile
-    ? `${profile.first_name} ${profile.last_name}`.trim() || ctxName
+    ? `${profile.firstName} ${profile.lastName}`.trim() || ctxName
     : ctxName || "Victor Thys";
 
   const displayRole = profile?.role || "Tuinzoeker";
@@ -145,8 +132,8 @@ export default function ProfileScreen() {
           >
             <ExpoImage
               source={
-                profile?.profile_image
-                  ? { uri: profile.profile_image }
+                profile?.profileImage
+                  ? { uri: profile.profileImage }
                   : require("@/assets/images/hero.png")
               }
               style={{ width: "100%", height: "100%" }}
@@ -192,7 +179,7 @@ export default function ProfileScreen() {
           <YStack gap="$1.5" alignItems="flex-end">
             <XStack gap="$1" alignItems="center" backgroundColor="rgba(255, 184, 0, 0.1)" paddingHorizontal="$3" paddingVertical="$1" borderRadius="$10" marginBottom="$2">
                <Ionicons name="star" size={16} color="#FFB800" />
-               <Text fontWeight="bold" color="#172211">{profile?.rating ?? 5.0}</Text>
+               <Text fontWeight="bold" color="#172211">{profile?.rating ? profile.rating.toFixed(1) : "Nieuw"}</Text>
             </XStack>
             <Circle
               size={36}
@@ -269,8 +256,8 @@ export default function ProfileScreen() {
                   >
                     <ExpoImage
                       source={
-                        garden.image_url
-                          ? { uri: garden.image_url }
+                        garden.imageUrl
+                          ? { uri: garden.imageUrl }
                           : require("@/assets/images/hero.png")
                       }
                       style={{ width: "100%", height: 110, borderRadius: 8 }}
@@ -299,7 +286,7 @@ export default function ProfileScreen() {
                             fontSize="$2"
                             fontWeight="600"
                           >
-                            {garden.rating?.toFixed(1) ?? "N/A"}
+                            {garden.owner?.rating ? garden.owner.rating.toFixed(1) : "Nieuw"}
                           </Text>
                         </XStack>
                       </XStack>
@@ -349,19 +336,20 @@ export default function ProfileScreen() {
                 <XStack justifyContent="space-between" alignItems="center">
                   <XStack gap="$2" alignItems="center">
                     <Circle size={24} overflow="hidden" backgroundColor="$borderColor">
-                       {review.profiles?.profile_image ? (
-                         <ExpoImage 
-                           source={{ uri: review.profiles.profile_image }}
-                           style={{ width: "100%", height: "100%" }}
-                         />
+                       {review.profiles?.profileImage ? (
+                          <ExpoImage 
+                            source={{ uri: review.profiles.profileImage }}
+                            style={{ width: "100%", height: "100%" }}
+                          />
                        ) : (
-                         <Ionicons name="person" size={12} color="$text_light" />
+                          <Ionicons name="person" size={12} color="$text_light" />
                        )}
                     </Circle>
                     <Text fontWeight="bold" fontSize="$3">
-                      {review.profiles?.first_name}
+                      {review.profiles?.firstName}
                     </Text>
                   </XStack>
+
                   <XStack gap="$0.5">
                     {[1, 2, 3, 4, 5].map((s) => (
                       <Ionicons 
@@ -379,7 +367,7 @@ export default function ProfileScreen() {
                   </Text>
                 )}
                 <Text color="$secondary" fontSize="$1">
-                  {new Date(review.created_at).toLocaleDateString('nl-BE')}
+                  {new Date(review.createdAt).toLocaleDateString('nl-BE')}
                 </Text>
               </Card>
             ))

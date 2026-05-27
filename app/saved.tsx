@@ -1,23 +1,15 @@
 import PageContainer from "@/components/ui/PageContainer";
 import Button from "@/components/ui/Button";
-import { supabase } from "@/utils/supabase";
+import { supabase, toCamelCase } from "@/utils/supabase";
 import { Image as ExpoImage } from "@/lib/image";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Card, H1, Spinner, Text, XStack, YStack } from "tamagui";
-
-type SavedGarden = {
-  id: string;
-  name: string;
-  rating: number | null;
-  location: string | null;
-  description: string | null;
-  image_url: string | null;
-};
+import { Garden } from "@/types/garden";
 
 export default function SavedGardensScreen() {
-  const [savedGardens, setSavedGardens] = useState<SavedGarden[]>([]);
+  const [savedGardens, setSavedGardens] = useState<Garden[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,7 +26,7 @@ export default function SavedGardensScreen() {
       const { data, error } = await supabase
         .from("saved_gardens")
         .select(
-          "garden_id, gardens(id, name, rating, location, description, image_url)"
+          "garden_id, gardens(id, name, location, description, image_url, owner:profiles!owner_id(rating))"
         )
         .eq("user_id", user.id);
 
@@ -44,14 +36,14 @@ export default function SavedGardensScreen() {
       }
 
       const mapped =
-        data?.map((row: any) => ({
+        data?.map((row: any) => toCamelCase({
           id: row.garden_id,
           name: row.gardens?.name ?? "Onbekende tuin",
-          rating: row.gardens?.rating ?? null,
           location: row.gardens?.location ?? null,
           description: row.gardens?.description ?? null,
           image_url: row.gardens?.image_url ?? null,
-        })) ?? [];
+          owner: row.gardens?.owner ?? null,
+        })) as Garden[] ?? [];
 
       setSavedGardens(mapped);
     } catch (error) {
@@ -114,8 +106,8 @@ export default function SavedGardensScreen() {
             >
               <ExpoImage
                 source={
-                  garden.image_url
-                    ? { uri: garden.image_url }
+                  garden.imageUrl
+                    ? { uri: garden.imageUrl }
                     : require("@/assets/images/hero.png")
                 }
                 style={{ width: "100%", height: 160 }}
@@ -133,7 +125,7 @@ export default function SavedGardensScreen() {
                       color="#FFB800"
                     />
                     <Text fontSize="$3" fontWeight="bold" color="$text_dark">
-                      {garden.rating?.toFixed(1) ?? "N/A"}
+                      {garden.owner?.rating ? garden.owner.rating.toFixed(1) : "Nieuw"}
                     </Text>
                   </XStack>
                 </XStack>

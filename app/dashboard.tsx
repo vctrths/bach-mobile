@@ -10,7 +10,7 @@ import OwnerView from "@/components/dashboard/OwnerView";
 import GardenerView from "@/components/dashboard/GardenerView";
 import React, { useCallback, useContext, useState } from "react";
 import { Circle, Spinner, Text, XStack, YStack } from "tamagui";
-import { supabase } from "@/utils/supabase";
+import { supabase, toCamelCase } from "@/utils/supabase";
 import { Image as ExpoImage } from "@/lib/image";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -33,13 +33,13 @@ export default function Dashboard() {
 
     setSearchLoading(true);
     try {
-      const { data } = await supabase
+      const response = await supabase
         .from("gardens")
-        .select("id, name, rating, location, image_url, appliances")
+        .select("id, name, location, image_url, appliances, owner:profiles!owner_id(rating)")
         .or(`name.ilike.%${query}%,location.ilike.%${query}%,description.ilike.%${query}%`)
         .limit(10);
 
-      if (data) setSearchResults(data as Garden[]);
+      if (response.data) setSearchResults(toCamelCase<Garden[]>(response.data));
     } catch (error) {
       console.error("Search error:", error);
     } finally {
@@ -87,10 +87,10 @@ export default function Dashboard() {
         rightElement={
           <XStack gap="$3" alignItems="center">
             <NotificationBell />
-            {profile?.profile_image ? (
+            {profile?.profileImage ? (
               <Circle size={50} onPress={() => router.push("/profile")} overflow="hidden">
                 <ExpoImage
-                  source={{ uri: profile.profile_image }}
+                  source={{ uri: profile.profileImage }}
                   style={{ width: "100%", height: "100%" }}
                   contentFit="cover"
                 />

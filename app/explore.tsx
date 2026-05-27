@@ -17,7 +17,7 @@ export default function ExploreScreen() {
     try {
       const { data, error } = await supabase
         .from("gardens")
-        .select("id, name, rating, location, image_url, appliances")
+        .select("id, name, location, image_url, appliances, owner:profiles!owner_id(rating)")
         .order("created_at", { ascending: false });
 
       if (error) {

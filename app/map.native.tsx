@@ -1,22 +1,13 @@
 import React, { useEffect, useState } from "react";
 import MapView, { Marker, Callout } from "react-native-maps";
 import { router } from "expo-router";
-import { supabase } from "@/utils/supabase";
+import { supabase, toCamelCase } from "@/utils/supabase";
 import TopNavPill from "@/components/ui/TopNavPill";
 import BottomNav from "@/components/ui/BottomNav";
 import { YStack, Text, Image, Spinner } from "tamagui";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-interface Garden {
-  id: string;
-  name: string;
-  location: string;
-  latitude: number;
-  longitude: number;
-  image_url: string;
-  rating: number;
-}
+import { Garden } from "@/types/garden";
 
 export default function MapScreen() {
   const [gardens, setGardens] = useState<Garden[]>([]);
@@ -30,8 +21,8 @@ export default function MapScreen() {
   async function fetchGardens() {
     const { data } = await supabase
       .from("gardens")
-      .select("id, name, location, latitude, longitude, image_url, rating");
-    if (data) setGardens(data);
+      .select("id, name, location, latitude, longitude, image_url, owner:profiles!owner_id(rating)");
+    if (data) setGardens(toCamelCase<Garden[]>(data));
     setLoading(false);
   }
 
@@ -57,20 +48,20 @@ export default function MapScreen() {
                 <Marker
                   key={garden.id}
                   coordinate={{
-                    latitude: garden.latitude,
-                    longitude: garden.longitude,
+                    latitude: garden.latitude!,
+                    longitude: garden.longitude!,
                   }}
                   title={garden.name}
-                  description={garden.location}
+                  description={garden.location || ""}
                   onCalloutPress={() =>
                     router.push(`/garden/${garden.id}`)
                   }
                 >
                   <Callout>
                     <YStack padding="$2" maxWidth={180}>
-                      {garden.image_url && (
+                      {garden.imageUrl && (
                         <Image
-                          source={{ uri: garden.image_url }}
+                          source={{ uri: garden.imageUrl }}
                           width={160}
                           height={80}
                           borderRadius="$2"
@@ -80,7 +71,7 @@ export default function MapScreen() {
                         {garden.name}
                       </Text>
                       <Text color="$secondary" fontSize="$2">
-                        {garden.location} · {"★".repeat(Math.round(garden.rating))}
+                        {garden.location} · {garden.owner?.rating ? "★".repeat(Math.round(garden.owner.rating)) : "Nieuw"}
                       </Text>
                     </YStack>
                   </Callout>

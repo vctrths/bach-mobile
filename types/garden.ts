@@ -1,50 +1,58 @@
 export interface Garden {
   id: string;
   name: string;
-  rating: number | null;
   location: string | null;
   latitude: number | null;
   longitude: number | null;
   description: string | null;
-  image_url: string | null;
+  imageUrl: string | null;
   appliances: string[] | null;
+  ownerId?: string | null;
+  createdAt?: string;
+  owner?: {
+    firstName: string | null;
+    lastName: string | null;
+    profileImage: string | null;
+    description: string | null;
+    rating: number | null;
+  };
 }
 
 export interface Review {
   id: string;
-  collaboration_id: string;
-  reviewer_id: string;
-  target_id: string;
-  target_type: "garden" | "user";
+  collaborationId: string;
+  reviewerId: string;
+  targetId: string;
+  targetType: "garden" | "user";
   rating: number;
   comment: string | null;
-  created_at: string;
+  createdAt: string;
   profiles?: {
-    first_name: string | null;
-    last_name: string | null;
-    profile_image: string | null;
+    firstName: string | null;
+    lastName: string | null;
+    profileImage: string | null;
   };
 }
 
 export interface Collaboration {
   id: string;
-  garden_id: string;
-  gardener_id: string;
-  owner_id: string;
-  request_id: string | null;
+  gardenId: string;
+  gardenerId: string;
+  ownerId: string;
+  requestId: string | null;
   status: "active" | "paused" | "ended";
   terms: string | null;
   days: string[];
-  start_date: string | null;
-  collaboration_type: string | null;
-  ended_at: string | null;
-  ended_by: string | null;
-  ended_reason: string | null;
-  created_at: string;
+  startDate: string | null;
+  collaborationType: string | null;
+  endedAt: string | null;
+  endedBy: string | null;
+  endedReason: string | null;
+  createdAt: string;
   gardens?: Garden;
   profiles?: {
-    first_name: string | null;
-    last_name: string | null;
-    profile_image: string | null;
+    firstName: string | null;
+    lastName: string | null;
+    profileImage: string | null;
   };
 }

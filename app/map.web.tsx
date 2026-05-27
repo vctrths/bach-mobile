@@ -1,23 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Map, Marker, ZoomControl } from "pigeon-maps";
 import { router } from "expo-router";
-import { supabase } from "@/utils/supabase";
+import { supabase, toCamelCase } from "@/utils/supabase";
 import TopNavPill from "@/components/ui/TopNavPill";
 import BottomNav from "@/components/ui/BottomNav";
 import { YStack, Text, Spinner, XStack } from "tamagui";
 import { Image as ExpoImage } from "@/lib/image";
 import { StyleSheet, View, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-interface Garden {
-  id: string;
-  name: string;
-  location: string;
-  latitude: number;
-  longitude: number;
-  image_url: string;
-  rating: number;
-}
+import { Garden } from "@/types/garden";
 
 const INITIAL_CENTER: [number, number] = [50.8798, 4.7005];
 const INITIAL_ZOOM = 12;
@@ -97,9 +88,9 @@ function GardenPopup({
       >
         <Pressable onPress={(e) => e.stopPropagation()}>
           <YStack gap="8">
-            {garden.image_url && (
+            {garden.imageUrl && (
               <ExpoImage
-                source={{ uri: garden.image_url }}
+                source={{ uri: garden.imageUrl }}
                 style={{ width: "100%", height: 120, borderRadius: 12 }}
                 contentFit="cover"
               />
@@ -116,7 +107,7 @@ function GardenPopup({
                   {" · "}
                 </Text>
                 <Text fontSize="14" color="#37392B">
-                  {"★".repeat(Math.round(garden.rating))}
+                  {garden.owner?.rating ? "★".repeat(Math.round(garden.owner.rating)) : "Nieuw"}
                 </Text>
               </XStack>
             </YStack>
@@ -155,14 +146,14 @@ export default function MapScreen() {
   async function fetchGardens() {
     const { data } = await supabase
       .from("gardens")
-      .select("id, name, location, latitude, longitude, image_url, rating");
-    if (data) setGardens(data);
+      .select("id, name, location, latitude, longitude, image_url, owner:profiles!owner_id(rating)");
+    if (data) setGardens(toCamelCase<Garden[]>(data));
     setLoading(false);
   }
 
   const gardensWithCoords = gardens.filter(
     (g) => g.latitude != null && g.longitude != null
-  );
+  ) as (Garden & { latitude: number; longitude: number })[];
 
   return (
     <View style={StyleSheet.absoluteFillObject}>

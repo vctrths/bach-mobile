@@ -17,7 +17,7 @@ export default function GardenCard({
   onPress,
   onFavoritePress,
 }: GardenCardProps) {
-  const imageSource = garden.image_url ? { uri: garden.image_url } : require("@/assets/images/hero.png");
+  const imageSource = garden.imageUrl ? { uri: garden.imageUrl } : require("@/assets/images/hero.png");
 
   return (
     <Card
@@ -44,7 +44,7 @@ export default function GardenCard({
           <XStack gap={4} alignItems="center">
             <MaterialCommunityIcons name="star" size={16} color="#C9A52E" />
             <Text fontSize={14} fontWeight="400" color="#000000">
-              {(garden.rating ?? 0).toFixed(1)}
+              {garden.owner?.rating ? garden.owner.rating.toFixed(1) : "Nieuw"}
             </Text>
           </XStack>
         </XStack>

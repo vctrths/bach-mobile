@@ -7,9 +7,8 @@ import { Image as ExpoImage } from "@/lib/image";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Card, H1, H2, Spinner, Text, XStack, YStack, Circle } from "tamagui";
-import { supabase } from "@/utils/supabase";
+import { supabase, toCamelCase } from "@/utils/supabase";
 import { type Garden, type Review } from "@/types/garden";
-import ApplianceBadges from "@/components/ui/ApplianceBadges";
 
 export default function GardenDetailsScreen() {
   const { id } = useLocalSearchParams();
@@ -20,25 +19,31 @@ export default function GardenDetailsScreen() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [gardenRes, reviewsRes] = await Promise.all([
+        const [gardenRes] = await Promise.all([
           supabase
             .from("gardens")
-            .select("*")
+            .select("*, owner:profiles!owner_id(first_name, last_name, profile_image, description, rating)")
             .eq("id", id as string)
-            .single(),
-          supabase
-            .from("reviews")
-            .select("*, profiles:reviewer_id(first_name, last_name, profile_image)")
-            .eq("target_id", id as string)
-            .eq("target_type", "garden")
-            .order("created_at", { ascending: false })
+            .single()
         ]);
 
         if (gardenRes.data) {
-          setGarden(gardenRes.data as Garden);
-        }
-        if (reviewsRes.data) {
-          setReviews(reviewsRes.data as any[]);
+          const gardenData = toCamelCase<Garden>(gardenRes.data);
+          setGarden(gardenData);
+
+          // Fetch reviews for the owner
+          if (gardenData.ownerId) {
+            const { data: reviewsData } = await supabase
+              .from("reviews")
+              .select("*, profiles:reviewer_id(first_name, last_name, profile_image)")
+              .eq("target_id", gardenData.ownerId)
+              .eq("target_type", "user")
+              .order("created_at", { ascending: false });
+
+            if (reviewsData) {
+              setReviews(toCamelCase<Review[]>(reviewsData));
+            }
+          }
         }
       } catch (err) {
         console.error("Error fetching data:", err);
@@ -125,7 +130,7 @@ export default function GardenDetailsScreen() {
             <XStack gap="$1" alignItems="center">
               <MaterialCommunityIcons name="star" size={18} color="#FFB800" />
               <Text color="$text_dark" fontSize="$3" fontWeight="bold">
-                {garden.rating ?? 0}
+                {garden.owner?.rating ? garden.owner.rating.toFixed(1) : "Nieuw"}
               </Text>
             </XStack>
           </XStack>
@@ -142,9 +147,9 @@ export default function GardenDetailsScreen() {
           overflow="hidden"
           height={250}
         >
-          {garden.image_url ? (
+          {garden.imageUrl ? (
             <ExpoImage
-              source={{ uri: garden.image_url }}
+              source={{ uri: garden.imageUrl }}
               style={{ width: "100%", height: "100%" }}
               contentFit="cover"
             />
@@ -211,7 +216,9 @@ export default function GardenDetailsScreen() {
             <H2 color="$text_dark" fontWeight="bold">Beoordelingen</H2>
             <XStack gap="$1" alignItems="center">
               <MaterialCommunityIcons name="star" size={20} color="#FFB800" />
-              <Text fontSize="$4" fontWeight="bold">{garden.rating ?? 0}</Text>
+              <Text fontSize="$4" fontWeight="bold">
+                {garden.owner?.rating ? garden.owner.rating.toFixed(1) : "Nieuw"}
+              </Text>
               <Text color="$secondary" fontSize="$3">({reviews.length})</Text>
             </XStack>
           </XStack>
@@ -241,9 +248,9 @@ export default function GardenDetailsScreen() {
                 <XStack justifyContent="space-between" alignItems="center">
                   <XStack gap="$2" alignItems="center">
                     <Circle size={32} overflow="hidden" backgroundColor="$background_secondary">
-                      {review.profiles?.profile_image ? (
+                      {review.profiles?.profileImage ? (
                         <ExpoImage
-                          source={{ uri: review.profiles.profile_image }}
+                          source={{ uri: review.profiles.profileImage }}
                           style={{ width: "100%", height: "100%" }}
                         />
                       ) : (
@@ -251,7 +258,7 @@ export default function GardenDetailsScreen() {
                       )}
                     </Circle>
                     <Text fontWeight="bold" fontSize="$3">
-                      {review.profiles?.first_name} {review.profiles?.last_name}
+                      {review.profiles?.firstName} {review.profiles?.lastName}
                     </Text>
                   </XStack>
                   <XStack gap="$1">
@@ -271,11 +278,65 @@ export default function GardenDetailsScreen() {
                   </Text>
                 )}
                 <Text color="$secondary" fontSize="$1">
-                  {new Date(review.created_at).toLocaleDateString('nl-BE')}
+                  {new Date(review.createdAt).toLocaleDateString('nl-BE')}
                 </Text>
               </Card>
             ))
           )}
+        </YStack>
+
+        {/* Owner Card Section */}
+        <YStack gap="$4" paddingBottom="$10">
+          <H2 color="$text_dark" fontWeight="bold">Over de eigenaar</H2>
+          <Card
+            elevation={2}
+            backgroundColor="$background_secondary"
+            borderColor="$borderColor"
+            borderWidth={1}
+            borderRadius="$6"
+            padding="$5"
+            gap="$4"
+          >
+            <XStack gap="$4" alignItems="center">
+              <Circle size={64} overflow="hidden" backgroundColor="$borderColor">
+                {garden.owner?.profileImage ? (
+                  <ExpoImage
+                    source={{ uri: garden.owner.profileImage }}
+                    style={{ width: "100%", height: "100%" }}
+                    contentFit="cover"
+                  />
+                ) : (
+                  <Ionicons name="person" size={32} color="$text_light" />
+                )}
+              </Circle>
+              <YStack gap="$1">
+                <Text fontSize="$5" fontWeight="bold" color="$text_dark">
+                  {garden.owner?.firstName} {garden.owner?.lastName}
+                </Text>
+                <XStack gap="$1" alignItems="center">
+                  <MaterialCommunityIcons name="star" size={18} color="#FFB800" />
+                  <Text fontWeight="bold" color="$text_dark">
+                    {garden.owner?.rating ? garden.owner.rating.toFixed(1) : "Nieuw"}
+                  </Text>
+                </XStack>
+              </YStack>
+            </XStack>
+            
+            {garden.owner?.description && (
+              <Text color="$text_dark" fontSize="$3" lineHeight="$4">
+                {garden.owner.description}
+              </Text>
+            )}
+            
+            <Button
+              label="Bekijk volledig profiel"
+              variant="outlined"
+              onPress={() => router.push(`/profile` as any)} // For now back to own profile or specific profile if implemented
+              backgroundColor="transparent"
+              borderColor="$primary"
+              color="$primary"
+            />
+          </Card>
         </YStack>
       </YStack>
     </PageContainer>

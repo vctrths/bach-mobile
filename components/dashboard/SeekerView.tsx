@@ -2,7 +2,7 @@ import Button from "@/components/ui/Button";
 import GardenCard from "@/components/ui/GardenCard";
 import ApplianceBadges from "@/components/ui/ApplianceBadges";
 import { LogCard, type GardenLog } from "@/components/ui/LogCard";
-import { supabase } from "@/utils/supabase";
+import { supabase, toCamelCase } from "@/utils/supabase";
 import { Image as ExpoImage } from "@/lib/image";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -42,7 +42,7 @@ export default function SeekerView({
       const [gardensRes, logsRes] = await Promise.all([
         supabase
           .from("gardens")
-          .select("id, name, rating, location, image_url, appliances")
+          .select("id, name, location, image_url, appliances, owner:profiles!owner_id(rating)")
           .limit(5),
         supabase
           .from("garden_logs")
@@ -50,8 +50,8 @@ export default function SeekerView({
           .limit(5),
       ]);
 
-      if (gardensRes.data) setGardens(gardensRes.data as Garden[]);
-      if (logsRes.data) setLogs(logsRes.data as GardenLog[]);
+      if (gardensRes.data) setGardens(toCamelCase<Garden[]>(gardensRes.data));
+      if (logsRes.data) setLogs(toCamelCase<GardenLog[]>(logsRes.data));
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
     } finally {
@@ -117,7 +117,7 @@ export default function SeekerView({
                 >
                   <XStack gap="$3" height={150}>
                     <ExpoImage
-                      source={(garden.image_url ? { uri: garden.image_url } : undefined) as any}
+                      source={(garden.imageUrl ? { uri: garden.imageUrl } : undefined) as any}
                       style={{ width: 120, height: "100%", backgroundColor: "$borderColor" }}
                       contentFit="cover"
                     />
@@ -128,7 +128,7 @@ export default function SeekerView({
                       <XStack alignItems="center" gap="$1" marginTop="$1">
                         <Ionicons name="star" size={14} color="#f59e0b" />
                         <Text fontSize="$3" color="$text_dark">
-                          {(garden.rating ?? 0).toFixed(1)}
+                          {garden.owner?.rating ? garden.owner.rating.toFixed(1) : "Nieuw"}
                         </Text>
                       </XStack>
                       <XStack alignItems="center" gap="$1" marginTop="$1">
