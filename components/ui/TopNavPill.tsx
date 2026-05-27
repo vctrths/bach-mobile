@@ -36,7 +36,7 @@ export default function TopNavPill({
       <YStack
         borderRadius="$10"
         padding={1}
-        backgroundColor="rgba(227, 236, 215, 0.55)"
+        backgroundColor="rgba(255, 255, 255, 0.34)"
         overflow="hidden"
         shadowColor="#0f1a0f"
         shadowOpacity={0.06}
@@ -46,10 +46,10 @@ export default function TopNavPill({
         <YStack
           borderRadius={33}
           overflow="hidden"
-          backgroundColor="rgba(255, 255, 255, 0.55)"
+          backgroundColor="rgba(255, 255, 255, 0.12)"
         >
           <BlurView
-            intensity={45}
+            intensity={55}
             tint="light"
             experimentalBlurMethod="dimezisBlurView"
             style={StyleSheet.absoluteFill}
