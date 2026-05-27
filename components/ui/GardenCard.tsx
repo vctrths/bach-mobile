@@ -65,7 +65,7 @@ export default function GardenCard({
             backgroundColor="#173300"
             color="#F5FFF3"
             borderRadius={64}
-            paddingVertical={12}
+            paddingVertical={8}
             paddingHorizontal={16}
             fontSize={16}
             fontWeight="700"
