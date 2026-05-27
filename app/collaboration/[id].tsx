@@ -2,9 +2,9 @@ import PageContainer from "@/components/ui/PageContainer";
 import ScreenContent from "@/components/ui/ScreenContent";
 import Button from "@/components/ui/Button";
 import RatingPicker from "@/components/ui/RatingPicker";
-import { supabase } from "@/utils/supabase";
+import { supabase, toCamelCase } from "@/utils/supabase";
 import { useAuth } from "@/context/AuthContext";
-import { Collaboration } from "@/types/garden";
+import { Collaboration, Garden } from "@/types/garden";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -35,7 +35,7 @@ export default function CollaborationDetailScreen() {
         .single();
 
       if (data) {
-        setCollaboration(data as any);
+        setCollaboration(toCamelCase<Collaboration>(data));
         
         // Check if user already reviewed
         const { data: reviewData } = await supabase
@@ -73,9 +73,9 @@ export default function CollaborationDetailScreen() {
 
       if (!error) {
         // Create notification for the other party
-        const otherPartyId = user?.id === collaboration.owner_id 
-          ? collaboration.gardener_id 
-          : collaboration.owner_id;
+        const otherPartyId = user?.id === collaboration.ownerId 
+          ? collaboration.gardenerId 
+          : collaboration.ownerId;
         
         if (otherPartyId) {
           await supabase.from("notifications").insert({
@@ -100,9 +100,9 @@ export default function CollaborationDetailScreen() {
     if (!collaboration || userRating === 0) return;
     setSubmitting(true);
     try {
-      const isOwner = user?.id === collaboration.owner_id;
-      const targetId = isOwner ? collaboration.gardener_id : collaboration.garden_id;
-      const targetType = isOwner ? "user" : "garden";
+      const isOwner = user?.id === collaboration.ownerId;
+      const targetId = isOwner ? collaboration.gardenerId : collaboration.ownerId;
+      const targetType = "user";
 
       const { error } = await supabase.from("reviews").insert({
         collaboration_id: id as string,
@@ -138,8 +138,8 @@ export default function CollaborationDetailScreen() {
   if (!collaboration) return null;
 
   const isEnded = collaboration.status === "ended";
-  const partnerName = user?.id === collaboration.owner_id 
-    ? `${collaboration.profiles?.first_name} ${collaboration.profiles?.last_name}`
+  const partnerName = user?.id === collaboration.ownerId 
+    ? `${collaboration.profiles?.firstName} ${collaboration.profiles?.lastName}`
     : "Tuineigenaar";
 
   return (
@@ -160,9 +160,9 @@ export default function CollaborationDetailScreen() {
             borderColor="$borderColor"
           >
             <YStack height={150} position="relative">
-              {collaboration.gardens?.image_url ? (
+              {collaboration.gardens?.imageUrl ? (
                 <ExpoImage
-                  source={{ uri: collaboration.gardens.image_url }}
+                  source={{ uri: collaboration.gardens.imageUrl }}
                   style={{ width: "100%", height: "100%" }}
                   contentFit="cover"
                 />
@@ -195,9 +195,9 @@ export default function CollaborationDetailScreen() {
           {/* Partner Info */}
           <XStack alignItems="center" gap="$4">
             <Circle size={60} overflow="hidden" backgroundColor="$background_secondary">
-              {collaboration.profiles?.profile_image ? (
+              {collaboration.profiles?.profileImage ? (
                 <ExpoImage
-                  source={{ uri: collaboration.profiles.profile_image }}
+                  source={{ uri: collaboration.profiles.profileImage }}
                   style={{ width: "100%", height: "100%" }}
                 />
               ) : (
@@ -234,7 +234,7 @@ export default function CollaborationDetailScreen() {
               <YStack gap="$2">
                 <XStack justifyContent="space-between">
                   <Text color="$secondary">Type:</Text>
-                  <Text fontWeight="600">{collaboration.collaboration_type}</Text>
+                  <Text fontWeight="600">{collaboration.collaborationType}</Text>
                 </XStack>
                 <XStack justifyContent="space-between">
                   <Text color="$secondary">Dagen:</Text>
@@ -242,7 +242,7 @@ export default function CollaborationDetailScreen() {
                 </XStack>
                 <XStack justifyContent="space-between">
                   <Text color="$secondary">Gestart op:</Text>
-                  <Text fontWeight="600">{new Date(collaboration.created_at).toLocaleDateString('nl-BE')}</Text>
+                  <Text fontWeight="600">{new Date(collaboration.createdAt).toLocaleDateString('nl-BE')}</Text>
                 </XStack>
               </YStack>
             </Card>

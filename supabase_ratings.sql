@@ -1,13 +1,13 @@
 -- 1. Add rating to profiles if it doesn't exist
-ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS rating float DEFAULT 5.0;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS rating float DEFAULT NULL;
 
 -- 2. Create the reviews table
 CREATE TABLE IF NOT EXISTS public.reviews (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   collaboration_id uuid REFERENCES public.collaborations(id) ON DELETE CASCADE NOT NULL,
   reviewer_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
-  target_id uuid NOT NULL, -- Either garden_id or profile_id
-  target_type text NOT NULL CHECK (target_type IN ('garden', 'user')),
+  target_id uuid NOT NULL, -- profile_id
+  target_type text NOT NULL CHECK (target_type = 'user'),
   rating integer NOT NULL CHECK (rating >= 1 AND rating <= 5),
   comment text CHECK (char_length(comment) <= 500),
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
@@ -38,15 +38,7 @@ CREATE POLICY "Participants can insert reviews for ended collaborations"
 CREATE OR REPLACE FUNCTION public.update_rating_averages() 
 RETURNS TRIGGER AS $$
 BEGIN
-  IF NEW.target_type = 'garden' THEN
-    UPDATE public.gardens 
-    SET rating = (
-      SELECT ROUND(AVG(rating)::numeric, 1) 
-      FROM public.reviews 
-      WHERE target_id = NEW.target_id AND target_type = 'garden'
-    ) 
-    WHERE id = NEW.target_id;
-  ELSIF NEW.target_type = 'user' THEN
+  IF NEW.target_type = 'user' THEN
     UPDATE public.profiles 
     SET rating = (
       SELECT ROUND(AVG(rating)::numeric, 1) 
