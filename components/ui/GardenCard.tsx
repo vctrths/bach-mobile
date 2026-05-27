@@ -29,6 +29,8 @@ export default function GardenCard({
       padding={12}
       gap={6}
       overflow="hidden"
+      onPress={onPress}
+      pressStyle={{ opacity: 0.9, scale: 0.98 }}
     >
       <ExpoImage
         source={imageSource as any}
