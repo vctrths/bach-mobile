@@ -180,7 +180,7 @@ export default function NotificationsScreen() {
           </Text>
         </YStack>
       ) : (
-        <YStack gap="$6">
+        <YStack gap="$6" paddingHorizontal="$5">
           {/* Last 7 days */}
           {last7Days.length > 0 && (
             <YStack gap="$3">
