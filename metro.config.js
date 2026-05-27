@@ -20,9 +20,6 @@ module.exports = (() => {
       if (moduleName === "react-native-maps" && platform === "web") {
         return { type: "empty" };
       }
-      if (moduleName === "expo-font" && platform === "web") {
-        return { type: "empty" };
-      }
       if (typeof defaultResolveRequest === "function") {
         return defaultResolveRequest(context, moduleName, platform);
       }
