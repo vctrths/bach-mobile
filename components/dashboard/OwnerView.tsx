@@ -338,7 +338,7 @@ export default function OwnerView() {
                   justifyContent="center"
                   alignItems="center"
                   onPress={() => router.push("/garden/create")}
-                  pressStyle={{ scale: 0.98, opacity: 0.8 }}
+                  pressStyle={{ scale: 0.98, opacity: 0.9 }}
                 >
                   <Ionicons name="add" size={40} color="white" />
                   <Text color="white" fontSize="$3" marginTop="$2">
@@ -484,6 +484,7 @@ export default function OwnerView() {
                     onPress={() =>
                       router.push(("/collaboration/" + gardener.id) as any)
                     }
+                    pressStyle={{ scale: 0.98, opacity: 0.9 }}
                   >
                     <Text
                       width={56}

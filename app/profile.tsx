@@ -252,7 +252,7 @@ export default function ProfileScreen() {
                     onPress={() =>
                       router.push(("/garden/" + garden.id) as any)
                     }
-                    pressStyle={{ scale: 0.97, opacity: 0.9 }}
+                    pressStyle={{ scale: 0.98, opacity: 0.9 }}
                   >
                     <ExpoImage
                       source={

@@ -28,7 +28,7 @@ export default function MessageItem({
       gap="$4"
       alignItems="center"
       onPress={() => router.push(`/messages/${id}` as any)}
-      pressStyle={{ opacity: 0.7 }}
+      pressStyle={{ scale: 0.98, opacity: 0.9 }}
     >
       <YStack position="relative">
         <Image

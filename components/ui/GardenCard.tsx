@@ -30,7 +30,7 @@ export default function GardenCard({
       gap={6}
       overflow="hidden"
       onPress={onPress}
-      pressStyle={{ opacity: 0.9, scale: 0.98 }}
+      pressStyle={{ scale: 0.98, opacity: 0.9 }}
     >
       <ExpoImage
         source={imageSource as any}
@@ -78,6 +78,7 @@ export default function GardenCard({
             borderWidth={1}
             padding={12}
             onPress={onFavoritePress || (() => {})}
+            pressStyle={{ scale: 0.94, opacity: 0.85 }}
             justifyContent="center"
             alignItems="center"
           >

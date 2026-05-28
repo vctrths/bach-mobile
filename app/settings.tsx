@@ -239,7 +239,7 @@ export default function SettingsScreen() {
               justifyContent="space-between"
               alignItems="center"
               onPress={item.onPress}
-              pressStyle={{ scale: 0.98, opacity: 0.85 }}
+              pressStyle={{ scale: 0.98, opacity: 0.9 }}
             >
               <Text color="$text_dark" fontSize="$4" fontWeight="500">
                 {item.label}
@@ -271,7 +271,7 @@ export default function SettingsScreen() {
               justifyContent="space-between"
               alignItems="center"
               onPress={item.onPress}
-              pressStyle={{ scale: 0.98, opacity: 0.85 }}
+              pressStyle={{ scale: 0.98, opacity: 0.9 }}
             >
               <Text color="$text_dark" fontSize="$4" fontWeight="500">
                 {item.label}

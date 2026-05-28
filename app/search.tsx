@@ -75,7 +75,7 @@ export default function SearchScreen() {
         <XStack gap="$3" alignItems="center">
           <NotificationBell />
           {profile?.profileImage ? (
-            <Circle size={50} onPress={() => router.push("/profile")} overflow="hidden">
+            <Circle size={50} onPress={() => router.push("/profile")} pressStyle={{ scale: 0.94, opacity: 0.85 }} overflow="hidden">
               <ExpoImage
                 source={{ uri: profile.profileImage }}
                 style={{ width: "100%", height: "100%" }}
@@ -198,6 +198,7 @@ export default function SearchScreen() {
                       justifyContent="center"
                       alignItems="center"
                       onPress={() => {}}
+                      pressStyle={{ scale: 0.94, opacity: 0.85 }}
                     >
                       <MaterialCommunityIcons name="heart" size={20} color="white" />
                     </Card>
