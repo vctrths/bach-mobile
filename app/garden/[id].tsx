@@ -168,18 +168,11 @@ export default function GardenDetailsScreen() {
             Aanwezig
           </Text>
           {(() => {
-            const rawAppliances = garden.appliances?.filter((key) => !!APPLIANCE_MAP[key]) || [];
-            
-            // Reorder: Put selected at the start
-            const validAppliances = [...rawAppliances].sort((a, b) => {
-              if (a === selectedAppliance) return -1;
-              if (b === selectedAppliance) return 1;
-              return 0;
-            });
+            const validAppliances = garden.appliances?.filter((key) => !!APPLIANCE_MAP[key]) || [];
             
             if (validAppliances.length > 0) {
               return (
-                <XStack gap="$3" flexWrap="wrap" alignItems="center">
+                <XStack gap="$3" flexWrap="wrap" alignItems="center" animation="quick">
                   {validAppliances.map((key) => {
                     const appliance = APPLIANCE_MAP[key];
                     const isSelected = selectedAppliance === key;
@@ -200,6 +193,7 @@ export default function GardenDetailsScreen() {
                         borderColor={isSelected ? "#173300" : "#E3ECD7"}
                         onPress={() => setSelectedAppliance(isSelected ? null : key)}
                         gap={isSelected ? "$2" : 0}
+                        pressStyle={{ scale: 0.95 }}
                       >
                         <MaterialCommunityIcons 
                           name={appliance.icon} 
@@ -214,7 +208,8 @@ export default function GardenDetailsScreen() {
                             color="#FFF" 
                             textTransform="uppercase"
                             animation="quick"
-                            enterStyle={{ opacity: 0, x: -10 }}
+                            enterStyle={{ opacity: 0, scale: 0.5 }}
+                            exitStyle={{ opacity: 0, scale: 0.5 }}
                           >
                             {appliance.label}
                           </Text>
