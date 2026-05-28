@@ -46,7 +46,7 @@ export default function RequestAcceptedScreen() {
   return (
     <PageContainer
       topNavTitle="Verzoek geaccepteerd"
-      onBackPress={() => router.push("/dashboard")}
+      onBackPress={() => router.push("/")}
       showBottomNav={false}
     >
       <YStack flex={1} paddingHorizontal="$4" paddingVertical="$6" gap="$6">
@@ -108,7 +108,7 @@ export default function RequestAcceptedScreen() {
                 label="Terug naar dashboard"
                 backgroundColor="transparent"
                 color="#173300"
-                onPress={() => router.push("/dashboard")}
+                onPress={() => router.push("/")}
               />
             </YStack>
           </>

@@ -230,7 +230,7 @@ export default function NotificationsScreen() {
                         <NotificationRow
                           notif={notif}
                           onPress={() =>
-                            router.push("/dashboard" as any)
+                            router.push("/" as any)
                           }
                         />
                         <XStack gap="$2">
@@ -251,7 +251,7 @@ export default function NotificationsScreen() {
                             backgroundColor="transparent"
                             color="#ef4444"
                             onPress={() =>
-                              router.push("/dashboard" as any)
+                              router.push("/" as any)
                             }
                           />
                           <Button
@@ -260,7 +260,7 @@ export default function NotificationsScreen() {
                             backgroundColor="#22c55e"
                             color="white"
                             onPress={() =>
-                              router.push("/dashboard" as any)
+                              router.push("/" as any)
                             }
                           />
                         </XStack>

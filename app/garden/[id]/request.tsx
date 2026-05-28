@@ -205,7 +205,7 @@ export default function GardenRequestScreen() {
 
       const partnerId = ownerId;
       if (!partnerId) {
-        router.push("/dashboard");
+        router.push("/");
         return;
       }
 
@@ -229,7 +229,7 @@ export default function GardenRequestScreen() {
           .single();
 
         if (convError || !newConv) {
-          router.push("/dashboard");
+          router.push("/");
           return;
         }
         conversationId = newConv.id;

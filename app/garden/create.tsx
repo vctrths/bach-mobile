@@ -153,10 +153,10 @@ export default function GardenCreateScreen() {
       } else {
         if (Platform.OS === 'web') {
           window.alert("Tuin aangemaakt!");
-          router.push("/dashboard");
+          router.push("/");
         } else {
           Alert.alert("Succes", "Tuin aangemaakt!", [
-            { text: "OK", onPress: () => router.push("/dashboard") },
+            { text: "OK", onPress: () => router.push("/") },
           ]);
         }
       }

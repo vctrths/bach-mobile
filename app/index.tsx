@@ -1,97 +1,141 @@
-import Button from "@/components/ui/Button";
-import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
+import PageContainer from "@/components/ui/PageContainer";
+import TopNavPill from "@/components/ui/TopNavPill";
+import SearchBar from "@/components/ui/SearchBar";
+import NotificationBell from "@/components/ui/NotificationBell";
+import { useAuth } from "@/context/AuthContext";
 import { OnboardingContext } from "@/context/OnboardingContext";
-import { router } from "expo-router";
-import React, { useContext } from "react";
-import { H1, Text, XStack, YStack } from "tamagui";
 import { UserRole } from "@/utils/role";
+import SeekerView from "@/components/dashboard/SeekerView";
+import OwnerView from "@/components/dashboard/OwnerView";
+import GardenerView from "@/components/dashboard/GardenerView";
+import React, { useCallback, useContext, useEffect, useState } from "react";
+import { Circle, Spinner, Text, XStack, YStack } from "tamagui";
+import { supabase, toCamelCase } from "@/utils/supabase";
+import { Image as ExpoImage } from "@/lib/image";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { type Garden } from "@/types/garden";
 
-/**
- * DEBUG GATE
- * This screen helps you choose between starting fresh with onboarding
- * or skipping straight to the dashboard.
- * 
- * TODO: Remove this file and rename dashboard.tsx back to index.tsx 
- * when development is complete.
- */
-export default function DebugGate() {
-  const { updateData } = useContext(OnboardingContext);
+export default function Dashboard() {
+  const { profile, loading, session } = useAuth();
+  const { data: onboardingData } = useContext(OnboardingContext);
 
-  const startAsRole = (role: UserRole) => {
-    updateData({ role });
-    router.push("/dashboard");
+  useEffect(() => {
+    if (!loading && !session) {
+      router.replace("/splash");
+    }
+  }, [loading, session]);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Garden[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+  const handleSearch = useCallback(async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    setSearchLoading(true);
+    try {
+      const response = await supabase
+        .from("gardens")
+        .select("id, name, location, image_url, appliances, owner:profiles!owner_id(rating)")
+        .or(`name.ilike.%${query}%,location.ilike.%${query}%,description.ilike.%${query}%`)
+        .limit(10);
+
+      if (response.data) setSearchResults(toCamelCase<Garden[]>(response.data));
+    } catch (error) {
+      console.error("Search error:", error);
+    } finally {
+      setSearchLoading(false);
+    }
+  }, []);
+
+  const onSearchChange = (text: string) => {
+    setSearchQuery(text);
+    handleSearch(text);
   };
 
-  return (
-    <ThemedSafeArea>
-      <YStack flex={1} justifyContent="center" padding="$6" gap="$4">
-        <H1 textAlign="center" color="$primary" fontWeight="bold">
-          Debug Mode
-        </H1>
-        <Text textAlign="center" color="$text_dark" marginBottom="$4">
-          Choose your entry point for testing:
-        </Text>
-
-        <Button
-          label="Start Onboarding Flow"
-          size="$6"
-          backgroundColor="$primary"
-          onPress={() => router.push("/onboarding")}
-          pressStyle={{ scale: 0.98, opacity: 0.9 }}
-        />
-
-        <XStack gap="$3">
-          <Button
-            label="Tuineigenaar"
-            flex={1}
-            size="$6"
-            backgroundColor="$primary"
-            onPress={() => startAsRole(UserRole.TUIN_EIGENAAR)}
-            pressStyle={{ scale: 0.98, opacity: 0.9 }}
-          />
-          <Button
-            label="Tuinzoeker"
-            flex={1}
-            size="$6"
-            backgroundColor="$accent"
-            onPress={() => startAsRole(UserRole.TUIN_ZOEKER)}
-            pressStyle={{ scale: 0.98, opacity: 0.9 }}
-          />
-        </XStack>
-
-        <Button
-          label="Tuinzoeker (met tuin)"
-          size="$6"
-          backgroundColor="$accent"
-          onPress={() => startAsRole(UserRole.TUIN_ZOEKER_MET_TUIN)}
-          pressStyle={{ scale: 0.98, opacity: 0.9 }}
-        />
-
-        <Button
-          label="Skip to Dashboard (no role)"
-          size="$6"
-          backgroundColor="transparent"
-          borderWidth={1}
-          borderColor="$primary"
-          onPress={() => router.push("/dashboard")}
-          pressStyle={{ scale: 0.98, opacity: 0.8 }}
-          color="$primary"
-        />
-
-        <Button
-          label="Login / Sign Up"
-          size="$6"
-          backgroundColor="$accent"
-          onPress={() => router.push("/login")}
-          pressStyle={{ scale: 0.98, opacity: 0.9 }}
-        />
-
-        <YStack marginTop="$10" padding="$4" backgroundColor="$borderColor" borderRadius="$4">
-          <Text fontSize="$2" color="$text_dark" textAlign="center">
-            Note: This screen is temporary for debugging.
-          </Text>
+  if (loading) {
+    return (
+      <PageContainer showTopNav={false}>
+        <YStack flex={1} justifyContent="center" alignItems="center" gap="$4">
+          <Spinner size="large" color="$primary" />
+          <Text color="$secondary" fontSize="$4">Laden...</Text>
         </YStack>
-      </YStack>
-    </ThemedSafeArea>
+      </PageContainer>
+    );
+  }
+
+  const role = (profile?.role ?? onboardingData.role)?.toLowerCase() ?? null;
+
+  const showingSearch = !!(searchQuery.trim() || isSearchFocused);
+
+  console.log("[Dashboard] render:", {
+    loading,
+    hasProfile: !!profile,
+    dbRole: profile?.role,
+    ctxRole: onboardingData.role,
+    resolvedRole: role,
+  });
+
+  return (
+    <PageContainer
+      showTopNav={true}
+      topNavTitle={
+        <XStack alignItems="center" gap="$2">
+          <Ionicons name="location" size={20} color="$primary" />
+          <Text color="$text_dark" fontWeight="600">Groene Vingers</Text>
+        </XStack>
+      }
+      rightElement={
+        <XStack gap="$3" alignItems="center">
+          <NotificationBell />
+          {profile?.profileImage ? (
+            <Circle size={50} onPress={() => router.push("/profile")} overflow="hidden">
+              <ExpoImage
+                source={{ uri: profile.profileImage }}
+                style={{ width: "100%", height: "100%" }}
+                contentFit="cover"
+              />
+            </Circle>
+          ) : (
+            <Ionicons
+              name="person-circle"
+              size={50}
+              color="$borderColor"
+              onPress={() => router.push("/profile")}
+              suppressHighlighting
+            />
+          )}
+        </XStack>
+      }
+      topNavChildren={
+        <SearchBar
+          active
+          value={searchQuery}
+          onChangeText={onSearchChange}
+          placeholder="Zoeken naar een tuin"
+        />
+      }
+      hideBack
+    >
+      {role === UserRole.TUIN_EIGENAAR && <OwnerView />}
+      {role === UserRole.TUIN_ZOEKER_MET_TUIN && <GardenerView />}
+      {(role === UserRole.TUIN_ZOEKER || !role) && (
+        <SeekerView
+          searchQuery={searchQuery}
+          searchResults={searchResults}
+          searchLoading={searchLoading}
+          isSearchFocused={isSearchFocused}
+          showingSearch={showingSearch}
+          onSearchChange={onSearchChange}
+          onSearchFocus={() => setIsSearchFocused(true)}
+          onSearchBlur={() => setIsSearchFocused(false)}
+        />
+      )}
+    </PageContainer>
   );
 }

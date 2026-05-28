@@ -23,7 +23,7 @@ export default function AuthCallbackScreen() {
         .single();
 
       if (existingProfile) {
-        router.replace("/dashboard");
+        router.replace("/");
       } else {
         const { error } = await supabase.from("profiles").insert({
           id: session.user.id,

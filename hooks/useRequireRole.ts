@@ -15,7 +15,7 @@ export function useRequireRole(allowedRoles: UserRole[]) {
     }
 
     if (!profile.role || !allowedRoles.includes(profile.role as UserRole)) {
-      router.replace("/dashboard");
+      router.replace("/");
     }
   }, [profile, loading, allowedRoles]);
 

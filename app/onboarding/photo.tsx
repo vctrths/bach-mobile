@@ -114,7 +114,7 @@ export default function Photo() {
       // 4. Clear onboarding context and navigate to dashboard
       reset();
       setTimeout(() => {
-        router.replace("/dashboard");
+        router.replace("/");
       }, 0);
     } catch (err) {
       setError(

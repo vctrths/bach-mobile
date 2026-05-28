@@ -31,7 +31,6 @@ function AppContent() {
       <Stack.Screen name="messages" />
       <Stack.Screen name="messages/[id]" />
       <Stack.Screen name="succesabo" />
-      <Stack.Screen name="dashboard" />
       <Stack.Screen name="saved" />
       <Stack.Screen name="pro/payment" />
       <Stack.Screen name="garden/create" />

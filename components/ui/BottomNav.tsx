@@ -22,7 +22,7 @@ export default function BottomNav({
   onProfilePress,
   unreadMessageCount = 0,
 }: BottomNavProps) {
-  const defaultHomePress = () => router.push("/dashboard");
+  const defaultHomePress = () => router.push("/");
   const defaultMapPress = () => router.push("/map" as any);
   const defaultMessagePress = () => router.push("/messages" as any);
   const defaultProfilePress = () => router.push("/profile");
