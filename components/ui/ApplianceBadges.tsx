@@ -10,6 +10,7 @@ export const APPLIANCE_MAP: Record<string, { label: string; icon: keyof typeof M
   compost: { label: "Compost", icon: "leaf" },
   seeds: { label: "Zaden", icon: "seed-outline" },
   shade: { label: "Schaduw", icon: "umbrella" },
+  greenhouse: { label: "Serre", icon: "greenhouse" },
 };
 
 interface ApplianceBadgesProps {

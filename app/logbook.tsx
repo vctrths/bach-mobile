@@ -114,7 +114,7 @@ function CircularProgress({
         justifyContent="center"
         alignItems="center"
       >
-        <Text fontSize={14} color="#172211" fontFamily="Inter">
+        <Text fontSize={14} color="#172211" fontFamily="$Inter">
           {current}/{total}
         </Text>
       </YStack>
@@ -227,11 +227,11 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
               fontSize={18}
               fontWeight="700"
               color="#172211"
-              fontFamily="Satoshi"
+              fontFamily="$Satoshi"
             >
               Jouw wekelijkse{"\n"}progressie
             </Text>
-            <Text fontSize={14} color="#172211" fontFamily="Satoshi">
+            <Text fontSize={14} color="#172211" fontFamily="$Satoshi">
               probeer wekelijks 4 dagen voor je planten te zorgen
             </Text>
           </YStack>
@@ -257,7 +257,7 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
           <Text
             fontSize={14}
             color="#172211"
-            fontFamily="Satoshi"
+            fontFamily="$Satoshi"
             textAlign="center"
           >
             Logboek
@@ -282,7 +282,7 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
           <Text
             fontSize={14}
             color="#172211"
-            fontFamily="Satoshi"
+            fontFamily="$Satoshi"
             textAlign="center"
           >
             Nieuwe log
@@ -308,7 +308,7 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
             fontSize={20}
             fontWeight="700"
             color="#172211"
-            fontFamily="Satoshi"
+            fontFamily="$Satoshi"
           >
             {monthName}
           </Text>
@@ -355,14 +355,14 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
                     <Text
                       fontSize={14}
                       color={isToday ? "white" : "rgba(0,0,0,0.6)"}
-                      fontFamily="Inter"
+                      fontFamily="$Inter"
                     >
                       {dayLabel}
                     </Text>
                     <Text
                       fontSize={14}
                       color={isToday ? "white" : "#172211"}
-                      fontFamily="Inter"
+                      fontFamily="$Inter"
                     >
                       {dayNum}
                     </Text>
@@ -380,7 +380,7 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
           fontSize={20}
           fontWeight="900"
           color="#000000"
-          fontFamily="Inter"
+          fontFamily="$Inter"
         >
           Recente logs
         </Text>
@@ -438,14 +438,14 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
                       fontSize={18}
                       fontWeight="700"
                       color="#000000"
-                      fontFamily="Satoshi"
+                      fontFamily="$Satoshi"
                     >
                       {log.date}
                     </Text>
                     <Text
                       fontSize={14}
                       color="rgba(0,0,0,0.6)"
-                      fontFamily="Satoshi"
+                      fontFamily="$Satoshi"
                       numberOfLines={2}
                     >
                       {log.description}
@@ -471,7 +471,7 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
                       fontSize={14}
                       fontWeight="700"
                       color="#172211"
-                      fontFamily="Inter"
+                      fontFamily="$Inter"
                     >
                       →
                     </Text>
@@ -517,7 +517,7 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
             fontSize={16}
             fontWeight="700"
             color="#000000"
-            fontFamily="Inter"
+            fontFamily="$Inter"
           >
             {profile?.firstName
               ? `${profile.firstName} ${profile.lastName || ""}`.trim()

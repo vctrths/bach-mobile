@@ -76,9 +76,9 @@ function GardenPopup({
         left={20}
         right={20}
         backgroundColor="white"
-        borderRadius="16"
-        padding="16"
-        gap="12"
+        borderRadius={16}
+        padding={16}
+        gap={12}
         shadowColor="rgba(0,0,0,0.15)"
         shadowOffset={{ width: 0, height: 4 }}
         shadowRadius={12}
@@ -96,17 +96,17 @@ function GardenPopup({
               />
             )}
             <YStack gap="2">
-              <Text fontWeight="700" fontSize="18" color="#172211">
+              <Text fontWeight="700" fontSize={18} color="#172211">
                 {garden.name}
               </Text>
-              <XStack alignItems="center" gap="4">
-                <Text fontSize="14" color="#57594D">
+              <XStack alignItems="center" gap={4}>
+                <Text fontSize={14} color="#57594D">
                   {garden.location}
                 </Text>
-                <Text fontSize="14" color="#57594D">
+                <Text fontSize={14} color="#57594D">
                   {" · "}
                 </Text>
-                <Text fontSize="14" color="#37392B">
+                <Text fontSize={14} color="#37392B">
                   {garden.owner?.rating ? "★".repeat(Math.round(garden.owner.rating)) : "Nieuw"}
                 </Text>
               </XStack>
@@ -121,7 +121,7 @@ function GardenPopup({
                   alignItems: "center",
                 }}
               >
-                <Text color="white" fontWeight="600" fontSize="15">
+                <Text color="white" fontWeight="600" fontSize={15}>
                   Bekijk details
                 </Text>
               </View>

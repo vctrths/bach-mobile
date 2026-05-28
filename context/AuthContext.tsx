@@ -16,6 +16,7 @@ export interface Profile {
   role: string | null;
   profileImage: string | null;
   description: string | null;
+  expoPushToken?: string | null;
 }
 
 interface AuthContextType {

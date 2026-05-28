@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   description text,
   role text,
   profile_image text,
+  expo_push_token text,
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 

@@ -11,6 +11,8 @@ Notifications.setNotificationHandler({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
 
@@ -57,8 +59,8 @@ async function registerForPushNotificationsAsync() {
 
 export const usePushNotifications = (userId?: string) => {
   const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
-  const notificationListener = useRef<any>();
-  const responseListener = useRef<any>();
+  const notificationListener = useRef<any>(null);
+  const responseListener = useRef<any>(null);
 
   useEffect(() => {
     if (!userId) return;
@@ -69,7 +71,7 @@ export const usePushNotifications = (userId?: string) => {
         // Save token to Supabase profile
         supabase
           .from('profiles')
-          .update({ expo_push_token: token })
+          .update({ expo_push_token: token } as any)
           .eq('id', userId)
           .then(({ error }) => {
             if (error) console.error('Error saving push token:', error);

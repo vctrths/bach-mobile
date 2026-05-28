@@ -116,11 +116,11 @@ export default function GardenDetailsScreen() {
 
         {/* Beschrijving Section */}
         <YStack gap="$4">
-          <Text fontFamily="Inter" fontWeight="900" fontSize={20} color="$text_dark">
+          <Text fontFamily="$Inter" fontWeight="900" fontSize={20} color="$text_dark">
             Beschrijving
           </Text>
           <Text
-            fontFamily="Inter"
+            fontFamily="$Inter"
             fontSize={16}
             color="$text_dark"
             lineHeight={22}
@@ -132,7 +132,7 @@ export default function GardenDetailsScreen() {
 
         {/* Locatie Section */}
         <YStack gap="$4">
-          <Text fontFamily="Inter" fontWeight="900" fontSize={20} color="$text_dark">
+          <Text fontFamily="$Inter" fontWeight="900" fontSize={20} color="$text_dark">
             Locatie
           </Text>
           <YStack borderRadius={10} overflow="hidden" height={244} backgroundColor="$borderColor">
@@ -169,7 +169,7 @@ export default function GardenDetailsScreen() {
 
         {/* Aanwezig Section */}
         <YStack gap="$4">
-          <Text fontFamily="Inter" fontWeight="900" fontSize={20} color="$text_dark">
+          <Text fontFamily="$Inter" fontWeight="900" fontSize={20} color="$text_dark">
             Aanwezig
           </Text>
           {(() => {
@@ -177,7 +177,8 @@ export default function GardenDetailsScreen() {
             
             if (validAppliances.length > 0) {
               return (
-                <XStack gap="$3" flexWrap="wrap" alignItems="center">
+                // @ts-ignore
+                <XStack gap="$3" flexWrap="wrap" alignItems="center" animation="quick">
                   {validAppliances.map((key) => {
                     const appliance = APPLIANCE_MAP[key];
                     const isSelected = selectedAppliance === key;
@@ -185,6 +186,8 @@ export default function GardenDetailsScreen() {
                     return (
                       <XStack
                         key={key}
+                        // @ts-ignore
+                        animation="quick"
                         backgroundColor={isSelected ? "#173300" : "#F1F3EC"}
                         height={50}
                         paddingHorizontal={isSelected ? 16 : 0}
@@ -205,12 +208,14 @@ export default function GardenDetailsScreen() {
                           color={isSelected ? "#FFF" : "#172211"} 
                         />
                         {isSelected && (
-                          <Text 
-                            fontFamily="Inter" 
+                            <Text 
+                            fontFamily="$Inter" 
                             fontWeight="900" 
                             fontSize={14} 
                             color="#FFF" 
                             textTransform="uppercase"
+                            // @ts-ignore
+                            animation="quick"
                             enterStyle={{ opacity: 0, scale: 0.5 }}
                             exitStyle={{ opacity: 0, scale: 0.5 }}
                           >
@@ -249,85 +254,74 @@ export default function GardenDetailsScreen() {
 
         {/* Extra informatie Section */}
         <YStack gap="$4">
-          <Text fontFamily="Inter" fontWeight="900" fontSize={20} color="$text_dark">
+          <Text fontFamily="$Inter" fontWeight="900" fontSize={20} color="$text_dark">
             Extra informatie
           </Text>
-          <YStack gap="$2">
-            {[
-              { label: "Grootte", value: "40 m²" },
-              { label: "Opgepast", value: "hond aanwezig" },
-              { label: "Toegang", value: "Via zijpoort" },
-              { label: "Verwachting eigenaar", value: "Geen pesticides" },
-            ].map((item, idx) => (
-              <XStack key={idx} gap="$1" alignItems="center">
-                <Text fontSize={16} color="$text_dark">• </Text>
-                <Text fontSize={16} color="$text_dark" fontWeight="bold">{item.label}:</Text>
-                <Text fontSize={16} color="$text_dark"> {item.value}</Text>
-              </XStack>
-            ))}
+          <YStack gap="$3">
+            <XStack gap="$3" alignItems="center">
+              <Circle size={40} backgroundColor="#F1F3EC" justifyContent="center" alignItems="center">
+                <MaterialCommunityIcons name="currency-eur" size={24} color="#172211" />
+              </Circle>
+              <YStack>
+                <Text fontFamily="$Inter" fontWeight="900" fontSize={16} color="$text_dark">
+                  Prijs
+                </Text>
+                <Text fontFamily="$Inter" fontSize={14} color="$secondary">
+                  €7.00 per maand
+                </Text>
+              </YStack>
+            </XStack>
           </YStack>
         </YStack>
 
         {/* Owner Profile Section */}
-        <YStack gap="$4" alignItems="center">
-          <Circle 
-            size={167} 
-            overflow="hidden" 
-            backgroundColor="$background_secondary"
-            justifyContent="center"
-            alignItems="center"
-          >
+        <YStack
+          padding="$5"
+          backgroundColor="#F1F3EC"
+          borderRadius={24}
+          gap="$4"
+          marginTop="$4"
+        >
+          <XStack gap="$4" alignItems="center">
             {garden.owner?.profileImage ? (
               <ExpoImage
                 source={{ uri: garden.owner.profileImage }}
-                style={{ width: "100%", height: "100%" }}
-                contentFit="cover"
+                style={{ width: 64, height: 64, borderRadius: 32 }}
               />
             ) : (
-              <Ionicons name="person" size={80} color="$secondary" />
+              <Circle size={64} backgroundColor="$borderColor" justifyContent="center" alignItems="center">
+                <Ionicons name="person" size={32} color="$secondary" />
+              </Circle>
             )}
-          </Circle>
-          <Text fontFamily="Inter" fontWeight="900" fontSize={20} color="$text_dark">
-            Wie is {garden.owner?.firstName ?? "de eigenaar"}?
-          </Text>
-          <Text
-            fontFamily="Inter"
-            fontSize={16}
-            color="$text_dark"
-            lineHeight={22}
-            textAlign="justify"
-          >
-            {garden.owner?.description ?? "Geen beschrijving beschikbaar."}
-          </Text>
-        </YStack>
+            <YStack flex={1}>
+              <Text fontFamily="$Inter" fontWeight="900" fontSize={22} color="$text_dark">
+                {garden.owner?.firstName} {garden.owner?.lastName}
+              </Text>
+              <XStack alignItems="center" gap="$1">
+                <Ionicons name="star" size={16} color="#EAB308" />
+                <Text fontFamily="$Inter" fontWeight="900" fontSize={16} color="$text_dark">
+                  {garden.owner?.rating?.toFixed(1) ?? "5.0"}
+                </Text>
+              </XStack>
+            </YStack>
+          </XStack>
 
-        {/* CTA Section */}
-        <YStack
-          backgroundColor="$background_secondary"
-          borderRadius={32}
-          padding="$6"
-          gap="$4"
-          alignItems="stretch"
-          marginBottom="$4"
-        >
           <Text
-            fontFamily="Inter"
-            fontWeight="900"
-            fontSize={20}
+            fontFamily="$Inter"
+            fontSize={15}
             color="$text_dark"
-            textAlign="center"
+            lineHeight={20}
           >
-            Is dit de tuin voor jou?
+            {garden.owner?.description ?? "Hoi! Ik ben de eigenaar van deze tuin. Laten we samenwerken om er iets moois van te maken."}
           </Text>
-          <Button
-            label="Stuur verzoek"
-            backgroundColor="#173300"
-            color="#F5FFF3"
-            borderRadius={64}
-            paddingVertical={12}
-            onPress={() => router.push(`/garden/${id}/request` as any)}
-          />
         </YStack>
+      </YStack>
+
+      <YStack padding="$4" paddingBottom={Platform.OS === "ios" ? 34 : 16} backgroundColor="$canvas">
+        <Button
+          label="Verstuur aanvraag"
+          onPress={() => router.push(`/garden/${id}/request`)}
+        />
       </YStack>
     </PageContainer>
   );
