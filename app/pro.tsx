@@ -1,108 +1,127 @@
 import Button from "@/components/ui/Button";
 import PageContainer from "@/components/ui/PageContainer";
-import { Ionicons } from "@expo/vector-icons";
-import { BlurView } from "expo-blur";
 import { router } from "expo-router";
 import React from "react";
-import { Card, H1, Text, XStack, YStack } from "tamagui";
+import { Text, YStack } from "tamagui";
+
+interface PlanFeatureProps {
+  children: React.ReactNode;
+}
+
+function PlanFeature({ children }: PlanFeatureProps) {
+  return (
+    <Text fontSize={16} color="#000000" fontFamily="$body">
+      {children}
+    </Text>
+  );
+}
+
+interface PlanCardProps {
+  title: string;
+  features: React.ReactNode[];
+  buttonLabel: string;
+  buttonVariant?: "primary" | "secondary";
+  onButtonPress: () => void;
+}
+
+function PlanCard({ title, features, buttonLabel, buttonVariant = "primary", onButtonPress }: PlanCardProps) {
+  const isPrimary = buttonVariant === "primary";
+
+  return (
+    <YStack
+      backgroundColor="#F0F3EC"
+      borderColor="#EAF0D8"
+      borderWidth={1}
+      borderRadius={32}
+      padding={12}
+      paddingBottom={24}
+      gap={16}
+    >
+      {/* Plan Header Badge */}
+      <YStack alignItems="flex-start">
+        <YStack
+          backgroundColor="#FFFFFF"
+          borderColor="#EAF0D8"
+          borderWidth={1}
+          borderRadius={500}
+          paddingHorizontal={12}
+          paddingVertical={8}
+        >
+          <Text
+            fontSize={20}
+            color="#000000"
+            fontFamily="$body"
+            fontWeight="900"
+          >
+            {title}
+          </Text>
+        </YStack>
+      </YStack>
+
+      {/* Features List */}
+      <YStack gap={8}>
+        {features.map((feature, index) => (
+          <PlanFeature key={index}>{feature}</PlanFeature>
+        ))}
+      </YStack>
+
+      {/* Action Button */}
+      <YStack
+        backgroundColor={isPrimary ? "#173300" : "transparent"}
+        borderColor={isPrimary ? "transparent" : "#D4E1AE"}
+        borderWidth={1}
+        borderRadius={64}
+        paddingHorizontal={16}
+        paddingVertical={12}
+        alignItems="center"
+        marginTop="auto"
+        onPress={onButtonPress}
+      >
+        <Text
+          fontSize={16}
+          color={isPrimary ? "#F5FFF3" : "#172211"}
+          fontFamily="$body"
+          fontWeight="700"
+        >
+          {buttonLabel}
+        </Text>
+      </YStack>
+    </YStack>
+  );
+}
 
 export default function ProScreen() {
   return (
     <PageContainer
-      topNavTitle="Terug naar dashboard"
-      onBackPress={() => router.push("/dashboard")}
+      topNavTitle="Abonnement"
+      onBackPress={() => router.back()}
       showBottomNav={false}
     >
-      {/* Premium Glassmorphic Title Card */}
-      <YStack
-        position="relative"
-        backgroundColor="rgba(255, 255, 255, 0.4)"
-        borderRadius="$10"
-        borderWidth={1}
-        borderColor="rgba(255, 255, 255, 0.45)"
-        padding="$6"
-        gap="$4"
-        overflow="hidden"
-        shadowColor="#0f1a0f"
-        shadowOpacity={0.08}
-        shadowRadius={16}
-        shadowOffset={{ width: 0, height: 4 }}
-        elevation={4}
-        alignItems="center"
-      >
-        <BlurView
-          intensity={45}
-          tint="light"
-          experimentalBlurMethod="dimezisBlurView"
-          style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+      <YStack gap={10} paddingHorizontal={16} paddingTop={16}>
+        {/* Pro Plan Card */}
+        <PlanCard
+          title="Pro plan"
+          features={[
+            "  - Tuinen bekijken & zoeken",
+            "  - Matchen met tuin eigenaar",
+            "  - Logboek bijhouden",
+            "",
+            "€7 / Per maand",
+          ]}
+          buttonLabel="Registreer nu"
+          buttonVariant="primary"
+          onButtonPress={() => router.push("/pro/payment")}
         />
-        
-        <H1 color="$text_dark" fontWeight="bold" textAlign="center">
-          Groene Vingers Pro
-        </H1>
-        <Text color="$text_dark" fontSize="$4" textAlign="center">
-          Voor wie net wat meer uit zijn tuinervaring wil halen.
-        </Text>
-      </YStack>
 
-      {/* Pro Benefits */}
-      <YStack gap="$4" paddingVertical="$2">
-        <XStack gap="$3" alignItems="center">
-          <Ionicons name="checkmark-circle" size={26} color="#173300" />
-          <Text color="$text_dark" fontSize="$4" flex={1}>
-            Stuur onbeperkt aantal aanvragen naar tuinen
-          </Text>
-        </XStack>
-
-        <XStack gap="$3" alignItems="center">
-          <Ionicons name="checkmark-circle" size={26} color="#173300" />
-          <Text color="$text_dark" fontSize="$4" flex={1}>
-            Exclusieve toegang tot premium oases
-          </Text>
-        </XStack>
-
-        <XStack gap="$3" alignItems="center">
-          <Ionicons name="checkmark-circle" size={26} color="#173300" />
-          <Text color="$text_dark" fontSize="$4" flex={1}>
-            Uitgebreid logboek en planningstools
-          </Text>
-        </XStack>
-
-        <XStack gap="$3" alignItems="center">
-          <Ionicons name="checkmark-circle" size={26} color="#173300" />
-          <Text color="$text_dark" fontSize="$4" flex={1}>
-            Geen advertenties
-          </Text>
-        </XStack>
-      </YStack>
-
-      {/* Price Card */}
-      <Card
-        elevation={2}
-        backgroundColor="$background_secondary"
-        borderColor="$borderColor"
-        borderWidth={1}
-        borderRadius="$6"
-        padding="$5"
-        gap="$3"
-        shadowColor="#000"
-        shadowOpacity={0.05}
-        shadowRadius={10}
-        shadowOffset={{ width: 0, height: 2 }}
-      >
-        <Text fontSize="$5" color="$primary" fontWeight="bold" textAlign="center">
-          €7 / maand
-        </Text>
-        <Text fontSize="$3" color="$text_dark" textAlign="center">
-          Elke maand opzegbaar. Start met 7 dagen gratis uitproberen.
-        </Text>
-        <Button
-          label="Probeer 7 dagen gratis"
-          backgroundColor="$background"
-          color="$white"
-          onPress={() => router.push("/pro/payment")}
+        {/* Free Plan Card */}
+        <PlanCard
+          title="Gratis plan"
+          features={["  - Tuinen bekijken & zoeken", ""]}
+          buttonLabel="Huidig plan"
+          buttonVariant="secondary"
+          onButtonPress={() => {}}
         />
-      </Card>
+      </YStack>
     </PageContainer>
   );
 }

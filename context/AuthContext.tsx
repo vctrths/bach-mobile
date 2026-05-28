@@ -17,6 +17,7 @@ export interface Profile {
   profileImage: string | null;
   description: string | null;
   expoPushToken?: string | null;
+  isPro: boolean;
 }
 
 interface AuthContextType {

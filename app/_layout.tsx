@@ -6,6 +6,7 @@ import { SplashScreen, Stack } from "expo-router";
 import { useEffect } from "react";
 import { TamaguiProvider } from "tamagui";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { StripeProvider } from "@stripe/stripe-react-native";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -65,9 +66,14 @@ export default function RootLayout() {
   return (
     <TamaguiProvider config={tamaConfig} defaultTheme="groenevingers">
       <AuthProvider>
-        <OnboardingProvider>
-          <AppContent />
-        </OnboardingProvider>
+        <StripeProvider
+          publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? ""}
+          merchantIdentifier="merchant.com.groen" // required for Apple Pay
+        >
+          <OnboardingProvider>
+            <AppContent />
+          </OnboardingProvider>
+        </StripeProvider>
       </AuthProvider>
     </TamaguiProvider>
   );

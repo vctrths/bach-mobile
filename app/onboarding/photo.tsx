@@ -101,6 +101,7 @@ export default function Photo() {
         email: onboardingData.email,
         description: onboardingData.description,
         role: onboardingData.role || "tuinzoeker",
+        is_pro: onboardingData.role === "tuineigenaar",
         profile_image: profileImageUrl,
       });
 

@@ -8,7 +8,8 @@ import { Alert, Platform } from "react-native";
 import { Card, Circle, Spinner, Text, XStack, YStack } from "tamagui";
 
 export default function SettingsScreen() {
-  const { signOut } = useAuth();
+  const { signOut, profile } = useAuth();
+  const isOwner = profile?.role?.toLowerCase() === "tuineigenaar";
   const [deleting, setDeleting] = useState(false);
 
   const handleVerify = async () => {
@@ -93,11 +94,15 @@ export default function SettingsScreen() {
       label: "Persoonlijke gegevens",
       onPress: () => router.push("/personal-details"),
     },
-    {
-      id: "abonnement",
-      label: "Abonnement",
-      onPress: () => router.push("/pro"),
-    },
+    ...(!isOwner
+      ? [
+          {
+            id: "abonnement",
+            label: "Abonnement",
+            onPress: () => router.push("/pro"),
+          },
+        ]
+      : []),
     {
       id: "verifieer",
       label: "Account verifiëren",
@@ -188,27 +193,29 @@ export default function SettingsScreen() {
   return (
     <PageContainer topNavTitle="Instellingen" activeTab="profile">
       <YStack paddingHorizontal="$5" gap="$5">
-        <Card
-          backgroundColor="rgba(227, 236, 215, 0.5)"
-          borderColor="rgba(227, 236, 215, 0.85)"
-          borderWidth={1}
-          borderRadius="$10"
-          paddingVertical="$3.5"
-          paddingHorizontal="$4"
-          alignItems="center"
-          justifyContent="center"
-          onPress={() => router.push("/pro")}
-          pressStyle={{ scale: 0.98, opacity: 0.9 }}
-        >
-          <Text
-            fontSize="$4"
-            color="$text_dark"
-            fontWeight="500"
-            opacity={0.85}
+        {!isOwner && (
+          <Card
+            backgroundColor="rgba(227, 236, 215, 0.5)"
+            borderColor="rgba(227, 236, 215, 0.85)"
+            borderWidth={1}
+            borderRadius="$10"
+            paddingVertical="$3.5"
+            paddingHorizontal="$4"
+            alignItems="center"
+            justifyContent="center"
+            onPress={() => router.push("/pro")}
+            pressStyle={{ scale: 0.98, opacity: 0.9 }}
           >
-            Upgrade naar Pro voor onbeperkte aanvragen
-          </Text>
-        </Card>
+            <Text
+              fontSize="$4"
+              color="$text_dark"
+              fontWeight="500"
+              opacity={0.85}
+            >
+              Upgrade naar Pro voor onbeperkte aanvragen
+            </Text>
+          </Card>
+        )}
 
         <YStack gap="$2.5">
           <Text
