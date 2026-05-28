@@ -65,8 +65,6 @@ export default function GardenDetailsScreen() {
           </Text>
           <Button
             label="Terug"
-            backgroundColor="$background"
-            color="$white"
             onPress={() => router.back()}
           />
         </YStack>
@@ -292,6 +290,7 @@ export default function GardenDetailsScreen() {
       <YStack padding="$4" paddingBottom={Platform.OS === "ios" ? 34 : 16} backgroundColor="$canvas">
         <Button
           label="Verstuur aanvraag"
+          variant="primary"
           onPress={() => router.push(`/garden/${id}/request`)}
         />
       </YStack>

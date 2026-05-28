@@ -637,8 +637,6 @@ export default function OwnerView() {
                     {/* Chat button */}
                     <Button
                       label="Chatten"
-                      backgroundColor="#173300"
-                      color="white"
                       onPress={() => handleChat(request)}
                     />
 
@@ -646,8 +644,8 @@ export default function OwnerView() {
                     <XStack gap="$2">
                       <Button
                         label="Afwijzen"
+                        variant="outline"
                         flex={1}
-                        backgroundColor="transparent"
                         color="#ef4444"
                         onPress={() => handleReject(request.id)}
                       />

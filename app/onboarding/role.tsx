@@ -105,10 +105,7 @@ export default function RoleSelection() {
           <ProgressDots total={4} current={0} />
           <Button
             label="Volgende stap"
-            backgroundColor="$background"
-            color="$white"
             onPress={handleNext}
-            opacity={selectedRole ? 1 : 0.5}
             disabled={!selectedRole}
           />
         </YStack>

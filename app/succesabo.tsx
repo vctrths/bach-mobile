@@ -1,8 +1,9 @@
 import PageContainer from "@/components/ui/PageContainer";
+import Button from "@/components/ui/Button";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
-import { YStack, H1, Text, Button } from "tamagui";
+import { YStack, H1, Text } from "tamagui";
 
 export default function SuccesaboScreen() {
   return (
@@ -16,12 +17,8 @@ export default function SuccesaboScreen() {
           <Text color="$secondary" fontSize="$3" textAlign="center" maxWidth={280}>Je Pro-abonnement is succesvol geactiveerd. Je kunt nu onbeperkt aanvragen versturen en genieten van alle premium functies.</Text>
         </YStack>
         <YStack gap="$3" width="100%">
-          <Button size="$5" backgroundColor="rgba(23, 51, 0, 0.1)" onPress={() => router.push("/")}>
-            <Text color="#173300" fontWeight="600">Ontdek tuinen</Text>
-          </Button>
-          <Button size="$5" backgroundColor="transparent" borderWidth={1} borderColor="rgba(23, 51, 0, 0.2)" onPress={() => router.push("/profile")}>
-            <Text color="#173300" fontWeight="600">Bekijk mijn profiel</Text>
-          </Button>
+          <Button label="Ontdek tuinen" variant="secondary" onPress={() => router.push("/")} />
+          <Button label="Bekijk mijn profiel" variant="outline" onPress={() => router.push("/profile")} />
         </YStack>
       </YStack>
     </PageContainer>

@@ -219,12 +219,9 @@ export default function PersonalDetailsScreen() {
         <XStack gap="$2" alignItems="center" justifyContent="center">
           {saving && <Spinner size="small" color="$primary" />}
           <Button
-            backgroundColor="$background"
-            color="white"
             label={saving ? "Bezig..." : "Opslaan"}
             onPress={handleSave}
             disabled={saving}
-            opacity={saving ? 0.7 : 1}
             marginTop="$2"
             flex={1}
           />

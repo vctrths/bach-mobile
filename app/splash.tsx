@@ -44,16 +44,11 @@ export default function SplashRouteScreen() {
           </H1>
           <Button
             label="Leer bij over onze app"
-            backgroundColor="$background"
-            color="$white"
             onPress={() => router.push("/onboarding")}
           />
           <Button
             label="Ga rechtstreeks naar login"
-            backgroundColor="transparent"
-            borderWidth={1}
-            borderColor="$primary"
-            color="$primary"
+            variant="outline"
             onPress={() => router.push("/login")}
           />
         </YStack>

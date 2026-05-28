@@ -1,4 +1,3 @@
-import Button from "@/components/ui/Button";
 import GardenCard from "@/components/ui/GardenCard";
 import ApplianceBadges from "@/components/ui/ApplianceBadges";
 import { LogCard, type GardenLog } from "@/components/ui/LogCard";

@@ -186,8 +186,6 @@ export default function SearchScreen() {
                     <Button
                       label="Details"
                       flex={1}
-                      backgroundColor="$background"
-                      color="$white"
                       onPress={() => router.push(("/garden/" + garden.id) as any)}
                       paddingVertical="$2"
                     />

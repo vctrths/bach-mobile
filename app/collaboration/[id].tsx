@@ -291,8 +291,6 @@ export default function CollaborationDetailScreen() {
 
               <Button
                 label={submitting ? "Versturen..." : "Beoordeling plaatsen"}
-                backgroundColor="#173300"
-                color="white"
                 onPress={handleSubmitReview}
                 disabled={userRating === 0 || submitting}
               />
@@ -316,7 +314,7 @@ export default function CollaborationDetailScreen() {
           {!isEnded && (
             <Button
               label={submitting ? "Verwerken..." : "Samenwerking beëindigen"}
-              backgroundColor="rgba(239, 68, 68, 0.1)"
+              variant="secondary"
               color="#ef4444"
               onPress={handleEndCollaboration}
               disabled={submitting}
@@ -325,10 +323,7 @@ export default function CollaborationDetailScreen() {
 
           <Button
             label="Chat openen"
-            backgroundColor="transparent"
-            color="#173300"
-            borderWidth={1}
-            borderColor="#173300"
+            variant="outline"
             onPress={() => router.push("/messages")}
           />
         </YStack>

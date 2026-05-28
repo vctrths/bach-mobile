@@ -52,22 +52,20 @@ export default function AccountSelect() {
                 </YStack>
                 <YStack gap="$6">
                     <YStack gap="$2">
-                        <Button label="Login" onPress={() => router.push("/login")} disabled={loading} opacity={loading ? 0.5 : 1} />
-                        <Button label="Account aanmaken" onPress={() => router.push("/onboarding/role")} disabled={loading} opacity={loading ? 0.5 : 1} />
+                        <Button label="Login" onPress={() => router.push("/login")} disabled={loading} />
+                        <Button label="Account aanmaken" onPress={() => router.push("/onboarding/role")} disabled={loading} />
                     </YStack>
                     <Divider hasLabel />
                     <YStack gap="$2">
                         <Button
-                            backgroundColor="$background_secondary"
-                            color="$text_dark"
+                            variant="secondary"
                             label="Ga door met Google"
                             icon={<Ionicons name="logo-google" size={20} />}
                             onPress={() => handleOAuth("google")}
                             disabled={loading}
                         />
                         <Button
-                            backgroundColor="$background_secondary"
-                            color="$text_dark"
+                            variant="secondary"
                             label="Ga door met Facebook"
                             icon={<Ionicons name="logo-facebook" size={20} />}
                             onPress={() => handleOAuth("facebook")}

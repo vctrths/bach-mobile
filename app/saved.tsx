@@ -85,8 +85,6 @@ export default function SavedGardensScreen() {
           </Text>
           <Button
             label="Tuinen ontdekken"
-            backgroundColor="$background"
-            color="$white"
             onPress={() => router.push("/search")}
           />
         </YStack>

@@ -115,11 +115,8 @@ export default function PaymentScreen() {
 
             <Button
               label={loading ? "Laden..." : "Betaal nu met Stripe"}
-              backgroundColor="$background"
-              color="$white"
               onPress={handlePayment}
               disabled={loading}
-              opacity={loading ? 0.7 : 1}
               marginTop="$4"
             />
           </YStack>

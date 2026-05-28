@@ -106,11 +106,8 @@ export default function Login() {
                             )}
                             <Button
                                 label={loading ? "Bezig met inloggen..." : "Login"}
-                                backgroundColor="$background"
-                                color="$white"
                                 onPress={handleLogin}
                                 disabled={loading}
-                                opacity={loading ? 0.6 : 1}
                             />
                         </YStack>
                     </YStack>
@@ -119,16 +116,14 @@ export default function Login() {
 
                     <YStack gap="$2">
                         <Button
-                            backgroundColor="$background_secondary"
-                            color="$text_dark"
+                            variant="secondary"
                             label="Ga door met Google"
                             icon={<Ionicons name="logo-google" size={20} />}
                             onPress={() => handleOAuth("google")}
                             disabled={loading}
                         />
                         <Button
-                            backgroundColor="$background_secondary"
-                            color="$text_dark"
+                            variant="secondary"
                             label="Ga door met Facebook"
                             icon={<Ionicons name="logo-facebook" size={20} />}
                             onPress={() => handleOAuth("facebook")}

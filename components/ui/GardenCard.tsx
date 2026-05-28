@@ -64,8 +64,6 @@ export default function GardenCard({
           <Button
             label="Details"
             flex={1}
-            backgroundColor="#173300"
-            color="#F5FFF3"
             borderRadius={64}
             paddingVertical={8}
             paddingHorizontal={16}

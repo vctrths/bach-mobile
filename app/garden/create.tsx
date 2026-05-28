@@ -332,11 +332,8 @@ export default function GardenCreateScreen() {
           {saving && <Spinner size="small" color="$primary" />}
           <Button
             label={saving ? "Bezig..." : "Tuin aanmaken"}
-            backgroundColor="$background"
-            color="white"
             onPress={handleCreate}
             disabled={saving}
-            opacity={saving ? 0.7 : 1}
             flex={1}
           />
         </XStack>
