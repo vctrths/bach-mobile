@@ -267,7 +267,13 @@ export default function GardenDetailsScreen() {
 
         {/* Owner Profile Section */}
         <YStack gap="$4" alignItems="center">
-          <Circle size={167} overflow="hidden" backgroundColor="$borderColor">
+          <Circle 
+            size={167} 
+            overflow="hidden" 
+            backgroundColor="$background_secondary"
+            justifyContent="center"
+            alignItems="center"
+          >
             {garden.owner?.profileImage ? (
               <ExpoImage
                 source={{ uri: garden.owner.profileImage }}
@@ -275,15 +281,11 @@ export default function GardenDetailsScreen() {
                 contentFit="cover"
               />
             ) : (
-              <ExpoImage
-                source={require("@/assets/images/garden-details/owner_victor.png")}
-                style={{ width: "100%", height: "100%" }}
-                contentFit="cover"
-              />
+              <Ionicons name="person" size={80} color="$secondary" />
             )}
           </Circle>
           <Text fontFamily="Inter" fontWeight="900" fontSize={20} color="$text_dark">
-            Wie is {garden.owner?.firstName ?? "Victor"}?
+            Wie is {garden.owner?.firstName ?? "de eigenaar"}?
           </Text>
           <Text
             fontFamily="Inter"
