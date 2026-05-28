@@ -82,6 +82,7 @@ export default function Button({
       paddingHorizontal={props.paddingHorizontal ?? styles.paddingHorizontal}
       disabled={disabled}
       opacity={opacity ?? (disabled ? 0.5 : 1)}
+      overflow="visible"
       hoverStyle={{
         backgroundColor: styles.hoverBackgroundColor,
         ...(variant === "secondary" && { borderColor: "$button_secondary_hover_border" }),
