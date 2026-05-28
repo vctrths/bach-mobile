@@ -129,10 +129,7 @@ export default function Security() {
           <ProgressDots total={4} current={2} />
           <Button
             label="Volgende stap"
-            backgroundColor="$background"
-            color="$white"
             onPress={handleNext}
-            opacity={isComplete ? 1 : 0.5}
             disabled={!isComplete}
           />
         </YStack>

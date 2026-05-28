@@ -168,11 +168,8 @@ export default function Photo() {
           <ProgressDots total={4} current={3} />
           <Button
             label={isLoading ? "Bezig met aanmaken..." : "Account aanmaken"}
-            backgroundColor="$background"
-            color="$white"
             onPress={handleNext}
             disabled={isLoading}
-            opacity={isLoading ? 0.6 : 1}
           />
         </YStack>
       </YStack>

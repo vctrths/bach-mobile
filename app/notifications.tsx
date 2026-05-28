@@ -209,8 +209,7 @@ export default function NotificationsScreen() {
                         />
                         <Button
                           label="Ga de tuin bekijken"
-                          backgroundColor="rgba(23, 51, 0, 0.08)"
-                          color="#173300"
+                          variant="secondary"
                           onPress={() =>
                             router.push("/messages" as any)
                           }
@@ -236,9 +235,8 @@ export default function NotificationsScreen() {
                         <XStack gap="$2">
                           <Button
                             label="Chat openen"
+                            variant="secondary"
                             flex={1}
-                            backgroundColor="rgba(23, 51, 0, 0.08)"
-                            color="#173300"
                             onPress={() =>
                               router.push("/messages" as any)
                             }
@@ -247,18 +245,16 @@ export default function NotificationsScreen() {
                         <XStack gap="$2">
                           <Button
                             label="Afwijzen"
+                            variant="decline"
                             flex={1}
-                            backgroundColor="transparent"
-                            color="#ef4444"
                             onPress={() =>
                               router.push("/" as any)
                             }
                           />
                           <Button
                             label="Accepteren"
+                            variant="accept"
                             flex={1}
-                            backgroundColor="#22c55e"
-                            color="white"
                             onPress={() =>
                               router.push("/" as any)
                             }

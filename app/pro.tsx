@@ -66,25 +66,12 @@ function PlanCard({ title, features, buttonLabel, buttonVariant = "primary", onB
       </YStack>
 
       {/* Action Button */}
-      <YStack
-        backgroundColor={isPrimary ? "#173300" : "transparent"}
-        borderColor={isPrimary ? "transparent" : "#D4E1AE"}
-        borderWidth={1}
-        borderRadius={64}
-        paddingHorizontal={16}
-        paddingVertical={12}
-        alignItems="center"
-        marginTop="auto"
-        onPress={onButtonPress}
-      >
-        <Text
-          fontSize={16}
-          color={isPrimary ? "#F5FFF3" : "#172211"}
-          fontFamily="$body"
-          fontWeight="700"
-        >
-          {buttonLabel}
-        </Text>
+      <YStack marginTop="auto">
+        <Button
+          label={buttonLabel}
+          variant={isPrimary ? "primary" : "secondary"}
+          onPress={onButtonPress}
+        />
       </YStack>
     </YStack>
   );

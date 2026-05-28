@@ -573,13 +573,13 @@ export default function GardenRequestScreen() {
               ? "Bezig..."
               : "Verzoek sturen"
           }
-          backgroundColor={isDisabled ? "#d1d5db" : "#EAF0D8"}
-          color={isDisabled ? "#6b7280" : "#172211"}
-          borderWidth={1}
-          borderColor={isDisabled ? "#9ca3af" : "#D4E1AE"}
+          variant="secondary"
+          backgroundColor={isDisabled ? "#d1d5db" : undefined}
+          color={isDisabled ? "#6b7280" : undefined}
+          borderColor={isDisabled ? "#9ca3af" : undefined}
+          borderWidth={isDisabled ? 1 : undefined}
           onPress={handleSubmit}
           disabled={isDisabled}
-          opacity={isDisabled ? 0.7 : 1}
         />
       </YStack>
     </PageContainer>
