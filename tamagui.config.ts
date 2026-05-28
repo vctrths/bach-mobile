@@ -29,6 +29,17 @@ const groeneVingersThema = {
   primary: "#37392B",
   secondary: "#57594D",
   error: "#D32F2F",
+  button_primary_bg: "#173300",
+  button_primary_hover: "#172211",
+  button_primary_text: "#F5FFF3",
+  button_secondary_bg: "#EAF0D8",
+  button_secondary_border: "#D4E1AE",
+  button_secondary_hover_border: "#E3ECD7",
+  button_secondary_text: "#172211",
+  button_decline_bg: "#FF0F03",
+  button_decline_text: "#FFFFFF",
+  button_accept_bg: "#698D14",
+  button_accept_text: "#FFFFFF",
 };
 
 export const config = createTamagui({

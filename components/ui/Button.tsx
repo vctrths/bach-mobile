@@ -1,7 +1,7 @@
 import { Button as TamaguiButton, Text } from "tamagui";
 import type { ReactNode } from "react";
 
-type ButtonVariant = "primary" | "secondary" | "outline";
+type ButtonVariant = "primary" | "secondary" | "decline" | "accept";
 
 interface ButtonProps extends Omit<React.ComponentProps<typeof TamaguiButton>, "color"> {
   label: string;
@@ -17,20 +17,44 @@ const VARIANT_STYLES: Record<ButtonVariant, {
   color: string;
   borderWidth?: number;
   borderColor?: string;
+  hoverBackgroundColor: string;
+  paddingVertical: number;
+  paddingHorizontal: number;
+  fontSize: number;
 }> = {
   primary: {
-    backgroundColor: "$background",
-    color: "$white",
+    backgroundColor: "$button_primary_bg",
+    color: "$button_primary_text",
+    hoverBackgroundColor: "$button_primary_hover",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    fontSize: 16,
   },
   secondary: {
-    backgroundColor: "rgba(23, 51, 0, 0.08)",
-    color: "#173300",
-  },
-  outline: {
-    backgroundColor: "transparent",
-    color: "#173300",
+    backgroundColor: "$button_secondary_bg",
+    color: "$button_secondary_text",
     borderWidth: 1,
-    borderColor: "$background",
+    borderColor: "$button_secondary_border",
+    hoverBackgroundColor: "$button_secondary_bg",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    fontSize: 16,
+  },
+  decline: {
+    backgroundColor: "$button_decline_bg",
+    color: "$button_decline_text",
+    hoverBackgroundColor: "$button_decline_bg",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    fontSize: 14,
+  },
+  accept: {
+    backgroundColor: "$button_accept_bg",
+    color: "$button_accept_text",
+    hoverBackgroundColor: "$button_accept_bg",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    fontSize: 14,
   },
 };
 
@@ -50,18 +74,24 @@ export default function Button({
   return (
     <TamaguiButton
       {...props}
-      borderRadius={props.borderRadius ?? 100}
+      borderRadius={props.borderRadius ?? 64}
       backgroundColor={props.backgroundColor ?? styles.backgroundColor}
       borderWidth={props.borderWidth ?? styles.borderWidth}
       borderColor={props.borderColor ?? styles.borderColor}
+      paddingVertical={props.paddingVertical ?? styles.paddingVertical}
+      paddingHorizontal={props.paddingHorizontal ?? styles.paddingHorizontal}
       disabled={disabled}
       opacity={opacity ?? (disabled ? 0.5 : 1)}
+      hoverStyle={{
+        backgroundColor: styles.hoverBackgroundColor,
+        ...(variant === "secondary" && { borderColor: "$button_secondary_hover_border" }),
+      }}
     >
       {icon && <TamaguiButton.Icon>{icon}</TamaguiButton.Icon>}
       <TamaguiButton.Text
         color={color ?? styles.color}
         fontWeight={fontWeight}
-        fontSize={fontSize}
+        fontSize={fontSize ?? styles.fontSize}
       >
         {label}
       </TamaguiButton.Text>

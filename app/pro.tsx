@@ -69,10 +69,7 @@ function PlanCard({ title, features, buttonLabel, buttonVariant = "primary", onB
       <YStack marginTop="auto">
         <Button
           label={buttonLabel}
-          variant={isPrimary ? "primary" : "outline"}
-          borderRadius={64}
-          paddingHorizontal={16}
-          paddingVertical={12}
+          variant={isPrimary ? "primary" : "secondary"}
           onPress={onButtonPress}
         />
       </YStack>

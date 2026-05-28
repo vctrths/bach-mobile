@@ -18,7 +18,7 @@ export default function SuccesaboScreen() {
         </YStack>
         <YStack gap="$3" width="100%">
           <Button label="Ontdek tuinen" variant="secondary" onPress={() => router.push("/")} />
-          <Button label="Bekijk mijn profiel" variant="outline" onPress={() => router.push("/profile")} />
+          <Button label="Bekijk mijn profiel" variant="secondary" onPress={() => router.push("/profile")} />
         </YStack>
       </YStack>
     </PageContainer>

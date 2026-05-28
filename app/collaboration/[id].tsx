@@ -314,8 +314,7 @@ export default function CollaborationDetailScreen() {
           {!isEnded && (
             <Button
               label={submitting ? "Verwerken..." : "Samenwerking beëindigen"}
-              variant="secondary"
-              color="#ef4444"
+              variant="decline"
               onPress={handleEndCollaboration}
               disabled={submitting}
             />
@@ -323,7 +322,7 @@ export default function CollaborationDetailScreen() {
 
           <Button
             label="Chat openen"
-            variant="outline"
+            variant="secondary"
             onPress={() => router.push("/messages")}
           />
         </YStack>

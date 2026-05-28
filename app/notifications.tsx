@@ -245,18 +245,16 @@ export default function NotificationsScreen() {
                         <XStack gap="$2">
                           <Button
                             label="Afwijzen"
-                            variant="outline"
+                            variant="decline"
                             flex={1}
-                            color="#ef4444"
                             onPress={() =>
                               router.push("/" as any)
                             }
                           />
                           <Button
                             label="Accepteren"
+                            variant="accept"
                             flex={1}
-                            backgroundColor="#22c55e"
-                            color="white"
                             onPress={() =>
                               router.push("/" as any)
                             }

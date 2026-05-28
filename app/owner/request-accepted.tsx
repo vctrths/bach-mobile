@@ -104,7 +104,7 @@ export default function RequestAcceptedScreen() {
               />
               <Button
                 label="Terug naar dashboard"
-                variant="outline"
+                variant="secondary"
                 onPress={() => router.push("/")}
               />
             </YStack>

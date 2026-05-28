@@ -644,16 +644,14 @@ export default function OwnerView() {
                     <XStack gap="$2">
                       <Button
                         label="Afwijzen"
-                        variant="outline"
+                        variant="decline"
                         flex={1}
-                        color="#ef4444"
                         onPress={() => handleReject(request.id)}
                       />
                       <Button
                         label="Accepteren"
+                        variant="accept"
                         flex={1}
-                        backgroundColor="#22c55e"
-                        color="white"
                         onPress={() => handleAccept(request)}
                       />
                     </XStack>

@@ -48,7 +48,7 @@ export default function SplashRouteScreen() {
           />
           <Button
             label="Ga rechtstreeks naar login"
-            variant="outline"
+            variant="secondary"
             onPress={() => router.push("/login")}
           />
         </YStack>
