@@ -1,63 +1,12 @@
 import { config as tamaguiConfig } from "@tamagui/config/v3";
 import { createFont, createTamagui } from "tamagui";
-import { createAnimations } from "@tamagui/animations-react-native";
-
-const animations = createAnimations({
-  quick: {
-    type: "spring",
-    damping: 20,
-    mass: 1,
-    stiffness: 250,
-  },
-  bouncy: {
-    type: "spring",
-    damping: 10,
-    mass: 0.9,
-    stiffness: 100,
-  },
-  lazy: {
-    type: "spring",
-    damping: 20,
-    stiffness: 60,
-  },
-});
 
 const satoshiFont = createFont({
   family: "Satoshi, Helvetica, Arial, sans-serif",
-  size: {
-    1: 12,
-    2: 14,
-    3: 15,
-    4: 16,
-    5: 18,
-    6: 20,
-    7: 24,
-    8: 32,
-    9: 48,
-    true: 16,
-  },
-  lineHeight: {
-    1: 17,
-    2: 22,
-    3: 25,
-    4: 26,
-    5: 29,
-    6: 32,
-    7: 38,
-    8: 50,
-    9: 72,
-  },
-  weight: {
-    1: "300",
-    3: "400",
-    5: "500",
-    7: "700",
-    9: "900",
-  },
-  letterSpacing: {
-    1: 0,
-    2: -0.5,
-  },
+  size: { 1: 12, 2: 14, 3: 15, 4: 16, 5: 18, 6: 20, 7: 24, 8: 32, 9: 48, true: 16 },
+  lineHeight: { 1: 17, 2: 22, 3: 25, 4: 26, 5: 29, 6: 32, 7: 38, 8: 50, 9: 72 },
+  weight: { 1: "300", 3: "400", 5: "500", 7: "700", 9: "900" },
+  letterSpacing: { 1: 0, 2: -0.5 },
   face: {
     300: { normal: "SatoshiLight" },
     400: { normal: "Satoshi" },
@@ -69,26 +18,25 @@ const satoshiFont = createFont({
 
 const groeneVingersThema = {
   ...tamaguiConfig.themes.light,
-
   background: "#173300",
   background_secondary: "#F1F3EC",
   canvas: "#FDFBF7",
   text_dark: "#172211",
   white: "#FFF",
   divider: "#F5F5F5",
-
   borderColor: "#E3ECD7",
   primary: "#37392B",
   secondary: "#57594D",
   error: "#D32F2F",
 };
 
-const config = createTamagui({
+export const config = createTamagui({
   ...tamaguiConfig,
-  animations,
   fonts: {
+    ...tamaguiConfig.fonts,
     heading: satoshiFont,
     body: satoshiFont,
+    Inter: satoshiFont,
   },
   themes: {
     ...tamaguiConfig.themes,
@@ -96,10 +44,10 @@ const config = createTamagui({
   },
 });
 
-type AppConfig = typeof config;
+export default config;
+
+export type AppConfig = typeof config;
 
 declare module "tamagui" {
   interface TamaguiCustomConfig extends AppConfig { }
 }
-
-export default config;
