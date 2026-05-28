@@ -1,4 +1,4 @@
-import { Button as TamaguiButton, Text } from "tamagui";
+import { Button as TamaguiButton, Text, XStack } from "tamagui";
 import type { ReactNode } from "react";
 
 type ButtonVariant = "primary" | "secondary" | "decline" | "accept";
@@ -78,7 +78,6 @@ export default function Button({
       backgroundColor={props.backgroundColor ?? styles.backgroundColor}
       borderWidth={props.borderWidth ?? styles.borderWidth}
       borderColor={props.borderColor ?? styles.borderColor}
-      padding={0}
       paddingVertical={props.paddingVertical ?? styles.paddingVertical}
       paddingHorizontal={props.paddingHorizontal ?? styles.paddingHorizontal}
       disabled={disabled}
@@ -88,15 +87,17 @@ export default function Button({
         ...(variant === "secondary" && { borderColor: "$button_secondary_hover_border" }),
       }}
     >
-      {icon && <TamaguiButton.Icon>{icon}</TamaguiButton.Icon>}
-      <TamaguiButton.Text
-        color={color ?? styles.color}
-        fontWeight={fontWeight}
-        fontSize={fontSize ?? styles.fontSize}
-        lineHeight={fontSize ?? styles.fontSize}
-      >
-        {label}
-      </TamaguiButton.Text>
+      <XStack gap={8} alignItems="center" justifyContent="center">
+        {icon && icon}
+        <Text
+          color={color ?? styles.color}
+          fontWeight={fontWeight}
+          fontSize={fontSize ?? styles.fontSize}
+          lineHeight={(fontSize ?? styles.fontSize) * 1.2}
+        >
+          {label}
+        </Text>
+      </XStack>
     </TamaguiButton>
   );
 }
