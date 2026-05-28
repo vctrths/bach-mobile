@@ -168,58 +168,61 @@ export default function GardenDetailsScreen() {
             Aanwezig
           </Text>
           {(() => {
-            const validAppliances = garden.appliances?.filter((key) => !!APPLIANCE_MAP[key]) || [];
+            const rawAppliances = garden.appliances?.filter((key) => !!APPLIANCE_MAP[key]) || [];
+            
+            // Reorder: Put selected at the start
+            const validAppliances = [...rawAppliances].sort((a, b) => {
+              if (a === selectedAppliance) return -1;
+              if (b === selectedAppliance) return 1;
+              return 0;
+            });
             
             if (validAppliances.length > 0) {
               return (
-                <YStack gap="$3">
-                  <XStack gap="$4" flexWrap="wrap">
-                    {validAppliances.map((key) => {
-                      const appliance = APPLIANCE_MAP[key];
-                      const isSelected = selectedAppliance === key;
-                      
-                      return (
-                        <Circle
-                          key={key}
-                          size={50}
-                          backgroundColor={isSelected ? "#173300" : "#F1F3EC"}
-                          justifyContent="center"
-                          alignItems="center"
-                          borderWidth={1}
-                          borderColor={isSelected ? "#173300" : "#E3ECD7"}
-                          onPress={() => setSelectedAppliance(isSelected ? null : key)}
-                        >
-                          <MaterialCommunityIcons 
-                            name={appliance.icon} 
-                            size={24} 
-                            color={isSelected ? "#FFF" : "#172211"} 
-                          />
-                        </Circle>
-                      );
-                    })}
-                  </XStack>
-
-                  {selectedAppliance && (
-                    <YStack 
-                      backgroundColor="$background_secondary" 
-                      padding="$3" 
-                      borderRadius={12}
-                      borderWidth={1}
-                      borderColor="$borderColor"
-                    >
-                      <Text 
-                        fontFamily="Inter" 
-                        fontWeight="900" 
-                        fontSize={14} 
-                        color="$text_dark" 
-                        textAlign="center"
-                        textTransform="uppercase"
+                <XStack gap="$3" flexWrap="wrap" alignItems="center">
+                  {validAppliances.map((key) => {
+                    const appliance = APPLIANCE_MAP[key];
+                    const isSelected = selectedAppliance === key;
+                    
+                    return (
+                      <XStack
+                        key={key}
+                        animation="quick"
+                        backgroundColor={isSelected ? "#173300" : "#F1F3EC"}
+                        height={50}
+                        paddingHorizontal={isSelected ? 16 : 0}
+                        width={isSelected ? "auto" : 50}
+                        minWidth={50}
+                        borderRadius={100}
+                        justifyContent="center"
+                        alignItems="center"
+                        borderWidth={1}
+                        borderColor={isSelected ? "#173300" : "#E3ECD7"}
+                        onPress={() => setSelectedAppliance(isSelected ? null : key)}
+                        gap={isSelected ? "$2" : 0}
                       >
-                        {APPLIANCE_MAP[selectedAppliance].label}
-                      </Text>
-                    </YStack>
-                  )}
-                </YStack>
+                        <MaterialCommunityIcons 
+                          name={appliance.icon} 
+                          size={24} 
+                          color={isSelected ? "#FFF" : "#172211"} 
+                        />
+                        {isSelected && (
+                          <Text 
+                            fontFamily="Inter" 
+                            fontWeight="900" 
+                            fontSize={14} 
+                            color="#FFF" 
+                            textTransform="uppercase"
+                            animation="quick"
+                            enterStyle={{ opacity: 0, x: -10 }}
+                          >
+                            {appliance.label}
+                          </Text>
+                        )}
+                      </XStack>
+                    );
+                  })}
+                </XStack>
               );
             }
             return (
