@@ -349,88 +349,6 @@ export default function OwnerView() {
             </ScrollView>
           </YStack>
 
-          {/* Actieve samenwerkingen Section */}
-          <YStack gap="$2">
-            <Text fontSize={24} fontWeight="900" color="$text_dark">
-              Actieve samenwerkingen
-            </Text>
-            {gardeners.length > 0 ? (
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <XStack gap="$4" paddingVertical="$2">
-                  {gardeners.map((gardener) => (
-                    <Card
-                      key={gardener.id}
-                      width={240}
-                      backgroundColor="white"
-                      borderColor="#E3ECD7"
-                      borderWidth={1}
-                      borderRadius={16}
-                      padding="$3"
-                      onPress={() =>
-                        router.push(("/collaboration/" + gardener.id) as any)
-                      }
-                      pressStyle={{ scale: 0.98, opacity: 0.9 }}
-                    >
-                      <XStack gap="$3" alignItems="center">
-                        <Circle
-                          size={48}
-                          backgroundColor="rgba(23, 51, 0, 0.08)"
-                          overflow="hidden"
-                        >
-                          {gardener.profileImage ? (
-                            <XStack width="100%" height="100%">
-                              <img
-                                src={gardener.profileImage}
-                                style={{
-                                  width: "100%",
-                                  height: "100%",
-                                  objectFit: "cover",
-                                  borderRadius: 24,
-                                }}
-                              />
-                            </XStack>
-                          ) : (
-                            <MaterialCommunityIcons
-                              name="account-outline"
-                              size={22}
-                              color="#173300"
-                            />
-                          )}
-                        </Circle>
-                        <YStack flex={1}>
-                          <Text
-                            fontSize="$4"
-                            fontWeight="bold"
-                            color="$text_dark"
-                            numberOfLines={1}
-                          >
-                            {gardener.firstName} {gardener.lastName}
-                          </Text>
-                          <XStack alignItems="center" gap="$1">
-                            <Ionicons
-                              name="leaf"
-                              size={12}
-                              color="$primary"
-                            />
-                            <Text
-                              fontSize="$2"
-                              color="#56594D"
-                              numberOfLines={1}
-                            >
-                              {gardener.gardenName}
-                            </Text>
-                          </XStack>
-                        </YStack>
-                      </XStack>
-                    </Card>
-                  ))}
-                </XStack>
-              </ScrollView>
-            ) : (
-              <CollaborationsPlaceholder />
-            )}
-          </YStack>
-
           {/* Jouw Planning Section */}
           <YStack gap="$2">
             <Text fontSize={24} fontWeight="900" color="$text_dark">
@@ -536,6 +454,88 @@ export default function OwnerView() {
               </YStack>
             ) : (
               <PlanningPlaceholder />
+            )}
+          </YStack>
+
+          {/* Actieve samenwerkingen Section */}
+          <YStack gap="$2">
+            <Text fontSize={24} fontWeight="900" color="$text_dark">
+              Actieve samenwerkingen
+            </Text>
+            {gardeners.length > 0 ? (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <XStack gap="$4" paddingVertical="$2">
+                  {gardeners.map((gardener) => (
+                    <Card
+                      key={gardener.id}
+                      width={260}
+                      backgroundColor="#F0F3EC"
+                      borderColor="#E3ECD7"
+                      borderWidth={1}
+                      borderRadius={16}
+                      padding={12}
+                      onPress={() =>
+                        router.push(("/collaboration/" + gardener.id) as any)
+                      }
+                      pressStyle={{ scale: 0.98, opacity: 0.9 }}
+                    >
+                      <XStack gap="$3" alignItems="center">
+                        <Circle
+                          size={48}
+                          backgroundColor="rgba(23, 51, 0, 0.08)"
+                          overflow="hidden"
+                        >
+                          {gardener.profileImage ? (
+                            <XStack width="100%" height="100%">
+                              <img
+                                src={gardener.profileImage}
+                                style={{
+                                  width: "100%",
+                                  height: "100%",
+                                  objectFit: "cover",
+                                  borderRadius: 24,
+                                }}
+                              />
+                            </XStack>
+                          ) : (
+                            <MaterialCommunityIcons
+                              name="account-outline"
+                              size={22}
+                              color="#173300"
+                            />
+                          )}
+                        </Circle>
+                        <YStack flex={1}>
+                          <Text
+                            fontSize={16}
+                            fontWeight="700"
+                            color="$text_dark"
+                            numberOfLines={1}
+                          >
+                            {gardener.firstName} {gardener.lastName}
+                          </Text>
+                          <XStack alignItems="center" gap={4}>
+                            <Ionicons
+                              name="leaf"
+                              size={12}
+                              color="$primary"
+                            />
+                            <Text
+                              fontSize={13}
+                              color="#56594D"
+                              numberOfLines={1}
+                            >
+                              {gardener.gardenName}
+                            </Text>
+                          </XStack>
+                        </YStack>
+                      </XStack>
+                    </Card>
+                  ))}
+                </XStack>
+              </ScrollView>
+            ) : (
+              <CollaborationsPlaceholder />
             )}
           </YStack>
 
