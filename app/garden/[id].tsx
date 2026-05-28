@@ -5,10 +5,10 @@ import { Image as ExpoImage } from "@/lib/image";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { H1, H2, Spinner, Text, XStack, YStack, Circle, ScrollView } from "tamagui";
+import { LayoutAnimation, Platform, StyleSheet } from "react-native";
 import { supabase, toCamelCase } from "@/utils/supabase";
 import { type Garden } from "@/types/garden";
 import MapView, { Marker } from "react-native-maps";
-import { StyleSheet } from "react-native";
 import { APPLIANCE_MAP } from "@/components/ui/ApplianceBadges";
 
 export default function GardenDetailsScreen() {
@@ -16,6 +16,11 @@ export default function GardenDetailsScreen() {
   const [garden, setGarden] = useState<Garden | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedAppliance, setSelectedAppliance] = useState<string | null>(null);
+
+  const toggleAppliance = (key: string) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setSelectedAppliance(current => current === key ? null : key);
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -172,7 +177,7 @@ export default function GardenDetailsScreen() {
             
             if (validAppliances.length > 0) {
               return (
-                <XStack gap="$3" flexWrap="wrap" alignItems="center" animation="quick">
+                <XStack gap="$3" flexWrap="wrap" alignItems="center">
                   {validAppliances.map((key) => {
                     const appliance = APPLIANCE_MAP[key];
                     const isSelected = selectedAppliance === key;
@@ -180,7 +185,6 @@ export default function GardenDetailsScreen() {
                     return (
                       <XStack
                         key={key}
-                        animation="quick"
                         backgroundColor={isSelected ? "#173300" : "#F1F3EC"}
                         height={50}
                         paddingHorizontal={isSelected ? 16 : 0}
@@ -191,7 +195,7 @@ export default function GardenDetailsScreen() {
                         alignItems="center"
                         borderWidth={1}
                         borderColor={isSelected ? "#173300" : "#E3ECD7"}
-                        onPress={() => setSelectedAppliance(isSelected ? null : key)}
+                        onPress={() => toggleAppliance(key)}
                         gap={isSelected ? "$2" : 0}
                         pressStyle={{ scale: 0.95 }}
                       >
@@ -207,7 +211,6 @@ export default function GardenDetailsScreen() {
                             fontSize={14} 
                             color="#FFF" 
                             textTransform="uppercase"
-                            animation="quick"
                             enterStyle={{ opacity: 0, scale: 0.5 }}
                             exitStyle={{ opacity: 0, scale: 0.5 }}
                           >
