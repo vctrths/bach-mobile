@@ -1,27 +1,6 @@
 import { createFont, createTamagui, createTokens } from "tamagui";
-import { createAnimations } from "@tamagui/animations-react-native";
 import { shorthands } from "@tamagui/shorthands";
 import { themes, tokens } from "@tamagui/config/v3";
-
-const animations = createAnimations({
-  quick: {
-    type: "spring",
-    damping: 20,
-    mass: 1,
-    stiffness: 250,
-  },
-  bouncy: {
-    type: "spring",
-    damping: 10,
-    mass: 0.9,
-    stiffness: 100,
-  },
-  lazy: {
-    type: "spring",
-    damping: 20,
-    stiffness: 60,
-  },
-});
 
 const satoshiFont = createFont({
   family: "Satoshi, Helvetica, Arial, sans-serif",
@@ -53,7 +32,6 @@ const groeneVingersThema = {
 };
 
 export const config = createTamagui({
-  animations,
   shorthands,
   fonts: {
     heading: satoshiFont,

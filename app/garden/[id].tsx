@@ -5,7 +5,7 @@ import { Image as ExpoImage } from "@/lib/image";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { H1, H2, Spinner, Text, XStack, YStack, Circle, ScrollView } from "tamagui";
-import { LayoutAnimation, Platform, StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 import { supabase, toCamelCase } from "@/utils/supabase";
 import { type Garden } from "@/types/garden";
 import MapView, { Marker } from "react-native-maps";
@@ -18,7 +18,6 @@ export default function GardenDetailsScreen() {
   const [selectedAppliance, setSelectedAppliance] = useState<string | null>(null);
 
   const toggleAppliance = (key: string) => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setSelectedAppliance(current => current === key ? null : key);
   };
 
@@ -177,8 +176,7 @@ export default function GardenDetailsScreen() {
             
             if (validAppliances.length > 0) {
               return (
-                // @ts-ignore
-                <XStack gap="$3" flexWrap="wrap" alignItems="center" animation="quick">
+                <XStack gap="$3" flexWrap="wrap" alignItems="center">
                   {validAppliances.map((key) => {
                     const appliance = APPLIANCE_MAP[key];
                     const isSelected = selectedAppliance === key;
@@ -186,8 +184,6 @@ export default function GardenDetailsScreen() {
                     return (
                       <XStack
                         key={key}
-                        // @ts-ignore
-                        animation="quick"
                         backgroundColor={isSelected ? "#173300" : "#F1F3EC"}
                         height={50}
                         paddingHorizontal={isSelected ? 16 : 0}
@@ -214,10 +210,6 @@ export default function GardenDetailsScreen() {
                             fontSize={14} 
                             color="#FFF" 
                             textTransform="uppercase"
-                            // @ts-ignore
-                            animation="quick"
-                            enterStyle={{ opacity: 0, scale: 0.5 }}
-                            exitStyle={{ opacity: 0, scale: 0.5 }}
                           >
                             {appliance.label}
                           </Text>
