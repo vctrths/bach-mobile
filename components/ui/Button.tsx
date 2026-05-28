@@ -1,15 +1,31 @@
-import { Button as TamaguiButton, Text, XStack } from "tamagui";
+import { Text, XStack } from "tamagui";
 import type { ReactNode } from "react";
 
 type ButtonVariant = "primary" | "secondary" | "decline" | "accept";
 
-interface ButtonProps extends Omit<React.ComponentProps<typeof TamaguiButton>, "color"> {
+interface ButtonProps {
   label: string;
   variant?: ButtonVariant;
   icon?: ReactNode;
-  color?: React.ComponentProps<typeof Text>["color"];
-  fontWeight?: React.ComponentProps<typeof Text>["fontWeight"];
-  fontSize?: React.ComponentProps<typeof Text>["fontSize"];
+  color?: string;
+  fontWeight?: "normal" | "bold" | "100" | "200" | "300" | "400" | "500" | "600" | "700" | "800" | "900";
+  fontSize?: number;
+  disabled?: boolean;
+  opacity?: number;
+  onPress?: () => void;
+  flex?: number;
+  marginVertical?: number | string;
+  marginHorizontal?: number | string;
+  marginTop?: number | string;
+  marginBottom?: number | string;
+  marginLeft?: number | string;
+  marginRight?: number | string;
+  paddingVertical?: number;
+  paddingHorizontal?: number;
+  borderRadius?: number;
+  backgroundColor?: string;
+  borderWidth?: number;
+  borderColor?: string;
 }
 
 const VARIANT_STYLES: Record<ButtonVariant, {
@@ -17,7 +33,7 @@ const VARIANT_STYLES: Record<ButtonVariant, {
   color: string;
   borderWidth?: number;
   borderColor?: string;
-  hoverBackgroundColor: string;
+  pressBackgroundColor: string;
   paddingVertical: number;
   paddingHorizontal: number;
   fontSize: number;
@@ -25,7 +41,7 @@ const VARIANT_STYLES: Record<ButtonVariant, {
   primary: {
     backgroundColor: "$button_primary_bg",
     color: "$button_primary_text",
-    hoverBackgroundColor: "$button_primary_hover",
+    pressBackgroundColor: "$button_primary_hover",
     paddingVertical: 12,
     paddingHorizontal: 16,
     fontSize: 16,
@@ -35,7 +51,7 @@ const VARIANT_STYLES: Record<ButtonVariant, {
     color: "$button_secondary_text",
     borderWidth: 1,
     borderColor: "$button_secondary_border",
-    hoverBackgroundColor: "$button_secondary_bg",
+    pressBackgroundColor: "$button_secondary_bg",
     paddingVertical: 12,
     paddingHorizontal: 16,
     fontSize: 16,
@@ -43,7 +59,7 @@ const VARIANT_STYLES: Record<ButtonVariant, {
   decline: {
     backgroundColor: "$button_decline_bg",
     color: "$button_decline_text",
-    hoverBackgroundColor: "$button_decline_bg",
+    pressBackgroundColor: "$button_decline_bg",
     paddingVertical: 8,
     paddingHorizontal: 16,
     fontSize: 14,
@@ -51,7 +67,7 @@ const VARIANT_STYLES: Record<ButtonVariant, {
   accept: {
     backgroundColor: "$button_accept_bg",
     color: "$button_accept_text",
-    hoverBackgroundColor: "$button_accept_bg",
+    pressBackgroundColor: "$button_accept_bg",
     paddingVertical: 8,
     paddingHorizontal: 16,
     fontSize: 14,
@@ -67,38 +83,59 @@ export default function Button({
   fontSize,
   disabled,
   opacity,
-  ...props
+  onPress,
+  flex,
+  marginVertical,
+  marginHorizontal,
+  marginTop,
+  marginBottom,
+  marginLeft,
+  marginRight,
+  paddingVertical,
+  paddingHorizontal,
+  borderRadius,
+  backgroundColor,
+  borderWidth,
+  borderColor,
 }: ButtonProps) {
   const styles = VARIANT_STYLES[variant];
 
   return (
-    <TamaguiButton
-      {...props}
-      borderRadius={props.borderRadius ?? 64}
-      backgroundColor={props.backgroundColor ?? styles.backgroundColor}
-      borderWidth={props.borderWidth ?? styles.borderWidth}
-      borderColor={props.borderColor ?? styles.borderColor}
-      paddingVertical={props.paddingVertical ?? styles.paddingVertical}
-      paddingHorizontal={props.paddingHorizontal ?? styles.paddingHorizontal}
-      disabled={disabled}
+    <XStack
+      onPress={onPress}
+      flex={flex}
+      marginVertical={marginVertical}
+      marginHorizontal={marginHorizontal}
+      marginTop={marginTop}
+      marginBottom={marginBottom}
+      marginLeft={marginLeft}
+      marginRight={marginRight}
+      borderRadius={borderRadius ?? 64}
+      backgroundColor={backgroundColor ?? styles.backgroundColor}
+      borderWidth={borderWidth ?? styles.borderWidth}
+      borderColor={borderColor ?? styles.borderColor}
+      paddingVertical={paddingVertical ?? styles.paddingVertical}
+      paddingHorizontal={paddingHorizontal ?? styles.paddingHorizontal}
+      alignItems="center"
+      justifyContent="center"
+      gap={8}
       opacity={opacity ?? (disabled ? 0.5 : 1)}
-      overflow="visible"
-      hoverStyle={{
-        backgroundColor: styles.hoverBackgroundColor,
+      pressStyle={{
+        backgroundColor: styles.pressBackgroundColor,
         ...(variant === "secondary" && { borderColor: "$button_secondary_hover_border" }),
+        scale: 0.98,
       }}
+      disabled={disabled}
     >
-      <XStack gap={8} alignItems="center" justifyContent="center">
-        {icon && icon}
-        <Text
-          color={color ?? styles.color}
-          fontWeight={fontWeight}
-          fontSize={fontSize ?? styles.fontSize}
-          lineHeight={(fontSize ?? styles.fontSize) * 1.2}
-        >
-          {label}
-        </Text>
-      </XStack>
-    </TamaguiButton>
+      {icon && icon}
+      <Text
+        color={color ?? styles.color}
+        fontWeight={fontWeight}
+        fontSize={fontSize ?? styles.fontSize}
+        lineHeight={(fontSize ?? styles.fontSize) * 1.2}
+      >
+        {label}
+      </Text>
+    </XStack>
   );
 }
