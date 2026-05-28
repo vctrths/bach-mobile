@@ -78,6 +78,7 @@ export default function Button({
       backgroundColor={props.backgroundColor ?? styles.backgroundColor}
       borderWidth={props.borderWidth ?? styles.borderWidth}
       borderColor={props.borderColor ?? styles.borderColor}
+      padding={0}
       paddingVertical={props.paddingVertical ?? styles.paddingVertical}
       paddingHorizontal={props.paddingHorizontal ?? styles.paddingHorizontal}
       disabled={disabled}
@@ -92,6 +93,7 @@ export default function Button({
         color={color ?? styles.color}
         fontWeight={fontWeight}
         fontSize={fontSize ?? styles.fontSize}
+        lineHeight={fontSize ?? styles.fontSize}
       >
         {label}
       </TamaguiButton.Text>
