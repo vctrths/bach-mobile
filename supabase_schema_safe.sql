@@ -34,7 +34,6 @@ CREATE TABLE IF NOT EXISTS public.gardens (
   location text NOT NULL,
   latitude double precision,
   longitude double precision,
-  rating float DEFAULT 5.0,
   image_url text,
   description text,
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL

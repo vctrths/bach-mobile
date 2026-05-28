@@ -244,27 +244,7 @@ export default function GardenDetailsScreen() {
           })()}
         </YStack>
 
-        {/* Extra informatie Section */}
-        <YStack gap="$4">
-          <Text fontFamily="$Inter" fontWeight="900" fontSize={20} color="$text_dark">
-            Extra informatie
-          </Text>
-          <YStack gap="$3">
-            <XStack gap="$3" alignItems="center">
-              <Circle size={40} backgroundColor="#F1F3EC" justifyContent="center" alignItems="center">
-                <MaterialCommunityIcons name="currency-eur" size={24} color="#172211" />
-              </Circle>
-              <YStack>
-                <Text fontFamily="$Inter" fontWeight="900" fontSize={16} color="$text_dark">
-                  Prijs
-                </Text>
-                <Text fontFamily="$Inter" fontSize={14} color="$secondary">
-                  €7.00 per maand
-                </Text>
-              </YStack>
-            </XStack>
-          </YStack>
-        </YStack>
+        {/* Owner Profile Section */}
 
         {/* Owner Profile Section */}
         <YStack
