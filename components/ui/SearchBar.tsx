@@ -61,14 +61,14 @@ export default function SearchBar({
           {placeholder}
         </Text>
       )}
-      {active && value && value.length > 0 && (
+      {active && value && value.length > 0 ? (
         <Ionicons
           name="close-circle"
           size={20}
           color="#9ca3af"
           onPress={() => onChangeText && onChangeText("")}
         />
-      )}
+      ) : null}
     </XStack>
   );
 }
