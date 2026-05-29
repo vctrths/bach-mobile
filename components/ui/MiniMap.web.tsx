@@ -1,70 +1,98 @@
-import React from "react";
-import { Map, Marker } from "pigeon-maps";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import React, { useMemo } from "react";
 import { StyleSheet, View } from "react-native";
+import { MapContainer, Marker, TileLayer } from "react-leaflet";
 
 interface MiniMapProps {
   latitude: number;
   longitude: number;
 }
 
-function CustomPin() {
-  return (
-    <View
-      style={{
-        width: 28,
-        height: 28,
-        borderRadius: 14,
-        backgroundColor: "#37392B",
-        borderWidth: 3,
-        borderColor: "#EAF0D8",
-        justifyContent: "center",
-        alignItems: "center",
-        boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.25)",
-        transform: [{ translateY: -14 }],
-      }}
-    >
-      <View
-        style={{
-          width: 6,
-          height: 6,
-          borderRadius: 3,
-          backgroundColor: "#A9D18E",
-        }}
-      />
-      <View
-        style={{
-          position: "absolute",
-          bottom: -8,
-          width: 0,
-          height: 0,
-          borderLeftWidth: 6,
-          borderRightWidth: 6,
-          borderTopWidth: 8,
-          borderLeftColor: "transparent",
-          borderRightColor: "transparent",
-          borderTopColor: "#37392B",
-        }}
-      />
-    </View>
-  );
-}
+const markerIcon = L.divIcon({
+  className: "groen-leaflet-marker",
+  html: `
+    <div class="groen-leaflet-pin">
+      <span></span>
+    </div>
+  `,
+  iconSize: [32, 40],
+  iconAnchor: [16, 36],
+});
 
 export default function MiniMap({ latitude, longitude }: MiniMapProps) {
-  const center: [number, number] = [latitude, longitude];
+  const center = useMemo<[number, number]>(
+    () => [latitude, longitude],
+    [latitude, longitude],
+  );
 
   return (
     <View style={StyleSheet.absoluteFillObject}>
-      <Map
+      <style>{`
+        .leaflet-container {
+          width: 100%;
+          height: 100%;
+          background: #eef3e8;
+        }
+        .leaflet-control-attribution {
+          display: none;
+        }
+        .groen-leaflet-marker {
+          background: transparent;
+          border: 0;
+        }
+        .groen-leaflet-pin {
+          width: 28px;
+          height: 28px;
+          border-radius: 999px;
+          background: #37392B;
+          border: 3px solid #EAF0D8;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+        }
+        .groen-leaflet-pin span {
+          width: 7px;
+          height: 7px;
+          border-radius: 999px;
+          background: #A9D18E;
+        }
+        .groen-leaflet-pin::after {
+          content: "";
+          position: absolute;
+          bottom: -9px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 0;
+          height: 0;
+          border-left: 7px solid transparent;
+          border-right: 7px solid transparent;
+          border-top: 10px solid #37392B;
+        }
+      `}</style>
+      <MapContainer
         center={center}
         zoom={14}
-        mouseEvents={false}
-        touchEvents={false}
-        metaWheelZoom={false}
+        dragging={false}
+        doubleClickZoom={false}
+        scrollWheelZoom={false}
+        touchZoom={false}
+        zoomControl={false}
+        attributionControl={false}
+        style={styles.map}
       >
-        <Marker anchor={center}>
-          <CustomPin />
-        </Marker>
-      </Map>
+        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <Marker position={center} icon={markerIcon} interactive={false} />
+      </MapContainer>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  map: {
+    height: "100%",
+    width: "100%",
+  },
+});
