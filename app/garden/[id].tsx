@@ -8,7 +8,7 @@ import { H1, H2, Spinner, Text, XStack, YStack, Circle, ScrollView } from "tamag
 import { Platform, StyleSheet } from "react-native";
 import { supabase, toCamelCase } from "@/utils/supabase";
 import { type Garden } from "@/types/garden";
-import MiniMap from "@/components/ui/MiniMap";
+import MiniMap from "../../components/ui/MiniMap";
 import { APPLIANCE_MAP } from "@/components/ui/ApplianceBadges";
 
 export default function GardenDetailsScreen() {
