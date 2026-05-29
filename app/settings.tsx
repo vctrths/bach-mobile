@@ -4,11 +4,12 @@ import { supabase } from "@/utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { Alert, Platform } from "react-native";
-import { Card, Circle, Spinner, Text, XStack, YStack } from "tamagui";
+import { Card, Circle, Spinner, Text, YStack } from "tamagui";
+import { useAlerts } from "@/context/AlertContext";
 
 export default function SettingsScreen() {
   const { signOut, profile } = useAuth();
+  const { alert } = useAlerts();
   const isOwner = profile?.role?.toLowerCase() === "tuineigenaar";
   const [deleting, setDeleting] = useState(false);
 
@@ -17,39 +18,20 @@ export default function SettingsScreen() {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) {
-      if (Platform.OS === 'web') {
-        window.alert("Je bent niet ingelogd.");
-      } else {
-        Alert.alert("Fout", "Je bent niet ingelogd.");
-      }
+      alert("Fout", "Je bent niet ingelogd.");
       return;
     }
     if (user.email_confirmed_at) {
-      if (Platform.OS === 'web') {
-        window.alert("Je account is al geverifieerd.");
-      } else {
-        Alert.alert("Account verifiëren", "Je account is al geverifieerd.");
-      }
+      alert("Account verifiëren", "Je account is al geverifieerd.");
     } else {
       const { error } = await supabase.auth.resend({
         type: "signup",
         email: user.email!,
       });
       if (error) {
-        if (Platform.OS === 'web') {
-          window.alert(error.message);
-        } else {
-          Alert.alert("Fout", error.message);
-        }
+        alert("Fout", error.message);
       } else {
-        if (Platform.OS === 'web') {
-          window.alert("Check je e-mail om je account te verifiëren.");
-        } else {
-          Alert.alert(
-            "Verificatie verstuurd",
-            "Check je e-mail om je account te verifiëren."
-          );
-        }
+        alert("Verificatie verstuurd", "Check je e-mail om je account te verifiëren.");
       }
     }
   };
@@ -67,11 +49,7 @@ export default function SettingsScreen() {
         .delete()
         .eq("id", user.id);
       if (error) {
-        if (Platform.OS === 'web') {
-          window.alert("Kon account niet verwijderen.");
-        } else {
-          Alert.alert("Fout", "Kon account niet verwijderen.");
-        }
+        alert("Fout", "Kon account niet verwijderen.");
         setDeleting(false);
         return;
       }
@@ -79,11 +57,7 @@ export default function SettingsScreen() {
       await signOut();
       router.replace("/login");
     } catch {
-      if (Platform.OS === 'web') {
-        window.alert("Er is iets misgegaan. Probeer opnieuw.");
-      } else {
-        Alert.alert("Fout", "Er is iets misgegaan. Probeer opnieuw.");
-      }
+      alert("Fout", "Er is iets misgegaan. Probeer opnieuw.");
       setDeleting(false);
     }
   };
@@ -132,23 +106,18 @@ export default function SettingsScreen() {
         </Circle>
       ),
       onPress: () => {
-        if (Platform.OS === 'web') {
-          const confirmed = window.confirm("Weet je zeker dat je je account wilt verwijderen? Dit kan niet ongedaan worden gemaakt.");
-          if (confirmed) handleDeleteAccount();
-        } else {
-          Alert.alert(
-            "Account verwijderen",
-            "Weet je zeker dat je je account wilt verwijderen? Dit kan niet ongedaan worden gemaakt.",
-            [
-              { text: "Annuleren", style: "cancel" },
-              {
-                text: "Verwijderen",
-                style: "destructive",
-                onPress: handleDeleteAccount,
-              },
-            ]
-          );
-        }
+        alert(
+          "Account verwijderen",
+          "Weet je zeker dat je je account wilt verwijderen? Dit kan niet ongedaan worden gemaakt.",
+          [
+            { text: "Annuleren", style: "cancel" },
+            {
+              text: "Verwijderen",
+              style: "destructive",
+              onPress: handleDeleteAccount,
+            },
+          ]
+        );
       },
     },
     {
@@ -165,27 +134,17 @@ export default function SettingsScreen() {
         </Circle>
       ),
       onPress: () => {
-        if (Platform.OS === 'web') {
-          const confirmed = window.confirm("Weet je zeker dat je wilt uitloggen?");
-          if (confirmed) {
-            (async () => {
+        alert("Uitloggen", "Weet je zeker dat je wilt uitloggen?", [
+          { text: "Annuleren", style: "cancel" },
+          {
+            text: "Uitloggen",
+            style: "destructive",
+            onPress: async () => {
               await signOut();
               router.replace("/login");
-            })();
-          }
-        } else {
-          Alert.alert("Uitloggen", "Weet je zeker dat je wilt uitloggen?", [
-            { text: "Annuleren", style: "cancel" },
-            {
-              text: "Uitloggen",
-              style: "destructive",
-              onPress: async () => {
-                await signOut();
-                router.replace("/login");
-              },
             },
-          ]);
-        }
+          },
+        ]);
       },
     },
   ];

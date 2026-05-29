@@ -4,10 +4,11 @@ import { supabase } from "@/utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { Alert, Platform } from "react-native";
-import { Card, Input, Spinner, Text, TextArea, XStack, YStack } from "tamagui";
+import { Input, Spinner, Text, TextArea, XStack, YStack } from "tamagui";
+import { useAlerts } from "@/context/AlertContext";
 
 export default function NewLogScreen() {
+  const { alert } = useAlerts();
   const [tasks, setTasks] = useState("");
   const [observations, setObservations] = useState("");
   const [followUps, setFollowUps] = useState("");
@@ -18,11 +19,7 @@ export default function NewLogScreen() {
 
   const handleSave = async () => {
     if (!tasks.trim()) {
-      if (Platform.OS === 'web') {
-        window.alert("Vul ten minste één uitgevoerde taak in.");
-      } else {
-        Alert.alert("Fout", "Vul ten minste één uitgevoerde taak in.");
-      }
+      alert("Fout", "Vul ten minste één uitgevoerde taak in.");
       return;
     }
 
@@ -32,11 +29,7 @@ export default function NewLogScreen() {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) {
-        if (Platform.OS === 'web') {
-          window.alert("Log eerst in om een log op te slaan");
-        } else {
-          Alert.alert("Fout", "Log eerst in om een log op te slaan");
-        }
+        alert("Fout", "Log eerst in om een log op te slaan");
         return;
       }
 
@@ -61,27 +54,14 @@ export default function NewLogScreen() {
       });
 
       if (error) {
-        if (Platform.OS === 'web') {
-          window.alert(error.message);
-        } else {
-          Alert.alert("Fout", error.message);
-        }
+        alert("Fout", error.message);
       } else {
-        if (Platform.OS === 'web') {
-          window.alert("Log opgeslagen!");
-          router.back();
-        } else {
-          Alert.alert("Succes", "Log opgeslagen!", [
-            { text: "OK", onPress: () => router.back() },
-          ]);
-        }
+        alert("Succes", "Log opgeslagen!", [
+          { text: "OK", onPress: () => router.back() },
+        ]);
       }
     } catch {
-      if (Platform.OS === 'web') {
-        window.alert("Er is iets misgegaan. Probeer het opnieuw.");
-      } else {
-        Alert.alert("Fout", "Er is iets misgegaan. Probeer het opnieuw.");
-      }
+      alert("Fout", "Er is iets misgegaan. Probeer het opnieuw.");
     } finally {
       setSaving(false);
     }
@@ -167,8 +147,7 @@ export default function NewLogScreen() {
             alignItems="center"
             gap="$2"
             onPress={() => {
-              if (Platform.OS === 'web') window.alert("Foto uploaden (placeholder)");
-              else Alert.alert("Upload", "Foto uploaden (placeholder)");
+              alert("Upload", "Foto uploaden (placeholder)");
             }}
             pressStyle={{ scale: 0.96, opacity: 0.8 }}
           >

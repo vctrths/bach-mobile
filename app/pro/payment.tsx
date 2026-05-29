@@ -3,8 +3,9 @@ import Button from "@/components/ui/Button";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState, useEffect } from "react";
-import { ScrollView, Alert, Platform } from "react-native";
+import { ScrollView, Platform } from "react-native";
 import { Card, H1, Text, XStack, YStack } from "tamagui";
+import { useAlerts } from "@/context/AlertContext";
 // eslint-disable-next-line import/no-unresolved
 import { useStripe as useNativeStripe } from "@/lib/stripe";
 import { useAuth } from "@/context/AuthContext";
@@ -22,6 +23,7 @@ function NativePaymentFlow({
   setLoading: (v: boolean) => void;
 }) {
   const { initPaymentSheet, presentPaymentSheet } = useNativeStripe();
+  const { alert } = useAlerts();
 
   const handlePayment = async () => {
     setLoading(true);
@@ -42,12 +44,12 @@ function NativePaymentFlow({
 
       if (error) {
         if (error.code === "Canceled") return;
-        Alert.alert(`Fout: ${error.code}`, error.message);
+        alert(`Fout: ${error.code}`, error.message);
       } else {
         router.push("/succesabo");
       }
     } catch (e: any) {
-      Alert.alert("Fout", e.message);
+      alert("Fout", e.message);
     } finally {
       setLoading(false);
     }
