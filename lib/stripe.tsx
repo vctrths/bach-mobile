@@ -12,9 +12,11 @@ export function StripeProvider({
 
 export function useStripe() {
   return {
-    initPaymentSheet: async () => ({ error: null }),
-    presentPaymentSheet: async () => ({
-      error: { code: "web_not_supported", message: "Use PaymentElement on web" },
-    }),
+    initPaymentSheet: async (_params: any): Promise<{ error?: { message: string } }> => {
+      return {};
+    },
+    presentPaymentSheet: async (): Promise<{ error?: { code: string; message: string } }> => {
+      return {};
+    },
   };
 }
