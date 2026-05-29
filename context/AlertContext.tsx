@@ -43,6 +43,7 @@ interface AlertContextType {
 }
 
 const AlertContext = createContext<AlertContextType | undefined>(undefined);
+const USE_NATIVE_ANIMATION_DRIVER = Platform.OS !== "web";
 
 const triggerHaptics = async (type: "success" | "error" | "warning" | "light") => {
   if (Platform.OS === "web") return;
@@ -99,7 +100,7 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
     if (toastState.show) {
       Animated.spring(toastAnim, {
         toValue: 1,
-        useNativeDriver: true,
+        useNativeDriver: USE_NATIVE_ANIMATION_DRIVER,
         tension: 40,
         friction: 8,
       }).start();
@@ -107,7 +108,7 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
       Animated.timing(toastAnim, {
         toValue: 0,
         duration: 250,
-        useNativeDriver: true,
+        useNativeDriver: USE_NATIVE_ANIMATION_DRIVER,
       }).start();
     }
   }, [toastState.show, toastAnim]);
@@ -118,14 +119,14 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
       Animated.parallel([
         Animated.spring(modalScaleAnim, {
           toValue: 1,
-          useNativeDriver: true,
+          useNativeDriver: USE_NATIVE_ANIMATION_DRIVER,
           tension: 50,
           friction: 8,
         }),
         Animated.timing(modalOpacityAnim, {
           toValue: 1,
           duration: 250,
-          useNativeDriver: true,
+          useNativeDriver: USE_NATIVE_ANIMATION_DRIVER,
         }),
       ]).start();
     } else {
@@ -133,12 +134,12 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
         Animated.timing(modalScaleAnim, {
           toValue: 0.95,
           duration: 200,
-          useNativeDriver: true,
+          useNativeDriver: USE_NATIVE_ANIMATION_DRIVER,
         }),
         Animated.timing(modalOpacityAnim, {
           toValue: 0,
           duration: 200,
-          useNativeDriver: true,
+          useNativeDriver: USE_NATIVE_ANIMATION_DRIVER,
         }),
       ]).start();
     }

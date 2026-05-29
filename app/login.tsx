@@ -7,6 +7,7 @@ import * as Linking from "expo-linking";
 import { router } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useState } from "react";
+import { Platform } from "react-native";
 import { H1, Input, Spinner, Text, YStack } from "tamagui";
 
 export default function Login() {
@@ -40,7 +41,10 @@ export default function Login() {
         setLoading(true);
         setError(null);
 
-        const redirectTo = Linking.createURL("auth/callback");
+        const redirectTo =
+            Platform.OS === "web" && typeof window !== "undefined"
+                ? `${window.location.origin}/auth/callback`
+                : Linking.createURL("auth/callback");
 
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider,

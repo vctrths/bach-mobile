@@ -2,11 +2,37 @@ import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import { supabase } from "@/utils/supabase";
 import { router } from "expo-router";
 import { useEffect } from "react";
+import { Platform } from "react-native";
 import { Spinner, Text, YStack } from "tamagui";
+
+async function recoverWebSessionFromUrl() {
+  if (Platform.OS !== "web" || typeof window === "undefined") return;
+
+  const url = new URL(window.location.href);
+  const code = url.searchParams.get("code");
+  const hashParams = new URLSearchParams(url.hash.replace(/^#/, ""));
+  const accessToken = hashParams.get("access_token");
+  const refreshToken = hashParams.get("refresh_token");
+
+  if (code) {
+    await supabase.auth.exchangeCodeForSession(code);
+  } else if (accessToken && refreshToken) {
+    await supabase.auth.setSession({
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    });
+  }
+
+  if (code || accessToken) {
+    window.history.replaceState(null, "", "/auth/callback");
+  }
+}
 
 export default function AuthCallbackScreen() {
   useEffect(() => {
     const handleOAuthSession = async () => {
+      await recoverWebSessionFromUrl();
+
       const {
         data: { session },
       } = await supabase.auth.getSession();
