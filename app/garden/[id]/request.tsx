@@ -1,6 +1,7 @@
 import Button from "@/components/ui/Button";
 import PageContainer from "@/components/ui/PageContainer";
 import { useAlerts } from "@/context/AlertContext";
+import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/utils/supabase";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -80,6 +81,7 @@ export default function GardenRequestScreen() {
   const { id } = useLocalSearchParams();
   const gardenId = Array.isArray(id) ? id[0] : id;
   const { alert } = useAlerts();
+  const { loading: authLoading, profile } = useAuth();
   const [gardenName, setGardenName] = useState("Aanvraag");
   const [ownerId, setOwnerId] = useState<string | null>(null);
   const [motivation, setMotivation] = useState("");
@@ -238,6 +240,20 @@ export default function GardenRequestScreen() {
         return;
       }
 
+      if (!profile?.isPremium) {
+        alert(
+          "Pro vereist",
+          "Je hebt een Pro-abonnement nodig om aanvragen te versturen.",
+          [
+            {
+              text: "Bekijk Pro",
+              onPress: () => router.push("/pro"),
+            },
+          ],
+        );
+        return;
+      }
+
       const { error } = await withTimeout(
         supabase.from("garden_requests").insert({
           garden_id: gardenId,
@@ -330,7 +346,7 @@ export default function GardenRequestScreen() {
 
   const isOwnGarden = ownerId && currentUserId && ownerId === currentUserId;
   const isDisabled =
-    loading || hasExistingRequest || checkingRequest || !!isOwnGarden;
+    authLoading || loading || hasExistingRequest || checkingRequest || !!isOwnGarden;
 
   return (
     <PageContainer topNavTitle={gardenName} activeTab="home">
@@ -686,7 +702,7 @@ export default function GardenRequestScreen() {
                 ? "Aanvraag al verstuurd"
                 : isOwnGarden
                   ? "Dit is je eigen tuin"
-                  : loading
+                  : authLoading || loading
                     ? "Bezig..."
                     : "Verzoek sturen"
           }

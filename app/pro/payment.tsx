@@ -1,177 +1,61 @@
-import PageContainer from "@/components/ui/PageContainer";
 import Button from "@/components/ui/Button";
-import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import React, { useState, useEffect } from "react";
-import { ScrollView, Platform } from "react-native";
-import { Card, H1, Text, XStack, YStack } from "tamagui";
+import PageContainer from "@/components/ui/PageContainer";
 import { useAlerts } from "@/context/AlertContext";
-// eslint-disable-next-line import/no-unresolved
-import { useStripe as useNativeStripe } from "@/lib/stripe";
 import { useAuth } from "@/context/AuthContext";
-import { supabase } from "@/utils/supabase";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { Ionicons } from "@expo/vector-icons";
+import * as WebBrowser from "expo-web-browser";
+import React, { useState } from "react";
+import { Platform, ScrollView } from "react-native";
+import { Card, H1, Text, XStack, YStack } from "tamagui";
 
-function NativePaymentFlow({
-  fetchPaymentSheetParams,
-  loading,
-  setLoading,
-}: {
-  fetchPaymentSheetParams: () => Promise<any>;
-  loading: boolean;
-  setLoading: (v: boolean) => void;
-}) {
-  const { initPaymentSheet, presentPaymentSheet } = useNativeStripe();
-  const { alert } = useAlerts();
+const PAYMENT_LINK_URL = process.env.EXPO_PUBLIC_STRIPE_PAYMENT_LINK_URL;
 
-  const handlePayment = async () => {
-    setLoading(true);
-    try {
-      const { paymentIntent, ephemeralKey, customer } = await fetchPaymentSheetParams();
-
-      const { error: initError } = await initPaymentSheet({
-        merchantDisplayName: "Groen",
-        customerId: customer,
-        customerEphemeralKeySecret: ephemeralKey,
-        paymentIntentClientSecret: paymentIntent,
-        allowsDelayedPaymentMethods: true,
-      });
-
-      if (initError) throw new Error(initError.message);
-
-      const { error } = await presentPaymentSheet();
-
-      if (error) {
-        if (error.code === "Canceled") return;
-        alert(`Fout: ${error.code}`, error.message);
-      } else {
-        router.push("/succesabo");
-      }
-    } catch (e: any) {
-      alert("Fout", e.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <Button
-      label={loading ? "Laden..." : "Betaal nu met Stripe"}
-      onPress={handlePayment}
-      disabled={loading}
-      marginTop="$4"
-    />
-  );
-}
-
-function WebPaymentFlow({
-  fetchPaymentSheetParams,
-}: {
-  fetchPaymentSheetParams: () => Promise<any>;
-}) {
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetchPaymentSheetParams()
-      .then((data) => {
-        setClientSecret(data.paymentIntent);
-        setLoading(false);
-      })
-      .catch((e) => {
-        setError(e.message);
-        setLoading(false);
-      });
-  }, []);
-
-  if (loading) {
-    return (
-      <YStack alignItems="center" padding="$6">
-        <Text color="$secondary">Betaalformulier laden...</Text>
-      </YStack>
-    );
+function buildPaymentLink(userId: string, email?: string | null) {
+  if (!PAYMENT_LINK_URL) {
+    throw new Error("Stripe Payment Link ontbreekt in de configuratie.");
   }
 
-  if (error || !clientSecret) {
-    return (
-      <YStack gap="$3">
-        <Text color="$error">{error || "Kon betaalgegevens niet ophalen"}</Text>
-        <Button label="Opnieuw proberen" onPress={() => window.location.reload()} />
-      </YStack>
-    );
+  const url = new URL(PAYMENT_LINK_URL);
+  url.searchParams.set("client_reference_id", userId);
+  if (email) {
+    url.searchParams.set("locked_prefilled_email", email);
   }
+  url.searchParams.set("locale", "nl");
 
-  return <WebPaymentForm clientSecret={clientSecret} />;
-}
-
-function WebPaymentForm({ clientSecret }: { clientSecret: string }) {
-  const [stripePromise] = useState(() =>
-    loadStripe(process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "")
-  );
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const CheckoutForm = () => {
-    const stripe = useStripe();
-    const elements = useElements();
-
-    const handleSubmit = async () => {
-      if (!stripe || !elements) return;
-      setSubmitting(true);
-      setError(null);
-
-      const { error } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/succesabo`,
-        },
-      });
-
-      if (error) {
-        setError(error.message ?? "Betaling mislukt");
-        setSubmitting(false);
-      }
-    };
-
-    return (
-      <YStack gap="$4">
-        <div style={{ marginTop: 16 }}>
-          <PaymentElement />
-        </div>
-        {error && <Text color="$error">{error}</Text>}
-        <Button
-          label={submitting ? "Verwerken..." : "Betaal nu"}
-          onPress={handleSubmit}
-          disabled={submitting || !stripe}
-        />
-      </YStack>
-    );
-  };
-
-  return (
-    <Elements stripe={stripePromise} options={{ clientSecret }}>
-      <CheckoutForm />
-    </Elements>
-  );
+  return url.toString();
 }
 
 export default function PaymentScreen() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const { alert } = useAlerts();
   const [loading, setLoading] = useState(false);
 
-  const fetchPaymentSheetParams = async () => {
-    const { data, error } = await supabase.functions.invoke("stripe-payment-sheet", {
-      body: { user_id: user?.id },
-    });
-
-    if (error) {
-      console.error("Error fetching payment sheet params:", error);
-      throw new Error("Kon betaalgegevens niet ophalen");
+  const openPaymentLink = async () => {
+    if (!user) {
+      alert("Fout", "Log eerst in om Pro te activeren.");
+      return;
     }
 
-    return data;
+    setLoading(true);
+    try {
+      const paymentLink = buildPaymentLink(user.id, profile?.email ?? user.email);
+
+      if (Platform.OS === "web") {
+        window.location.assign(paymentLink);
+        return;
+      }
+
+      await WebBrowser.openBrowserAsync(paymentLink);
+    } catch (error) {
+      alert(
+        "Fout",
+        error instanceof Error
+          ? error.message
+          : "Kon Stripe niet openen. Probeer het opnieuw.",
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -195,11 +79,12 @@ export default function PaymentScreen() {
                 Groene Vingers Pro
               </H1>
               <Text fontSize="$6" color="$primary" fontWeight="bold">
-                €7/maand
+                EUR 7/maand
               </Text>
             </XStack>
             <Text fontSize="$4" color="$secondary">
-              Elke maand opzegbaar. 7 dagen gratis proefperiode.
+              Elke maand opzegbaar. Je betaling wordt veilig verwerkt door
+              Stripe.
             </Text>
           </Card>
 
@@ -208,26 +93,23 @@ export default function PaymentScreen() {
               Veilig betalen met Stripe
             </H1>
             <Text color="$text_dark" fontSize="$4">
-              We gebruiken Stripe om je betaling veilig te verwerken. Je kunt betalen met creditcard,
-              Apple Pay of Google Pay.
+              Na betaling zet Stripe automatisch je Pro-status aan via onze
+              Supabase webhook.
             </Text>
 
             <XStack alignItems="center" gap="$2" marginTop="$2">
               <Ionicons name="shield-checkmark" size={18} color="#22c55e" />
               <Text fontSize="$3" color="$secondary">
-                Je betaling is beveiligd met 256-bit encryptie.
+                Je betaalgegevens worden niet opgeslagen in de app.
               </Text>
             </XStack>
 
-            {Platform.OS === "web" ? (
-              <WebPaymentFlow fetchPaymentSheetParams={fetchPaymentSheetParams} />
-            ) : (
-              <NativePaymentFlow
-                fetchPaymentSheetParams={fetchPaymentSheetParams}
-                loading={loading}
-                setLoading={setLoading}
-              />
-            )}
+            <Button
+              label={loading ? "Stripe openen..." : "Betaal nu met Stripe"}
+              onPress={openPaymentLink}
+              disabled={loading}
+              marginTop="$4"
+            />
           </YStack>
         </YStack>
       </ScrollView>

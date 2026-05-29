@@ -370,10 +370,14 @@ export type Database = {
           email: string
           first_name: string
           id: string
+          is_premium: boolean
           last_name: string
+          premium_activated_at: string | null
           profile_image: string | null
           rating: number | null
           role: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
         }
         Insert: {
           created_at?: string
@@ -381,10 +385,14 @@ export type Database = {
           email: string
           first_name: string
           id: string
+          is_premium?: boolean
           last_name: string
+          premium_activated_at?: string | null
           profile_image?: string | null
           rating?: number | null
           role: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
         }
         Update: {
           created_at?: string
@@ -392,10 +400,14 @@ export type Database = {
           email?: string
           first_name?: string
           id?: string
+          is_premium?: boolean
           last_name?: string
+          premium_activated_at?: string | null
           profile_image?: string | null
           rating?: number | null
           role?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
         }
         Relationships: []
       }

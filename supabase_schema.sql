@@ -8,8 +8,18 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   role text,
   profile_image text,
   expo_push_token text,
+  is_premium boolean DEFAULT false NOT NULL,
+  stripe_customer_id text,
+  stripe_subscription_id text,
+  premium_activated_at timestamp with time zone,
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS is_premium boolean DEFAULT false NOT NULL,
+  ADD COLUMN IF NOT EXISTS stripe_customer_id text,
+  ADD COLUMN IF NOT EXISTS stripe_subscription_id text,
+  ADD COLUMN IF NOT EXISTS premium_activated_at timestamp with time zone;
 
 -- 2. Gardens Table
 CREATE TABLE IF NOT EXISTS public.gardens (
@@ -43,6 +53,13 @@ ALTER TABLE public.garden_logs ENABLE ROW LEVEL SECURITY;
 -- RLS Policies
 CREATE POLICY "Public profiles are viewable by everyone" ON public.profiles FOR SELECT USING (true);
 CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING (auth.uid() = id);
+
+REVOKE UPDATE (
+  is_premium,
+  stripe_customer_id,
+  stripe_subscription_id,
+  premium_activated_at
+) ON public.profiles FROM anon, authenticated;
 
 CREATE POLICY "Gardens are viewable by everyone" ON public.gardens FOR SELECT USING (true);
 CREATE POLICY "Users can create own gardens" ON public.gardens FOR INSERT WITH CHECK (auth.uid() = owner_id);
