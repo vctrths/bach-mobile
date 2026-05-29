@@ -38,10 +38,7 @@ export default function TopNavPill({
         padding={1}
         backgroundColor="rgba(255, 255, 255, 0.34)"
         overflow="hidden"
-        shadowColor="#0f1a0f"
-        shadowOpacity={0.06}
-        shadowRadius={12}
-        shadowOffset={{ width: 0, height: 4 }}
+        boxShadow="0px 4px 12px rgba(15, 26, 15, 0.06)"
       >
         <YStack
           borderRadius={33}
@@ -66,10 +63,7 @@ export default function TopNavPill({
                     borderColor="rgba(0, 0, 0, 0.04)"
                     justifyContent="center"
                     alignItems="center"
-                    shadowColor="#000"
-                    shadowOpacity={0.05}
-                    shadowRadius={6}
-                    shadowOffset={{ width: 0, height: 2 }}
+                    boxShadow="0px 2px 6px rgba(0, 0, 0, 0.05)"
                     onPress={handleBack}
                     pressStyle={{ scale: 0.94, opacity: 0.85 }}
                   >

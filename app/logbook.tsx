@@ -215,10 +215,7 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
         borderWidth={1}
         borderRadius={20}
         padding={16}
-        shadowColor="#000"
-        shadowOpacity={0.05}
-        shadowRadius={20}
-        shadowOffset={{ width: 0, height: 4 }}
+        boxShadow="0px 4px 20px rgba(0, 0, 0, 0.05)"
       >
         <XStack alignItems="center" gap="$4">
           <CircularProgress current={weeklyCount} total={4} />
@@ -249,10 +246,7 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
           padding={16}
           justifyContent="center"
           alignItems="center"
-          shadowColor="#000"
-          shadowOpacity={0.05}
-          shadowRadius={20}
-          shadowOffset={{ width: 0, height: 4 }}
+          boxShadow="0px 4px 20px rgba(0, 0, 0, 0.05)"
         >
           <Text
             fontSize={14}
@@ -272,10 +266,7 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
           padding={16}
           justifyContent="center"
           alignItems="center"
-          shadowColor="#000"
-          shadowOpacity={0.05}
-          shadowRadius={20}
-          shadowOffset={{ width: 0, height: 4 }}
+          boxShadow="0px 4px 20px rgba(0, 0, 0, 0.05)"
           onPress={() => router.push("/logbook/new" as any)}
           pressStyle={{ scale: 0.96, opacity: 0.8 }}
         >
@@ -298,10 +289,7 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
         borderRadius={20}
         padding={16}
         gap="$4"
-        shadowColor="#000"
-        shadowOpacity={0.05}
-        shadowRadius={20}
-        shadowOffset={{ width: 0, height: 4 }}
+        boxShadow="0px 4px 20px rgba(0, 0, 0, 0.05)"
       >
         <XStack justifyContent="space-between" alignItems="center">
           <Text

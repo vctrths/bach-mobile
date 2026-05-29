@@ -13,10 +13,7 @@ export default function NotificationBell({ unreadCount = 0 }: { unreadCount?: nu
         borderColor="rgba(0, 0, 0, 0.04)"
         justifyContent="center"
         alignItems="center"
-        shadowColor="#000"
-        shadowOpacity={0.05}
-        shadowRadius={6}
-        shadowOffset={{ width: 0, height: 2 }}
+        boxShadow="0px 2px 6px rgba(0, 0, 0, 0.05)"
         onPress={() => router.push("/notifications")}
         pressStyle={{ scale: 0.94, opacity: 0.85 }}
       >

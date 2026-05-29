@@ -65,11 +65,7 @@ export default function BottomNav({
       padding={1}
       backgroundColor="rgba(255, 255, 255, 0.34)"
       overflow="hidden"
-      shadowColor="#0f1a0f"
-      shadowOpacity={0.18}
-      shadowRadius={22}
-      shadowOffset={{ width: 0, height: 12 }}
-      elevation={12}
+      boxShadow="0px 12px 22px rgba(15, 26, 15, 0.18)"
       alignItems="center"
     >
       <XStack

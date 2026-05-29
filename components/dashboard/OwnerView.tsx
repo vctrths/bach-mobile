@@ -430,13 +430,7 @@ export default function OwnerView() {
                               height={32}
                               borderRadius={16}
                               backgroundColor="#FFEDB3"
-                              style={{
-                                shadowColor: "#FFE696",
-                                shadowOffset: { width: 0, height: 0 },
-                                shadowOpacity: 1,
-                                shadowRadius: 2,
-                                elevation: 2,
-                              }}
+                              boxShadow="0px 0px 2px #FFE696"
                             />
                           ) : (
                             <YStack

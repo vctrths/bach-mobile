@@ -92,10 +92,7 @@ export default function ProfileScreen() {
           alignItems="center"
           onPress={() => router.push("/settings")}
           pressStyle={{ scale: 0.94, opacity: 0.85 }}
-          shadowColor="#000"
-          shadowOpacity={0.04}
-          shadowRadius={4}
-          shadowOffset={{ width: 0, height: 2 }}
+          boxShadow="0px 2px 4px rgba(0, 0, 0, 0.04)"
         >
           <Ionicons
             name="settings-outline"
@@ -125,10 +122,7 @@ export default function ProfileScreen() {
             overflow="hidden"
             borderWidth={4}
             borderColor="white"
-            shadowColor="#000"
-            shadowOpacity={0.1}
-            shadowRadius={8}
-            shadowOffset={{ width: 0, height: 4 }}
+            boxShadow="0px 4px 8px rgba(0, 0, 0, 0.1)"
           >
             <ExpoImage
               source={
@@ -190,10 +184,7 @@ export default function ProfileScreen() {
               alignItems="center"
               onPress={() => router.push("/saved")}
               pressStyle={{ scale: 0.94, opacity: 0.85 }}
-              shadowColor="#000"
-              shadowOpacity={0.04}
-              shadowRadius={4}
-              shadowOffset={{ width: 0, height: 2 }}
+              boxShadow="0px 2px 4px rgba(0, 0, 0, 0.04)"
             >
               <Ionicons name="bookmark-outline" size={20} color="#172211" />
             </Circle>

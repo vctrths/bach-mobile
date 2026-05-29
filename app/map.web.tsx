@@ -25,11 +25,7 @@ function CustomPin({ isActive }: { isActive: boolean }) {
         borderColor: "#EAF0D8",
         justifyContent: "center",
         alignItems: "center",
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 4,
+        boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.25)",
         transform: [{ translateY: -14 }],
       }}
     >
@@ -79,10 +75,7 @@ function GardenPopup({
         borderRadius={16}
         padding={16}
         gap={12}
-        shadowColor="rgba(0,0,0,0.15)"
-        shadowOffset={{ width: 0, height: 4 }}
-        shadowRadius={12}
-        elevation={5}
+        boxShadow="0px 4px 12px rgba(0,0,0,0.15)"
         borderWidth={1}
         borderColor="#E3ECD7"
       >
