@@ -1,5 +1,6 @@
 import Button from "@/components/ui/Button";
 import PageContainer from "@/components/ui/PageContainer";
+import { useAuth } from "@/context/AuthContext";
 import { router } from "expo-router";
 import React from "react";
 import { Text, YStack } from "tamagui";
@@ -78,6 +79,9 @@ function PlanCard({ title, features, buttonLabel, buttonVariant = "primary", onB
 }
 
 export default function ProScreen() {
+  const { profile } = useAuth();
+  const isPremium = !!profile?.isPremium;
+
   return (
     <PageContainer
       topNavTitle="Abonnement"
@@ -90,13 +94,16 @@ export default function ProScreen() {
           features={[
             "  - Tuinen bekijken & zoeken",
             "  - Matchen met tuin eigenaar",
+            "  - Aanvragen versturen",
             "  - Logboek bijhouden",
             "",
             "€7 / Per maand",
           ]}
-          buttonLabel="Registreer nu"
+          buttonLabel={isPremium ? "Huidig plan" : "Registreer nu"}
           buttonVariant="primary"
-          onButtonPress={() => router.push("/pro/payment")}
+          onButtonPress={() => {
+            if (!isPremium) router.push("/pro/payment");
+          }}
         />
 
         {/* Free Plan Card */}

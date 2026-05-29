@@ -1,11 +1,18 @@
 import PageContainer from "@/components/ui/PageContainer";
 import Button from "@/components/ui/Button";
+import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 import { YStack, H1, Text } from "tamagui";
 
 export default function SuccesaboScreen() {
+  const { refreshProfile } = useAuth();
+
+  useEffect(() => {
+    refreshProfile();
+  }, [refreshProfile]);
+
   return (
     <PageContainer showTopNav={false}>
       <YStack flex={1} justifyContent="center" alignItems="center" gap="$6">

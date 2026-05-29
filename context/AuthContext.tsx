@@ -3,6 +3,7 @@ import { Session, User } from "@supabase/supabase-js";
 import {
   createContext,
   useContext,
+  useCallback,
   useEffect,
   useState,
   ReactNode,
@@ -17,7 +18,10 @@ export interface Profile {
   profileImage: string | null;
   description: string | null;
   expoPushToken?: string | null;
-  isPro: boolean;
+  isPremium: boolean;
+  stripeCustomerId?: string | null;
+  stripeSubscriptionId?: string | null;
+  premiumActivatedAt?: string | null;
 }
 
 interface AuthContextType {
@@ -44,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  async function fetchProfile(userId: string) {
+  const fetchProfile = useCallback(async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from("profiles")
@@ -60,7 +64,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (data) {
-        setProfile(toCamelCase<Profile>(data));
+        const nextProfile = toCamelCase<Profile>(data);
+        setProfile({
+          ...nextProfile,
+          isPremium: Boolean(nextProfile.isPremium),
+        });
       } else {
         setProfile(null);
       }
@@ -68,7 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error("[AuthContext] fetchProfile error:", error);
       setProfile(null);
     }
-  }
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -114,7 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       active = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [fetchProfile]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -123,11 +131,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(null);
   };
 
-  const refreshProfile = async () => {
+  const refreshProfile = useCallback(async () => {
     if (user) {
       await fetchProfile(user.id);
     }
-  };
+  }, [fetchProfile, user]);
 
   return (
     <AuthContext.Provider
