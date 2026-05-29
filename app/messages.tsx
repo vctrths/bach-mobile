@@ -120,6 +120,7 @@ export default function Messages() {
       activeTab="message"
       scrollable={false}
       hideBack
+      contentPaddingBottom={0}
     >
       {loading ? (
         <YStack flex={1} justifyContent="center" alignItems="center">
@@ -150,7 +151,7 @@ export default function Messages() {
             />
           )}
           ItemSeparatorComponent={() => <YStack height={6} />}
-          contentContainerStyle={{ paddingHorizontal: 8, paddingBottom: 100 }}
+          contentContainerStyle={{ paddingHorizontal: 8, paddingBottom: 152 }}
         />
       )}
     </PageContainer>
