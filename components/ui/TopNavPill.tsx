@@ -53,7 +53,7 @@ export default function TopNavPill({
           />
 
           <YStack paddingHorizontal="$4" paddingVertical="$3" gap="$3">
-            <XStack alignItems="center" justifyContent="space-between">
+            <XStack alignItems="center" justifyContent="space-between" minHeight={44}>
               <XStack alignItems="center" gap="$4">
                 {!hideBack && (
                   <Circle
