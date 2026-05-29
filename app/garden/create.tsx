@@ -47,20 +47,24 @@ export default function GardenCreateScreen() {
   };
 
   const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted" && Platform.OS !== "web") {
-      alert(
-        "Toestemming nodig",
-        "We hebben toegang tot je foto's nodig om een tuinafbeelding te kunnen kiezen."
-      );
-      return;
+    if (Platform.OS !== "web") {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        alert(
+          "Toestemming nodig",
+          "We hebben toegang tot je foto's nodig om een tuinafbeelding te kunnen kiezen."
+        );
+        return;
+      }
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
-      allowsEditing: true,
-      aspect: [16, 9],
       quality: 0.8,
+      ...(Platform.OS !== "web" && {
+        allowsEditing: true,
+        aspect: [16, 9] as [number, number],
+      }),
     });
 
     if (!result.canceled) {

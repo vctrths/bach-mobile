@@ -8,6 +8,7 @@ import * as ImagePicker from "expo-image-picker";
 import { Image as ExpoImage } from "@/lib/image";
 import { router } from "expo-router";
 import { useContext, useState } from "react";
+import { Platform } from "react-native";
 import { Circle, H1, Text, YStack } from "tamagui";
 
 export default function Photo() {
@@ -17,19 +18,23 @@ export default function Photo() {
   const [error, setError] = useState<string | null>(null);
 
   const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      alert(
-        "Sorry, we hebben toegang tot je foto's nodig om een profielfoto te kunnen kiezen.",
-      );
-      return;
+    if (Platform.OS !== "web") {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        alert(
+          "Sorry, we hebben toegang tot je foto's nodig om een profielfoto te kunnen kiezen.",
+        );
+        return;
+      }
     }
 
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
       quality: 1,
+      ...(Platform.OS !== "web" && {
+        allowsEditing: true,
+        aspect: [1, 1] as [number, number],
+      }),
     });
 
     if (!result.canceled) {

@@ -1,16 +1,16 @@
-import { useFonts } from "@/lib/font-hooks";
+import { AlertProvider } from "@/context/AlertContext";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { OnboardingProvider } from "@/context/OnboardingContext";
-import { AlertProvider } from "@/context/AlertContext";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { useFonts } from "@/lib/font-hooks";
 import tamaConfig from "@/tamagui.config";
 import { SplashScreen, Stack } from "expo-router";
 import { useEffect } from "react";
 import { Platform } from "react-native";
 import { TamaguiProvider } from "tamagui";
-import { usePushNotifications } from "@/hooks/usePushNotifications";
-// eslint-disable-next-line import/no-unresolved
-import { StripeProvider } from "@/lib/stripe";
+
 import { PwaHead } from "@/lib/pwa-head";
+import { StripeProvider } from "@/lib/stripe";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -66,7 +66,6 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (Platform.OS === "web") {
-      // eslint-disable-next-line import/no-unresolved
       import("@/lib/register-sw").then((m) => m.registerServiceWorker());
     }
   }, []);
