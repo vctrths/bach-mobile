@@ -1,3 +1,3 @@
-export const usePushNotifications = (userId?: string) => {
+export const usePushNotifications = (_userId?: string) => {
   return { expoPushToken: null };
 };

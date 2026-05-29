@@ -8,7 +8,7 @@ import { router } from 'expo-router';
 // Dynamically require expo-notifications only on native platforms
 const Notifications = Platform.OS !== 'web' ? require('expo-notifications') : null;
 
-if (Notifications) {
+if (Notifications && typeof Notifications.setNotificationHandler === 'function') {
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldShowAlert: true,
