@@ -1,3 +1,6 @@
+#setup env file
+printenv | grep EXPO_PUBLIC_ > .env
+
 #!/bin/bash
 set -e
 
