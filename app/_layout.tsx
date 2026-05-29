@@ -1,6 +1,7 @@
 import { useFonts } from "@/lib/font-hooks";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { OnboardingProvider } from "@/context/OnboardingContext";
+import { AlertProvider } from "@/context/AlertContext";
 import tamaConfig from "@/tamagui.config";
 import { SplashScreen, Stack } from "expo-router";
 import { useEffect } from "react";
@@ -81,7 +82,9 @@ export default function RootLayout() {
           merchantIdentifier="merchant.com.groen" // required for Apple Pay
         >
           <OnboardingProvider>
-            <AppContent />
+            <AlertProvider>
+              <AppContent />
+            </AlertProvider>
           </OnboardingProvider>
         </StripeProvider>
       </AuthProvider>
