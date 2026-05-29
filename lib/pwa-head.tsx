@@ -52,6 +52,34 @@ export function PwaHead() {
           font-style: normal;
           font-display: swap;
         }
+        @font-face {
+          font-family: "SatoshiLight";
+          src: url("/fonts/Satoshi-Light.otf") format("opentype");
+          font-weight: 300;
+          font-style: normal;
+          font-display: swap;
+        }
+        @font-face {
+          font-family: "SatoshiMedium";
+          src: url("/fonts/Satoshi-Medium.otf") format("opentype");
+          font-weight: 500;
+          font-style: normal;
+          font-display: swap;
+        }
+        @font-face {
+          font-family: "SatoshiBold";
+          src: url("/fonts/Satoshi-Bold.otf") format("opentype");
+          font-weight: 700;
+          font-style: normal;
+          font-display: swap;
+        }
+        @font-face {
+          font-family: "SatoshiBlack";
+          src: url("/fonts/Satoshi-Black.otf") format("opentype");
+          font-weight: 900;
+          font-style: normal;
+          font-display: swap;
+        }
         html, body, #root {
           height: 100%;
           margin: 0;
