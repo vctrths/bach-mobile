@@ -99,7 +99,7 @@ function getSupabase(): SupabaseClient<Database> {
 
   _client = createClient<Database>(url, key, {
     auth: {
-      storage: safeStorage,
+      storage: Platform.OS === 'web' ? undefined : safeStorage,
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: false,
