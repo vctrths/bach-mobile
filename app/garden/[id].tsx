@@ -113,11 +113,11 @@ export default function GardenDetailsScreen() {
 
         {/* Beschrijving Section */}
         <YStack gap="$4">
-          <Text fontFamily="$Inter" fontWeight="900" fontSize={20} color="$text_dark">
+          <Text fontFamily="$Satoshi" fontWeight="900" fontSize={20} color="$text_dark">
             Beschrijving
           </Text>
           <Text
-            fontFamily="$Inter"
+            fontFamily="$Satoshi"
             fontSize={16}
             color="$text_dark"
             lineHeight={22}
@@ -129,7 +129,7 @@ export default function GardenDetailsScreen() {
 
         {/* Locatie Section */}
         <YStack gap="$4">
-          <Text fontFamily="$Inter" fontWeight="900" fontSize={20} color="$text_dark">
+          <Text fontFamily="$Satoshi" fontWeight="900" fontSize={20} color="$text_dark">
             Locatie
           </Text>
           <YStack borderRadius={10} overflow="hidden" height={244} backgroundColor="$borderColor">
@@ -147,7 +147,7 @@ export default function GardenDetailsScreen() {
 
         {/* Aanwezig Section */}
         <YStack gap="$4">
-          <Text fontFamily="$Inter" fontWeight="900" fontSize={20} color="$text_dark">
+          <Text fontFamily="$Satoshi" fontWeight="900" fontSize={20} color="$text_dark">
             Aanwezig
           </Text>
           {(() => {
@@ -184,7 +184,7 @@ export default function GardenDetailsScreen() {
                         />
                         {isSelected && (
                             <Text 
-                            fontFamily="$Inter" 
+                            fontFamily="$Satoshi" 
                             fontWeight="900" 
                             fontSize={14} 
                             color="#FFF" 
@@ -245,12 +245,12 @@ export default function GardenDetailsScreen() {
               </Circle>
             )}
             <YStack flex={1}>
-              <Text fontFamily="$Inter" fontWeight="900" fontSize={22} color="$text_dark">
+              <Text fontFamily="$Satoshi" fontWeight="900" fontSize={22} color="$text_dark">
                 {garden.owner?.firstName} {garden.owner?.lastName}
               </Text>
               <XStack alignItems="center" gap="$1">
                 <Ionicons name="star" size={16} color="#EAB308" />
-                <Text fontFamily="$Inter" fontWeight="900" fontSize={16} color="$text_dark">
+                <Text fontFamily="$Satoshi" fontWeight="900" fontSize={16} color="$text_dark">
                   {garden.owner?.rating?.toFixed(1) ?? "5.0"}
                 </Text>
               </XStack>
@@ -258,7 +258,7 @@ export default function GardenDetailsScreen() {
           </XStack>
 
           <Text
-            fontFamily="$Inter"
+            fontFamily="$Satoshi"
             fontSize={15}
             color="$text_dark"
             lineHeight={20}

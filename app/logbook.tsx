@@ -114,7 +114,7 @@ function CircularProgress({
         justifyContent="center"
         alignItems="center"
       >
-        <Text fontSize={14} color="#172211" fontFamily="$Inter">
+        <Text fontSize={14} color="#172211" fontFamily="$Satoshi">
           {current}/{total}
         </Text>
       </YStack>
@@ -355,14 +355,14 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
                     <Text
                       fontSize={14}
                       color={isToday ? "white" : "rgba(0,0,0,0.6)"}
-                      fontFamily="$Inter"
+                      fontFamily="$Satoshi"
                     >
                       {dayLabel}
                     </Text>
                     <Text
                       fontSize={14}
                       color={isToday ? "white" : "#172211"}
-                      fontFamily="$Inter"
+                      fontFamily="$Satoshi"
                     >
                       {dayNum}
                     </Text>
@@ -380,7 +380,7 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
           fontSize={20}
           fontWeight="900"
           color="#000000"
-          fontFamily="$Inter"
+          fontFamily="$Satoshi"
         >
           Recente logs
         </Text>
@@ -471,7 +471,7 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
                       fontSize={14}
                       fontWeight="700"
                       color="#172211"
-                      fontFamily="$Inter"
+                      fontFamily="$Satoshi"
                     >
                       →
                     </Text>
@@ -517,7 +517,7 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
             fontSize={16}
             fontWeight="700"
             color="#000000"
-            fontFamily="$Inter"
+            fontFamily="$Satoshi"
           >
             {profile?.firstName
               ? `${profile.firstName} ${profile.lastName || ""}`.trim()
