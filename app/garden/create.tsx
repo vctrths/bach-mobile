@@ -151,7 +151,6 @@ export default function GardenCreateScreen() {
   return (
     <PageContainer
       topNavTitle="Tuin aanmaken"
-      onBackPress={() => router.back()}
       activeTab="home"
     >
       <ScreenContent>

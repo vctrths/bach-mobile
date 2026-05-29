@@ -3,6 +3,7 @@ import ScreenContent from "@/components/ui/ScreenContent";
 import { supabase } from "@/utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { safeBack } from "@/utils/navigation";
 import React, { useState } from "react";
 import { Input, Spinner, Text, TextArea, XStack, YStack } from "tamagui";
 import { useAlerts } from "@/context/AlertContext";
@@ -57,7 +58,7 @@ export default function NewLogScreen() {
         alert("Fout", error.message);
       } else {
         alert("Succes", "Log opgeslagen!", [
-          { text: "OK", onPress: () => router.back() },
+          { text: "OK", onPress: () => safeBack() },
         ]);
       }
     } catch {
@@ -70,7 +71,6 @@ export default function NewLogScreen() {
   return (
     <PageContainer
       topNavTitle="Nieuwe log"
-      onBackPress={() => router.back()}
       activeTab="home"
     >
       <ScreenContent>

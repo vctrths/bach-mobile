@@ -175,7 +175,7 @@ export default function PaymentScreen() {
   };
 
   return (
-    <PageContainer topNavTitle="Betaalgegevens" onBackPress={() => router.back()}>
+    <PageContainer topNavTitle="Betaalgegevens">
       <ScrollView showsVerticalScrollIndicator={false}>
         <YStack gap="$6" paddingHorizontal="$4">
           <Card

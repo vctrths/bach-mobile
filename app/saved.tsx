@@ -56,7 +56,6 @@ export default function SavedGardensScreen() {
   return (
     <PageContainer
       topNavTitle="Opgeslagen tuinen"
-      onBackPress={() => router.back()}
       activeTab="profile"
     >
       {loading ? (

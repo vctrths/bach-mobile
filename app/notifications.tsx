@@ -153,7 +153,6 @@ export default function NotificationsScreen() {
   return (
     <PageContainer
       topNavTitle="Meldingen"
-      onBackPress={() => router.back()}
       activeTab="profile"
     >
       {loading ? (

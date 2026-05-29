@@ -1,23 +1,27 @@
 import { useEffect, useRef, useState } from 'react';
 import { Platform } from 'react-native';
 import * as Device from 'expo-device';
-import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import { supabase } from '@/utils/supabase';
 import { router } from 'expo-router';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+// Dynamically require expo-notifications only on native platforms
+const Notifications = Platform.OS !== 'web' ? require('expo-notifications') : null;
+
+if (Notifications) {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
+}
 
 async function registerForPushNotificationsAsync() {
-  if (Platform.OS === 'web') return null;
+  if (!Notifications || Platform.OS === 'web') return null;
 
   if (!Device.isDevice) {
     console.log('Must use physical device for Push Notifications');
@@ -79,15 +83,15 @@ export const usePushNotifications = (userId?: string) => {
       }
     });
     
-    if (Platform.OS === 'web') return;
+    if (!Notifications || Platform.OS === 'web') return;
     
     // Handle notifications while app is in foreground
-    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+    notificationListener.current = Notifications.addNotificationReceivedListener((notification: any) => {
       // You could handle custom UI here if needed
     });
 
     // Handle notification clicks
-    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+    responseListener.current = Notifications.addNotificationResponseReceivedListener((response: any) => {
       const { data } = response.notification.request.content;
       console.log('Notification clicked with data:', data);
       

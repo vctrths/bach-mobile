@@ -19,7 +19,9 @@ module.exports = (() => {
     resolveRequest: (context, moduleName, platform) => {
       if (
         (moduleName === "react-native-maps" ||
-          moduleName === "@react-native-community/datetimepicker") &&
+          moduleName === "@react-native-community/datetimepicker" ||
+          moduleName === "expo-notifications" ||
+          moduleName.startsWith("expo-notifications/")) &&
         platform === "web"
       ) {
         return { type: "empty" };
