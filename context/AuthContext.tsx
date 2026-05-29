@@ -84,9 +84,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (!active) return;
       
-      // Prevent child components from mounting and making concurrent 
-      // Supabase requests while we are fetching the profile
-      setLoading(true);
+      // Only block the UI on initial load or explicit sign in/out.
+      // This prevents the entire app from unmounting and remounting (which refetches all data)
+      // whenever the user tabs back into the browser and triggers a TOKEN_REFRESHED event.
+      const shouldBlockUI = _event === 'INITIAL_SESSION' || _event === 'SIGNED_IN' || _event === 'SIGNED_OUT';
+      
+      if (shouldBlockUI) {
+        setLoading(true);
+      }
       
       try {
         setSession(session);
