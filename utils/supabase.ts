@@ -20,7 +20,12 @@ function getAsyncStorage() {
 const safeStorage = {
   getItem: async (key: string): Promise<string | null> => {
     if (Platform.OS === 'web') {
-      return typeof window !== 'undefined' ? window.localStorage.getItem(key) : null
+      try {
+        return typeof window !== 'undefined' ? window.localStorage.getItem(key) : null;
+      } catch (e) {
+        console.warn("[supabase] safeStorage.getItem error on web:", e);
+        return fallbackStorage[key] || null;
+      }
     }
     try {
       const storage = getAsyncStorage()
@@ -32,8 +37,13 @@ const safeStorage = {
   },
   setItem: async (key: string, value: string): Promise<void> => {
     if (Platform.OS === 'web') {
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(key, value)
+      try {
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem(key, value)
+        }
+      } catch (e) {
+        console.warn("[supabase] safeStorage.setItem error on web:", e);
+        fallbackStorage[key] = value;
       }
       return
     }
@@ -50,8 +60,13 @@ const safeStorage = {
   },
   removeItem: async (key: string): Promise<void> => {
     if (Platform.OS === 'web') {
-      if (typeof window !== 'undefined') {
-        window.localStorage.removeItem(key)
+      try {
+        if (typeof window !== 'undefined') {
+          window.localStorage.removeItem(key)
+        }
+      } catch (e) {
+        console.warn("[supabase] safeStorage.removeItem error on web:", e);
+        delete fallbackStorage[key];
       }
       return
     }
