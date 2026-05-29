@@ -1,3 +1,3 @@
-export function useFonts(): [boolean] {
+export function useFonts(_fontMap: any): [boolean] {
   return [true];
 }

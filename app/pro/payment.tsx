@@ -2,15 +2,160 @@ import PageContainer from "@/components/ui/PageContainer";
 import Button from "@/components/ui/Button";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ScrollView, Alert, Platform } from "react-native";
 import { Card, H1, Text, XStack, YStack } from "tamagui";
-import { useStripe } from "@stripe/stripe-react-native";
+// eslint-disable-next-line import/no-unresolved
+import { useStripe as useNativeStripe } from "@/lib/stripe";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/utils/supabase";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
+
+function NativePaymentFlow({
+  fetchPaymentSheetParams,
+  loading,
+  setLoading,
+}: {
+  fetchPaymentSheetParams: () => Promise<any>;
+  loading: boolean;
+  setLoading: (v: boolean) => void;
+}) {
+  const { initPaymentSheet, presentPaymentSheet } = useNativeStripe();
+
+  const handlePayment = async () => {
+    setLoading(true);
+    try {
+      const { paymentIntent, ephemeralKey, customer } = await fetchPaymentSheetParams();
+
+      const { error: initError } = await initPaymentSheet({
+        merchantDisplayName: "Groen",
+        customerId: customer,
+        customerEphemeralKeySecret: ephemeralKey,
+        paymentIntentClientSecret: paymentIntent,
+        allowsDelayedPaymentMethods: true,
+      });
+
+      if (initError) throw new Error(initError.message);
+
+      const { error } = await presentPaymentSheet();
+
+      if (error) {
+        if (error.code === "Canceled") return;
+        Alert.alert(`Fout: ${error.code}`, error.message);
+      } else {
+        router.push("/succesabo");
+      }
+    } catch (e: any) {
+      Alert.alert("Fout", e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Button
+      label={loading ? "Laden..." : "Betaal nu met Stripe"}
+      onPress={handlePayment}
+      disabled={loading}
+      marginTop="$4"
+    />
+  );
+}
+
+function WebPaymentFlow({
+  fetchPaymentSheetParams,
+}: {
+  fetchPaymentSheetParams: () => Promise<any>;
+}) {
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchPaymentSheetParams()
+      .then((data) => {
+        setClientSecret(data.paymentIntent);
+        setLoading(false);
+      })
+      .catch((e) => {
+        setError(e.message);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return (
+      <YStack alignItems="center" padding="$6">
+        <Text color="$secondary">Betaalformulier laden...</Text>
+      </YStack>
+    );
+  }
+
+  if (error || !clientSecret) {
+    return (
+      <YStack gap="$3">
+        <Text color="$error">{error || "Kon betaalgegevens niet ophalen"}</Text>
+        <Button label="Opnieuw proberen" onPress={() => window.location.reload()} />
+      </YStack>
+    );
+  }
+
+  return <WebPaymentForm clientSecret={clientSecret} />;
+}
+
+function WebPaymentForm({ clientSecret }: { clientSecret: string }) {
+  const [stripePromise] = useState(() =>
+    loadStripe(process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "")
+  );
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const CheckoutForm = () => {
+    const stripe = useStripe();
+    const elements = useElements();
+
+    const handleSubmit = async () => {
+      if (!stripe || !elements) return;
+      setSubmitting(true);
+      setError(null);
+
+      const { error } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: `${window.location.origin}/succesabo`,
+        },
+      });
+
+      if (error) {
+        setError(error.message ?? "Betaling mislukt");
+        setSubmitting(false);
+      }
+    };
+
+    return (
+      <YStack gap="$4">
+        <div style={{ marginTop: 16 }}>
+          <PaymentElement />
+        </div>
+        {error && <Text color="$error">{error}</Text>}
+        <Button
+          label={submitting ? "Verwerken..." : "Betaal nu"}
+          onPress={handleSubmit}
+          disabled={submitting || !stripe}
+        />
+      </YStack>
+    );
+  };
+
+  return (
+    <Elements stripe={stripePromise} options={{ clientSecret }}>
+      <CheckoutForm />
+    </Elements>
+  );
+}
 
 export default function PaymentScreen() {
-  const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
 
@@ -25,47 +170,6 @@ export default function PaymentScreen() {
     }
 
     return data;
-  };
-
-  const initializePaymentSheet = async () => {
-    setLoading(true);
-    try {
-      const { paymentIntent, ephemeralKey, customer } = await fetchPaymentSheetParams();
-
-      const { error } = await initPaymentSheet({
-        merchantDisplayName: "Groen",
-        customerId: customer,
-        customerEphemeralKeySecret: ephemeralKey,
-        paymentIntentClientSecret: paymentIntent,
-        allowsDelayedPaymentMethods: true,
-        defaultBillingDetails: {
-          name: user?.user_metadata?.first_name + " " + user?.user_metadata?.last_name,
-        },
-      });
-
-      if (error) {
-        throw new Error(error.message);
-      }
-    } catch (e: any) {
-      if (Platform.OS === "web") window.alert(e.message);
-      else Alert.alert("Fout", e.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePayment = async () => {
-    await initializePaymentSheet();
-    
-    const { error } = await presentPaymentSheet();
-
-    if (error) {
-      if (error.code === "Canceled") return;
-      if (Platform.OS === "web") window.alert(error.message);
-      else Alert.alert(`Fout: ${error.code}`, error.message);
-    } else {
-      router.push("/succesabo");
-    }
   };
 
   return (
@@ -113,12 +217,15 @@ export default function PaymentScreen() {
               </Text>
             </XStack>
 
-            <Button
-              label={loading ? "Laden..." : "Betaal nu met Stripe"}
-              onPress={handlePayment}
-              disabled={loading}
-              marginTop="$4"
-            />
+            {Platform.OS === "web" ? (
+              <WebPaymentFlow fetchPaymentSheetParams={fetchPaymentSheetParams} />
+            ) : (
+              <NativePaymentFlow
+                fetchPaymentSheetParams={fetchPaymentSheetParams}
+                loading={loading}
+                setLoading={setLoading}
+              />
+            )}
           </YStack>
         </YStack>
       </ScrollView>

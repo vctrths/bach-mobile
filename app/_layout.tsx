@@ -4,9 +4,12 @@ import { OnboardingProvider } from "@/context/OnboardingContext";
 import tamaConfig from "@/tamagui.config";
 import { SplashScreen, Stack } from "expo-router";
 import { useEffect } from "react";
+import { Platform } from "react-native";
 import { TamaguiProvider } from "tamagui";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
-import { StripeProvider } from "@stripe/stripe-react-native";
+// eslint-disable-next-line import/no-unresolved
+import { StripeProvider } from "@/lib/stripe";
+import { PwaHead } from "@/lib/pwa-head";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -60,10 +63,18 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
+  useEffect(() => {
+    if (Platform.OS === "web") {
+      // eslint-disable-next-line import/no-unresolved
+      import("@/lib/register-sw").then((m) => m.registerServiceWorker());
+    }
+  }, []);
+
   if (!loaded) return null;
 
   return (
     <TamaguiProvider config={tamaConfig} defaultTheme="groenevingers">
+      {Platform.OS === "web" && <PwaHead />}
       <AuthProvider>
         <StripeProvider
           publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? ""}

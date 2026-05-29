@@ -16,6 +16,8 @@
     "@expo/vector-icons": "^15.0.3",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/datetimepicker": "^9.1.0",
+    "@stripe/react-stripe-js": "^6.4.0",
+    "@stripe/stripe-js": "^9.7.0",
     "@stripe/stripe-react-native": "^0.66.0",
     "@supabase/supabase-js": "^2.105.1",
     "@tamagui/animations-react-native": "2.0.0-rc.42",
