@@ -21,6 +21,7 @@ function AppContent() {
   return (
     <Stack screenOptions={{ headerShown: false, animation: "none" }}>
       <Stack.Screen name="index" />
+      <Stack.Screen name="dashboard" />
       <Stack.Screen name="explore" />
       <Stack.Screen name="pro" />
       <Stack.Screen name="profile" />
