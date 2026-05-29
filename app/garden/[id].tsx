@@ -8,7 +8,7 @@ import { H1, H2, Spinner, Text, XStack, YStack, Circle, ScrollView } from "tamag
 import { Platform, StyleSheet } from "react-native";
 import { supabase, toCamelCase } from "@/utils/supabase";
 import { type Garden } from "@/types/garden";
-import MapView, { Marker } from "react-native-maps";
+import MiniMap from "@/components/ui/MiniMap";
 import { APPLIANCE_MAP } from "@/components/ui/ApplianceBadges";
 
 export default function GardenDetailsScreen() {
@@ -134,26 +134,7 @@ export default function GardenDetailsScreen() {
           </Text>
           <YStack borderRadius={10} overflow="hidden" height={244} backgroundColor="$borderColor">
             {garden.latitude && garden.longitude ? (
-              <MapView
-                style={StyleSheet.absoluteFillObject}
-                initialRegion={{
-                  latitude: garden.latitude,
-                  longitude: garden.longitude,
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
-                }}
-                scrollEnabled={false}
-                zoomEnabled={false}
-                rotateEnabled={false}
-                pitchEnabled={false}
-              >
-                <Marker
-                  coordinate={{
-                    latitude: garden.latitude,
-                    longitude: garden.longitude,
-                  }}
-                />
-              </MapView>
+              <MiniMap latitude={garden.latitude} longitude={garden.longitude} />
             ) : (
               <ExpoImage
                 source={require("@/assets/images/garden-details/map_placeholder.png")}
