@@ -60,7 +60,7 @@ function getActiveDayIndices(days: string[]): Set<number> {
   return indices;
 }
 
-const fetchWithTimeout = async <T,>(promise: Promise<T>, ms: number = 8000): Promise<T> => {
+const fetchWithTimeout = async <T,>(promise: PromiseLike<T>, ms: number = 8000): Promise<T> => {
   return Promise.race([
     promise,
     new Promise<T>((_, reject) => setTimeout(() => reject(new Error('Supabase fetch timeout')), ms))

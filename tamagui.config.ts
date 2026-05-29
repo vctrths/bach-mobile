@@ -46,32 +46,6 @@ const groeneVingersThema = {
   button_accept_text: "#FFFFFF",
 };
 
-const appThemes = {
-  ...themes,
-  groenevingers: groeneVingersThema,
-};
-
-function withServerThemeFallbackValues<T extends Record<string, Record<string, any>>>(
-  themeMap: T
-) {
-  return Object.fromEntries(
-    Object.entries(themeMap).map(([themeName, theme]) => [
-      themeName,
-      Object.fromEntries(
-        Object.entries(theme).map(([key, value]) => [
-          key,
-          value && typeof value === "object" && "get" in value
-            ? value
-            : {
-                val: value,
-                get: () => value,
-              },
-        ])
-      ),
-    ])
-  ) as T;
-}
-
 export const config = createTamagui({
   defaultFont: "body",
   shorthands,
@@ -82,7 +56,10 @@ export const config = createTamagui({
     Inter: satoshiFont,
     Satoshi: satoshiFont,
   },
-  themes: withServerThemeFallbackValues(appThemes),
+  themes: {
+    ...themes,
+    groenevingers: groeneVingersThema,
+  },
   tokens,
 });
 

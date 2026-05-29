@@ -1,4 +1,4 @@
-const CACHE_NAME = "groen-v2";
+const CACHE_NAME = "groen-v3";
 const APP_SHELL_ASSETS = [
   "/",
   "/manifest.json",
