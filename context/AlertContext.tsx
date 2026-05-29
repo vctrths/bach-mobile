@@ -1,25 +1,31 @@
-import React, { createContext, useContext, useState, useRef, useEffect } from "react";
+import Button from "@/components/ui/Button";
+import { Ionicons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
+import * as Haptics from "expo-haptics";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   Animated,
   Dimensions,
-  StyleSheet,
+  Keyboard,
   Platform,
+  StyleSheet,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  Keyboard,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { BlurView } from "expo-blur";
 import { Circle, Text, XStack, YStack } from "tamagui";
-import { Ionicons } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
-import Button from "@/components/ui/Button";
 
 type ToastType = "success" | "error" | "info" | "warning";
 
 interface AlertButton {
   text: string;
-  onPress?: () => void;
+  onPress?: () => void | Promise<void>;
   style?: "default" | "cancel" | "destructive";
 }
 
@@ -30,22 +36,16 @@ interface ToastOptions {
 }
 
 interface AlertContextType {
-  alert: (
-    title: string,
-    message: string,
-    buttons?: AlertButton[]
-  ) => void;
-  toast: (
-    message: string,
-    type?: ToastType,
-    duration?: number
-  ) => void;
+  alert: (title: string, message: string, buttons?: AlertButton[]) => void;
+  toast: (message: string, type?: ToastType, duration?: number) => void;
 }
 
 const AlertContext = createContext<AlertContextType | undefined>(undefined);
 const USE_NATIVE_ANIMATION_DRIVER = Platform.OS !== "web";
 
-const triggerHaptics = async (type: "success" | "error" | "warning" | "light") => {
+const triggerHaptics = async (
+  type: "success" | "error" | "warning" | "light",
+) => {
   if (Platform.OS === "web") return;
   try {
     if (type === "success") {
@@ -146,7 +146,11 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
   }, [modalState.show, modalScaleAnim, modalOpacityAnim]);
 
   // Toast show helper
-  const showToast = (message: string, type: ToastType = "info", duration = 4000) => {
+  const showToast = (
+    message: string,
+    type: ToastType = "info",
+    duration = 4000,
+  ) => {
     if (toastTimeoutRef.current) {
       clearTimeout(toastTimeoutRef.current);
     }
@@ -168,7 +172,7 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
   const showAlert = (
     title: string,
     message: string,
-    buttons?: AlertButton[]
+    buttons?: AlertButton[],
   ) => {
     Keyboard.dismiss();
     triggerHaptics("light");
@@ -196,15 +200,12 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
     setToastState((prev) => ({ ...prev, show: false }));
   };
 
-  const handleButtonPress = (onPress?: () => void) => {
+  const handleButtonPress = async (onPress?: () => void | Promise<void>) => {
     triggerHaptics("light");
-    setModalState((prev) => ({ ...prev, show: false }));
     if (onPress) {
-      // Small timeout to allow modal animation to complete before triggering callback action
-      setTimeout(() => {
-        onPress();
-      }, 200);
+      await onPress();
     }
+    setModalState((prev) => ({ ...prev, show: false }));
   };
 
   // Colors & Icons for Toast
@@ -291,12 +292,32 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
                 borderBottomLeftRadius={15}
               />
 
-              <XStack flex={1} alignItems="center" paddingHorizontal="$4" paddingVertical="$3" gap="$3">
-                <Ionicons name={toastConfig.icon} size={24} color={toastConfig.color} />
-                <Text flex={1} color="$text_dark" fontSize="$4" fontWeight="500">
+              <XStack
+                flex={1}
+                alignItems="center"
+                paddingHorizontal="$4"
+                paddingVertical="$3"
+                gap="$3"
+              >
+                <Ionicons
+                  name={toastConfig.icon}
+                  size={24}
+                  color={toastConfig.color}
+                />
+                <Text
+                  flex={1}
+                  color="$text_dark"
+                  fontSize="$4"
+                  fontWeight="500"
+                >
                   {toastState.message}
                 </Text>
-                <Circle size={22} backgroundColor="rgba(0,0,0,0.03)" justifyContent="center" alignItems="center">
+                <Circle
+                  size={22}
+                  backgroundColor="rgba(0,0,0,0.03)"
+                  justifyContent="center"
+                  alignItems="center"
+                >
                   <Ionicons name="close" size={14} color="#57594D" />
                 </Circle>
               </XStack>
@@ -307,10 +328,16 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
 
       {/* Modal Dialog Rendering */}
       {modalState.show && (
-        <Animated.View style={[styles.modalOverlay, { opacity: modalOpacityAnim }]}>
+        <Animated.View
+          style={[styles.modalOverlay, { opacity: modalOpacityAnim }]}
+        >
           {/* Dismiss keyboard on tap outside, but don't close modal unless requested */}
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <YStack style={StyleSheet.absoluteFill} justifyContent="center" alignItems="center">
+            <YStack
+              style={StyleSheet.absoluteFill}
+              justifyContent="center"
+              alignItems="center"
+            >
               {/* Backdrop Blur */}
               <BlurView
                 intensity={35}
@@ -371,12 +398,15 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
                   {/* Action Buttons */}
                   <XStack
                     gap="$3"
-                    flexDirection={modalState.buttons.length === 2 ? "row" : "column"}
+                    flexDirection={
+                      modalState.buttons.length === 2 ? "row" : "column"
+                    }
                     marginTop="$2"
                   >
                     {modalState.buttons.map((btn, index) => {
                       // Map native style to custom Button variants
-                      let variant: "primary" | "secondary" | "decline" = "primary";
+                      let variant: "primary" | "secondary" | "decline" =
+                        "primary";
                       if (btn.style === "cancel") {
                         variant = "secondary";
                       } else if (btn.style === "destructive") {
