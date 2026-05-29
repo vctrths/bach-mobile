@@ -10,8 +10,11 @@ export function PwaHead() {
       <meta name="apple-mobile-web-app-title" content="Groen" />
       <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       <link rel="manifest" href="/manifest.json" />
+      <link rel="preload" href="/fonts/Satoshi-Light.otf" as="font" type="font/otf" crossOrigin="anonymous" />
       <link rel="preload" href="/fonts/Satoshi-Regular.otf" as="font" type="font/otf" crossOrigin="anonymous" />
+      <link rel="preload" href="/fonts/Satoshi-Medium.otf" as="font" type="font/otf" crossOrigin="anonymous" />
       <link rel="preload" href="/fonts/Satoshi-Bold.otf" as="font" type="font/otf" crossOrigin="anonymous" />
+      <link rel="preload" href="/fonts/Satoshi-Black.otf" as="font" type="font/otf" crossOrigin="anonymous" />
       <style>{`
         @font-face {
           font-family: "Satoshi";
@@ -21,28 +24,28 @@ export function PwaHead() {
           font-display: swap;
         }
         @font-face {
-          font-family: "SatoshiLight";
+          font-family: "Satoshi";
           src: url("/fonts/Satoshi-Light.otf") format("opentype");
           font-weight: 300;
           font-style: normal;
           font-display: swap;
         }
         @font-face {
-          font-family: "SatoshiMedium";
+          font-family: "Satoshi";
           src: url("/fonts/Satoshi-Medium.otf") format("opentype");
           font-weight: 500;
           font-style: normal;
           font-display: swap;
         }
         @font-face {
-          font-family: "SatoshiBold";
+          font-family: "Satoshi";
           src: url("/fonts/Satoshi-Bold.otf") format("opentype");
           font-weight: 700;
           font-style: normal;
           font-display: swap;
         }
         @font-face {
-          font-family: "SatoshiBlack";
+          font-family: "Satoshi";
           src: url("/fonts/Satoshi-Black.otf") format("opentype");
           font-weight: 900;
           font-style: normal;
