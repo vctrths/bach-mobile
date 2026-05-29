@@ -20,8 +20,8 @@ interface ButtonProps {
   marginBottom?: number | string;
   marginLeft?: number | string;
   marginRight?: number | string;
-  paddingVertical?: number;
-  paddingHorizontal?: number;
+  paddingVertical?: number | string;
+  paddingHorizontal?: number | string;
   borderRadius?: number;
   backgroundColor?: string;
   borderWidth?: number;
