@@ -41,8 +41,13 @@ export default function Onboarding() {
     }
   }
   return (
-    <YStack flex={1} justifyContent="space-between" paddingHorizontal="$6">
-      <YStack marginTop="$4">
+    <YStack
+      flex={1}
+      justifyContent="space-between"
+      paddingHorizontal="$6"
+      paddingVertical="$12"
+    >
+      <YStack>
         <Info
           image={onboardingSteps[step].image}
           title={onboardingSteps[step].title}
@@ -50,10 +55,7 @@ export default function Onboarding() {
         />
       </YStack>
 
-      <Button
-        label="Volgende"
-        onPress={() => handleStep()}
-      />
+      <Button label="Volgende" onPress={() => handleStep()} />
     </YStack>
   );
 }

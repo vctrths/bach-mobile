@@ -49,8 +49,8 @@ export default function PageContainer({
     contentPaddingBottom !== undefined
       ? contentPaddingBottom
       : showBottomNav
-      ? DEFAULT_BOTTOM_NAV_HEIGHT + bottomNavExtraMargin + GAP + 30
-      : GAP;
+        ? DEFAULT_BOTTOM_NAV_HEIGHT + bottomNavExtraMargin + GAP + 30
+        : GAP;
 
   return (
     <ThemedSafeArea>

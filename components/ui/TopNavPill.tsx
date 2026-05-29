@@ -1,6 +1,6 @@
+import { safeBack } from "@/utils/navigation";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
-import { safeBack } from "@/utils/navigation";
 import React from "react";
 import { StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -31,6 +31,7 @@ export default function TopNavPill({
       left={0}
       right={0}
       paddingHorizontal="$4"
+      paddingTop="$2"
       zIndex={10}
     >
       <YStack
@@ -53,7 +54,11 @@ export default function TopNavPill({
           />
 
           <YStack paddingHorizontal="$4" paddingVertical="$3" gap="$3">
-            <XStack alignItems="center" justifyContent="space-between" minHeight={44}>
+            <XStack
+              alignItems="center"
+              justifyContent="space-between"
+              minHeight={44}
+            >
               <XStack alignItems="center" gap="$4">
                 {!hideBack && (
                   <Circle

@@ -13,10 +13,10 @@ const infoSchema = z.object({
   email: z.string().email({ message: "Dit e-mailadres is ongeldig" }),
   description: z
     .string()
-    .min(1, { message: "Vul een beschrijving in" }) // Default message for empty
+    .min(1, { message: "Vul een beschrijving in" })
     .refine((val) => !val.includes("ongepast"), {
       message: "Je beschrijving bevat ongepaste woorden",
-    }), // Just a simple mock for the figma error
+    }),
 });
 
 export default function InfoSelection() {
