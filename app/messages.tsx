@@ -1,7 +1,6 @@
 import PageContainer from "@/components/ui/PageContainer";
 import MessageItem from "@/components/ui/MessageItem";
 import { supabase } from "@/utils/supabase";
-import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { FlatList } from "react-native";
 import { Spinner, Text, YStack } from "tamagui";
@@ -19,7 +18,6 @@ type ConversationWithPartner = {
 export default function Messages() {
   const [conversations, setConversations] = useState<ConversationWithPartner[]>([]);
   const [loading, setLoading] = useState(true);
-  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     fetchConversations();
@@ -55,17 +53,6 @@ export default function Messages() {
 
       if (error || !conversationsData) return;
 
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-      const { count: unread } = await supabase
-        .from("messages")
-        .select("*", { count: "exact", head: true })
-        .neq("sender_id", user.id)
-        .gte("created_at", sevenDaysAgo.toISOString());
-
-      setUnreadCount(unread || 0);
-
       const conversationsWithDetails = await Promise.all(
         conversationsData.map(async (conv) => {
           const partnerId = conv.user1_id === user.id ? conv.user2_id : conv.user1_id;
@@ -90,12 +77,7 @@ export default function Messages() {
             partner_name: `${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`.trim(),
             partner_image: profile?.profile_image ?? null,
             last_message: lastMessage?.content ?? "",
-            last_message_time: lastMessage
-              ? new Date(lastMessage.created_at).toLocaleTimeString("nl-NL", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })
-              : "",
+            last_message_time: lastMessage?.created_at ?? "",
             is_online: false,
           };
         })
@@ -110,18 +92,26 @@ export default function Messages() {
   };
 
   const formatRelativeTime = (dateStr: string) => {
+    if (!dateStr) return "";
     const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return "";
+
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
+    const diffWeeks = Math.floor(diffDays / 7);
+    const diffMonths = Math.floor(diffDays / 30);
 
-    if (diffMins < 1) return "Nu";
-    if (diffMins < 60) return `${diffMins}m`;
-    if (diffHours < 24) return `${diffHours}u`;
-    if (diffDays < 7) return `${diffDays}d`;
-    return date.toLocaleDateString("nl-NL");
+    if (diffMins < 60 || diffHours < 24) return "recent";
+    if (diffDays === 1) return "gisteren";
+    if (diffDays < 7) return `${diffDays} dagen geleden`;
+    if (diffWeeks === 1) return "vorige week";
+    if (diffWeeks < 4) return `${diffWeeks} weken geleden`;
+    if (diffMonths === 1) return "vorige maand";
+    if (diffMonths < 12) return `${diffMonths} maanden geleden`;
+    return date.toLocaleDateString("nl-NL", { month: "long", year: "numeric" });
   };
 
   return (
@@ -158,10 +148,8 @@ export default function Messages() {
               isOnline={item.is_online}
             />
           )}
-          ItemSeparatorComponent={() => (
-            <YStack height={1} backgroundColor="$divider" />
-          )}
-          contentContainerStyle={{ paddingBottom: 100 }}
+          ItemSeparatorComponent={() => <YStack height={6} />}
+          contentContainerStyle={{ paddingHorizontal: 8, paddingBottom: 100 }}
         />
       )}
     </PageContainer>
