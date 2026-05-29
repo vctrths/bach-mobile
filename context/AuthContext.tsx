@@ -105,6 +105,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         userId: session?.user?.id,
       });
       if (!active) return;
+      
+      // Prevent child components from mounting and making concurrent 
+      // Supabase requests while we are fetching the profile
+      setLoading(true);
+      
       try {
         setSession(session);
         setUser(session?.user ?? null);
