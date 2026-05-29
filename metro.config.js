@@ -17,7 +17,11 @@ module.exports = (() => {
     assetExts: resolver.assetExts.filter((ext) => ext !== "svg"),
     sourceExts: [...resolver.sourceExts, "svg"],
     resolveRequest: (context, moduleName, platform) => {
-      if (moduleName === "react-native-maps" && platform === "web") {
+      if (
+        (moduleName === "react-native-maps" ||
+          moduleName === "@react-native-community/datetimepicker") &&
+        platform === "web"
+      ) {
         return { type: "empty" };
       }
       if (typeof defaultResolveRequest === "function") {
