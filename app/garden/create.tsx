@@ -8,8 +8,9 @@ import { Image as ExpoImage } from "@/lib/image";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { Alert, Platform } from "react-native";
+import { Platform } from "react-native";
 import { Card, Input, Spinner, Text, TextArea, XStack, YStack } from "tamagui";
+import { useAlerts } from "@/context/AlertContext";
 
 async function geocodeLocation(location: string): Promise<{ latitude: number; longitude: number } | null> {
   try {
@@ -31,6 +32,7 @@ async function geocodeLocation(location: string): Promise<{ latitude: number; lo
 }
 
 export default function GardenCreateScreen() {
+  const { alert } = useAlerts();
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
@@ -47,7 +49,7 @@ export default function GardenCreateScreen() {
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted" && Platform.OS !== "web") {
-      Alert.alert(
+      alert(
         "Toestemming nodig",
         "We hebben toegang tot je foto's nodig om een tuinafbeelding te kunnen kiezen."
       );
@@ -68,19 +70,11 @@ export default function GardenCreateScreen() {
 
   const handleCreate = async () => {
     if (!name.trim()) {
-      if (Platform.OS === 'web') {
-        window.alert("Vul een tuinnaam in.");
-      } else {
-        Alert.alert("Fout", "Vul een tuinnaam in.");
-      }
+      alert("Fout", "Vul een tuinnaam in.");
       return;
     }
     if (!location.trim()) {
-      if (Platform.OS === 'web') {
-        window.alert("Vul een locatie in.");
-      } else {
-        Alert.alert("Fout", "Vul een locatie in.");
-      }
+      alert("Fout", "Vul een locatie in.");
       return;
     }
 
@@ -90,11 +84,7 @@ export default function GardenCreateScreen() {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) {
-        if (Platform.OS === 'web') {
-          window.alert("Log eerst in om een tuin aan te maken");
-        } else {
-          Alert.alert("Fout", "Log eerst in om een tuin aan te maken");
-        }
+        alert("Fout", "Log eerst in om een tuin aan te maken");
         return;
       }
 
@@ -145,27 +135,14 @@ export default function GardenCreateScreen() {
       const { error } = await supabase.from("gardens").insert(insertData as any);
 
       if (error) {
-        if (Platform.OS === 'web') {
-          window.alert(error.message);
-        } else {
-          Alert.alert("Fout", error.message);
-        }
+        alert("Fout", error.message);
       } else {
-        if (Platform.OS === 'web') {
-          window.alert("Tuin aangemaakt!");
-          router.push("/");
-        } else {
-          Alert.alert("Succes", "Tuin aangemaakt!", [
-            { text: "OK", onPress: () => router.push("/") },
-          ]);
-        }
+        alert("Succes", "Tuin aangemaakt!", [
+          { text: "OK", onPress: () => router.push("/") },
+        ]);
       }
     } catch {
-      if (Platform.OS === 'web') {
-        window.alert("Er is iets misgegaan. Probeer het opnieuw.");
-      } else {
-        Alert.alert("Fout", "Er is iets misgegaan. Probeer het opnieuw.");
-      }
+      alert("Fout", "Er is iets misgegaan. Probeer het opnieuw.");
     } finally {
       setSaving(false);
     }

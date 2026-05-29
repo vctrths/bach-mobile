@@ -4,8 +4,9 @@ import { supabase } from "@/utils/supabase";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Alert, Platform } from "react-native";
+import { Platform } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { useAlerts } from "@/context/AlertContext";
 import { Circle, Text, TextArea, Input, XStack, YStack } from "tamagui";
 import { z } from "zod";
 
@@ -38,6 +39,7 @@ const requestSchema = z.object({
 
 export default function GardenRequestScreen() {
   const { id } = useLocalSearchParams();
+  const { alert } = useAlerts();
   const [gardenName, setGardenName] = useState("Aanvraag");
   const [ownerId, setOwnerId] = useState<string | null>(null);
   const [motivation, setMotivation] = useState("");
@@ -131,26 +133,12 @@ export default function GardenRequestScreen() {
 
   const handleSubmit = async () => {
     if (hasExistingRequest) {
-      if (Platform.OS === 'web') {
-        window.alert("Je hebt al een aanvraag verstuurd voor deze tuin.");
-      } else {
-        Alert.alert(
-          "Aanvraag bestaat al",
-          "Je hebt al een aanvraag verstuurd voor deze tuin."
-        );
-      }
+      alert("Aanvraag bestaat al", "Je hebt al een aanvraag verstuurd voor deze tuin.");
       return;
     }
 
     if (ownerId && currentUserId && ownerId === currentUserId) {
-      if (Platform.OS === 'web') {
-        window.alert("Je kan geen aanvraag sturen voor je eigen tuin.");
-      } else {
-        Alert.alert(
-          "Dit is je eigen tuin",
-          "Je kan geen aanvraag sturen voor je eigen tuin."
-        );
-      }
+      alert("Dit is je eigen tuin", "Je kan geen aanvraag sturen voor je eigen tuin.");
       return;
     }
 
@@ -177,11 +165,7 @@ export default function GardenRequestScreen() {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        if (Platform.OS === 'web') {
-          window.alert("Log eerst in om een aanvraag te sturen");
-        } else {
-          Alert.alert("Fout", "Log eerst in om een aanvraag te sturen");
-        }
+        alert("Fout", "Log eerst in om een aanvraag te sturen");
         return;
       }
 
@@ -195,11 +179,7 @@ export default function GardenRequestScreen() {
       });
 
       if (error) {
-        if (Platform.OS === 'web') {
-          window.alert(error.message);
-        } else {
-          Alert.alert("Fout", error.message);
-        }
+        alert("Fout", error.message);
         return;
       }
 
@@ -243,11 +223,7 @@ export default function GardenRequestScreen() {
 
       router.push(`/messages/${conversationId}`);
     } catch {
-      if (Platform.OS === 'web') {
-        window.alert("Er is iets misgegaan. Probeer het opnieuw.");
-      } else {
-        Alert.alert("Fout", "Er is iets misgegaan. Probeer het opnieuw.");
-      }
+      alert("Fout", "Er is iets misgegaan. Probeer het opnieuw.");
     } finally {
       setLoading(false);
     }
