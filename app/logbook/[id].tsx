@@ -93,7 +93,6 @@ export default function LogDetailScreen() {
   return (
     <PageContainer
       topNavTitle={pageTitle}
-      onBackPress={() => router.back()}
       activeTab="home"
     >
       <ScreenContent>

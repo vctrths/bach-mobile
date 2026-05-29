@@ -3,6 +3,7 @@ import Button from "@/components/ui/Button";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image as ExpoImage } from "@/lib/image";
 import { router, useLocalSearchParams } from "expo-router";
+import { safeBack } from "@/utils/navigation";
 import React, { useEffect, useState } from "react";
 import { H1, H2, Spinner, Text, XStack, YStack, Circle, ScrollView } from "tamagui";
 import { Platform, StyleSheet } from "react-native";
@@ -65,7 +66,7 @@ export default function GardenDetailsScreen() {
           </Text>
           <Button
             label="Terug"
-            onPress={() => router.back()}
+            onPress={() => safeBack()}
           />
         </YStack>
       </PageContainer>

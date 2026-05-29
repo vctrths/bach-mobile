@@ -3,6 +3,7 @@ import PageContainer from "@/components/ui/PageContainer";
 import { supabase } from "@/utils/supabase";
 import { OnboardingContext } from "@/context/OnboardingContext";
 import { router } from "expo-router";
+import { safeBack } from "@/utils/navigation";
 import React, { useContext, useEffect, useState } from "react";
 import { Input, Spinner, Text, TextArea, XStack, YStack } from "tamagui";
 import { useAlerts } from "@/context/AlertContext";
@@ -76,7 +77,7 @@ export default function PersonalDetailsScreen() {
 
       updateData({ firstName, lastName, email, description });
       alert("Succes", "Je persoonlijke gegevens zijn bijgewerkt!", [
-        { text: "OK", onPress: () => router.back() },
+        { text: "OK", onPress: () => safeBack() },
       ]);
     } catch {
       alert("Fout", "Er is iets misgegaan. Probeer het opnieuw.");

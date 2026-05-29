@@ -127,7 +127,7 @@ export default function CollaborationDetailScreen() {
 
   if (loading) {
     return (
-      <PageContainer topNavTitle="Samenwerking" onBackPress={() => router.back()}>
+      <PageContainer topNavTitle="Samenwerking">
         <YStack flex={1} justifyContent="center" alignItems="center">
           <Spinner size="large" color="$primary" />
         </YStack>
@@ -145,7 +145,6 @@ export default function CollaborationDetailScreen() {
   return (
     <PageContainer
       topNavTitle="Samenwerking details"
-      onBackPress={() => router.back()}
       activeTab="home"
     >
       <ScreenContent>

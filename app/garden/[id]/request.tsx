@@ -235,7 +235,6 @@ export default function GardenRequestScreen() {
   return (
     <PageContainer
       topNavTitle={gardenName}
-      onBackPress={() => router.back()}
       activeTab="home"
     >
       <YStack paddingHorizontal={16} paddingTop="$6" gap={32} paddingBottom={200}>

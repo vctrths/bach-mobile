@@ -81,7 +81,6 @@ export default function ProScreen() {
   return (
     <PageContainer
       topNavTitle="Abonnement"
-      onBackPress={() => router.back()}
       showBottomNav={false}
     >
       <YStack gap={10} paddingHorizontal={16} paddingTop={16}>

@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
-import { router } from "expo-router";
+import { safeBack } from "@/utils/navigation";
 import React from "react";
 import { StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -22,7 +22,7 @@ export default function TopNavPill({
   children,
 }: TopNavPillProps) {
   const insets = useSafeAreaInsets();
-  const handleBack = onBackPress || (() => router.back());
+  const handleBack = onBackPress || safeBack;
 
   return (
     <YStack
