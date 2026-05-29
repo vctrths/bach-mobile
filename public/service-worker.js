@@ -1,6 +1,5 @@
-const CACHE_NAME = "groen-v3";
+const CACHE_NAME = "groen-v4";
 const APP_SHELL_ASSETS = [
-  "/",
   "/manifest.json",
   "/icons/icon-192x192.png",
   "/icons/icon-512x512.png",
@@ -36,6 +35,32 @@ async function networkFirst(request) {
   }
 }
 
+async function navigationNetworkFirst(request) {
+  const cache = await caches.open(CACHE_NAME);
+
+  try {
+    const freshRequest = new Request(request, { cache: "no-store" });
+    const response = await fetch(freshRequest);
+
+    if (shouldCacheResponse(response)) {
+      await cache.put(request, response.clone());
+    }
+
+    return response;
+  } catch {
+    return (
+      (await cache.match(request)) ||
+      (await cache.match("/index.html")) ||
+      (await cache.match("/")) ||
+      new Response("Groene Vingers is offline.", {
+        status: 503,
+        statusText: "Service Unavailable",
+        headers: { "Content-Type": "text/plain" },
+      })
+    );
+  }
+}
+
 async function cacheFirst(request) {
   const cache = await caches.open(CACHE_NAME);
   const cached = await cache.match(request);
@@ -68,6 +93,12 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -77,7 +108,7 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (request.mode === "navigate") {
-    event.respondWith(networkFirst(request));
+    event.respondWith(navigationNetworkFirst(request));
     return;
   }
 
