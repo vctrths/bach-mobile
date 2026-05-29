@@ -1,14 +1,16 @@
-import PageContainer from "@/components/ui/PageContainer";
 import Button from "@/components/ui/Button";
+import PageContainer from "@/components/ui/PageContainer";
+import { useAlerts } from "@/context/AlertContext";
 import { supabase } from "@/utils/supabase";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Platform } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import { useAlerts } from "@/context/AlertContext";
-import { Circle, Text, TextArea, Input, XStack, YStack } from "tamagui";
+import { Circle, Select, Text, TextArea, XStack, YStack } from "tamagui";
 import { z } from "zod";
+
+const REQUEST_TIMEOUT_MS = 12000;
 
 const DAYS = [
   { key: "M", label: "M" },
@@ -20,6 +22,13 @@ const DAYS = [
   { key: "Zo", label: "Z" },
 ];
 
+const COLLABORATION_TYPES = [
+  { value: "weekly_maintenance", label: "Wekelijks onderhoud" },
+  { value: "harvest_help", label: "Oogsthulp" },
+  { value: "shared_gardening", label: "Samen tuinieren" },
+  { value: "one_time_help", label: "Eenmalige hulp" },
+];
+
 const requestSchema = z.object({
   motivation: z
     .string()
@@ -27,18 +36,49 @@ const requestSchema = z.object({
     .max(300, "Max 300 tekens"),
   collaborationType: z.string().min(1, "Selecteer een type samenwerking"),
   days: z.array(z.string()).min(1, "Selecteer minstens één dag"),
-  startDate: z.custom<Date>((val) => {
-    if (!(val instanceof Date) || isNaN(val.getTime())) return false;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return val >= today;
-  }, {
-    message: "Startdatum kan niet in het verleden liggen",
-  }),
+  startDate: z.custom<Date>(
+    (val) => {
+      if (!(val instanceof Date) || isNaN(val.getTime())) return false;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return val >= today;
+    },
+    {
+      message: "Startdatum kan niet in het verleden liggen",
+    },
+  ),
 });
+
+function formatDateForSupabase(date: Date) {
+  return `${date.getFullYear()}-${(date.getMonth() + 1)
+    .toString()
+    .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
+}
+
+function withTimeout<T>(
+  promise: PromiseLike<T>,
+  timeoutMessage = "De server reageert niet. Probeer het opnieuw.",
+) {
+  return new Promise<T>((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      reject(new Error(timeoutMessage));
+    }, REQUEST_TIMEOUT_MS);
+
+    Promise.resolve(promise)
+      .then((value) => {
+        clearTimeout(timeout);
+        resolve(value);
+      })
+      .catch((error) => {
+        clearTimeout(timeout);
+        reject(error);
+      });
+  });
+}
 
 export default function GardenRequestScreen() {
   const { id } = useLocalSearchParams();
+  const gardenId = Array.isArray(id) ? id[0] : id;
   const { alert } = useAlerts();
   const [gardenName, setGardenName] = useState("Aanvraag");
   const [ownerId, setOwnerId] = useState<string | null>(null);
@@ -58,16 +98,20 @@ export default function GardenRequestScreen() {
 
   useEffect(() => {
     async function fetchGarden() {
-      if (!id) return;
+      if (!gardenId) return;
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await withTimeout(supabase.auth.getUser());
         if (user) setCurrentUserId(user.id);
 
-        const { data, error } = await supabase
-          .from("gardens")
-          .select("name, owner_id")
-          .eq("id", id as string)
-          .single();
+        const { data, error } = await withTimeout(
+          supabase
+            .from("gardens")
+            .select("name, owner_id")
+            .eq("id", gardenId)
+            .single(),
+        );
         if (data && !error) {
           setGardenName((data as any).name);
           setOwnerId((data as any).owner_id);
@@ -77,26 +121,28 @@ export default function GardenRequestScreen() {
       }
     }
     fetchGarden();
-  }, [id]);
+  }, [gardenId]);
 
   useEffect(() => {
     async function checkExistingRequest() {
-      if (!id) return;
+      if (!gardenId) return;
       try {
         const {
           data: { user },
-        } = await supabase.auth.getUser();
+        } = await withTimeout(supabase.auth.getUser());
         if (!user) {
           setCheckingRequest(false);
           return;
         }
 
-        const { data, error } = await supabase
-          .from("garden_requests")
-          .select("id")
-          .eq("garden_id", id as string)
-          .eq("user_id", user.id)
-          .maybeSingle();
+        const { data, error } = await withTimeout(
+          supabase
+            .from("garden_requests")
+            .select("id")
+            .eq("garden_id", gardenId)
+            .eq("user_id", user.id)
+            .maybeSingle(),
+        );
 
         if (data && !error) {
           setHasExistingRequest(true);
@@ -108,13 +154,13 @@ export default function GardenRequestScreen() {
       }
     }
     checkExistingRequest();
-  }, [id]);
+  }, [gardenId]);
 
   const toggleDay = (dayKey: string) => {
     setSelectedDays((prev) =>
       prev.includes(dayKey)
         ? prev.filter((d) => d !== dayKey)
-        : [...prev, dayKey]
+        : [...prev, dayKey],
     );
     setErrors((e) => ({ ...e, days: "" }));
   };
@@ -131,14 +177,35 @@ export default function GardenRequestScreen() {
     }
   };
 
+  const openFallbackSuccess = () => {
+    alert(
+      "Aanvraag verstuurd",
+      "Je aanvraag is verstuurd. Je kan je berichten later openen zodra de chat klaarstaat.",
+      [{ text: "OK", onPress: () => router.push(`/garden/${gardenId}`) }],
+    );
+  };
+
   const handleSubmit = async () => {
+    if (loading) return;
+
+    if (!gardenId) {
+      alert("Fout", "Deze tuin kon niet gevonden worden.");
+      return;
+    }
+
     if (hasExistingRequest) {
-      alert("Aanvraag bestaat al", "Je hebt al een aanvraag verstuurd voor deze tuin.");
+      alert(
+        "Aanvraag bestaat al",
+        "Je hebt al een aanvraag verstuurd voor deze tuin.",
+      );
       return;
     }
 
     if (ownerId && currentUserId && ownerId === currentUserId) {
-      alert("Dit is je eigen tuin", "Je kan geen aanvraag sturen voor je eigen tuin.");
+      alert(
+        "Dit is je eigen tuin",
+        "Je kan geen aanvraag sturen voor je eigen tuin.",
+      );
       return;
     }
 
@@ -159,85 +226,120 @@ export default function GardenRequestScreen() {
     }
 
     setLoading(true);
+    let requestCreated = false;
     try {
       const {
         data: { user },
-      } = await supabase.auth.getUser();
+        error: userError,
+      } = await withTimeout(supabase.auth.getUser());
 
-      if (!user) {
+      if (userError || !user) {
         alert("Fout", "Log eerst in om een aanvraag te sturen");
         return;
       }
 
-      const { error } = await supabase.from("garden_requests").insert({
-        garden_id: id as string,
-        user_id: user.id,
-        motivation,
-        collaboration_type: collabType,
-        days: selectedDays,
-        start_date: startDate ? `${startDate.getFullYear()}-${(startDate.getMonth() + 1).toString().padStart(2, "0")}-${startDate.getDate().toString().padStart(2, "0")}` : null,
-      });
+      const { error } = await withTimeout(
+        supabase.from("garden_requests").insert({
+          garden_id: gardenId,
+          user_id: user.id,
+          motivation,
+          collaboration_type: collabType,
+          days: selectedDays,
+          start_date: startDate ? formatDateForSupabase(startDate) : null,
+        }),
+      );
 
       if (error) {
         alert("Fout", error.message);
         return;
       }
 
+      requestCreated = true;
+      setHasExistingRequest(true);
+
       const partnerId = ownerId;
       if (!partnerId) {
-        router.push("/");
+        openFallbackSuccess();
         return;
       }
 
       const user1 = user.id < partnerId ? user.id : partnerId;
       const user2 = user.id < partnerId ? partnerId : user.id;
 
-      const { data: existingConv } = await supabase
-        .from("conversations")
-        .select("id")
-        .eq("user1_id", user1)
-        .eq("user2_id", user2)
-        .maybeSingle();
+      const { data: existingConv, error: existingConvError } =
+        await withTimeout(
+          supabase
+            .from("conversations")
+            .select("id")
+            .eq("user1_id", user1)
+            .eq("user2_id", user2)
+            .maybeSingle(),
+        );
+
+      if (existingConvError) {
+        throw existingConvError;
+      }
 
       let conversationId = existingConv?.id;
 
       if (!conversationId) {
-        const { data: newConv, error: convError } = await supabase
-          .from("conversations")
-          .insert({ user1_id: user1, user2_id: user2 })
-          .select("id")
-          .single();
+        const { data: newConv, error: convError } = await withTimeout(
+          supabase
+            .from("conversations")
+            .insert({ user1_id: user1, user2_id: user2 })
+            .select("id")
+            .single(),
+        );
 
         if (convError || !newConv) {
-          router.push("/");
-          return;
+          throw convError ?? new Error("Kon geen gesprek aanmaken.");
         }
         conversationId = newConv.id;
       }
 
-      await supabase.from("messages").insert({
-        conversation_id: conversationId,
-        sender_id: user.id,
-        content: `Hallo! Ik heb zojuist een aanvraag gestuurd voor je tuin ${gardenName}.`,
-      });
+      const { error: messageError } = await withTimeout(
+        supabase.from("messages").insert({
+          conversation_id: conversationId,
+          sender_id: user.id,
+          content: `Hallo! Ik heb zojuist een aanvraag gestuurd voor je tuin ${gardenName}.`,
+        }),
+      );
+
+      if (messageError) {
+        throw messageError;
+      }
 
       router.push(`/messages/${conversationId}`);
-    } catch {
-      alert("Fout", "Er is iets misgegaan. Probeer het opnieuw.");
+    } catch (error) {
+      console.error("Garden request submit error:", error);
+      if (requestCreated) {
+        openFallbackSuccess();
+        return;
+      }
+
+      alert(
+        "Fout",
+        error instanceof Error
+          ? error.message
+          : "Er is iets misgegaan. Probeer het opnieuw.",
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const isOwnGarden = ownerId && currentUserId && ownerId === currentUserId;
-  const isDisabled = loading || hasExistingRequest || checkingRequest || !!isOwnGarden;
+  const isDisabled =
+    loading || hasExistingRequest || checkingRequest || !!isOwnGarden;
 
   return (
-    <PageContainer
-      topNavTitle={gardenName}
-      activeTab="home"
-    >
-      <YStack paddingHorizontal={16} paddingTop="$6" gap={32} paddingBottom={200}>
+    <PageContainer topNavTitle={gardenName} activeTab="home">
+      <YStack
+        paddingHorizontal={16}
+        paddingTop="$6"
+        gap={32}
+        paddingBottom={200}
+      >
         {isOwnGarden && (
           <YStack
             backgroundColor="rgba(239, 68, 68, 0.1)"
@@ -269,7 +371,8 @@ export default function GardenRequestScreen() {
               Aanvraag al verstuurd
             </Text>
             <Text color="#ef4444" fontSize={14}>
-              Je hebt al een aanvraag voor deze tuin verstuurd. Je kan slechts één aanvraag per tuin indienen.
+              Je hebt al een aanvraag voor deze tuin verstuurd. Je kan slechts
+              één aanvraag per tuin indienen.
             </Text>
           </YStack>
         )}
@@ -323,20 +426,36 @@ export default function GardenRequestScreen() {
               alignItems="center"
               justifyContent="space-between"
             >
-              <Input
-                flex={1}
-                placeholder="Typ hier je samenwerkingstype..."
+              <Select
                 value={collabType}
-                onChangeText={(val) => {
-                  setCollabType(val);
+                onValueChange={(value) => {
+                  setCollabType(value);
                   setErrors((e) => ({ ...e, collaborationType: "" }));
                 }}
-                backgroundColor="transparent"
-                borderWidth={0}
-                padding={0}
-                fontSize={14}
-                color={collabType ? "#000000" : "#929292"}
-              />
+              >
+                <Select.Trigger
+                  flex={1}
+                  backgroundColor="transparent"
+                  borderWidth={0}
+                  padding={0}
+                  iconAfter={null}
+                >
+                  <Select.Value placeholder="Kies een samenwerkingstype" />
+                </Select.Trigger>
+                <Select.Content>
+                  <Select.Viewport backgroundColor="white" borderRadius={8}>
+                    {COLLABORATION_TYPES.map((type, index) => (
+                      <Select.Item
+                        key={type.value}
+                        index={index}
+                        value={type.value}
+                      >
+                        <Select.ItemText>{type.label}</Select.ItemText>
+                      </Select.Item>
+                    ))}
+                  </Select.Viewport>
+                </Select.Content>
+              </Select>
               <MaterialCommunityIcons
                 name="chevron-down"
                 size={20}
@@ -353,10 +472,20 @@ export default function GardenRequestScreen() {
           <YStack gap={8}>
             <XStack gap={4} alignItems="flex-start" padding={10}>
               <YStack width={56} gap={12} alignItems="flex-start">
-                <Text color="#56594D" fontSize={16} fontWeight="500" opacity={0.4}>
+                <Text
+                  color="#56594D"
+                  fontSize={16}
+                  fontWeight="500"
+                  opacity={0.4}
+                >
                   Dag
                 </Text>
-                <Text color="#56594D" fontSize={16} fontWeight="500" opacity={0.4}>
+                <Text
+                  color="#56594D"
+                  fontSize={16}
+                  fontWeight="500"
+                  opacity={0.4}
+                >
                   Aanw.
                 </Text>
               </YStack>
@@ -370,7 +499,9 @@ export default function GardenRequestScreen() {
                   onPress={() => toggleDay(day.key)}
                 >
                   <Text
-                    color={selectedDays.includes(day.key) ? "$primary" : "#36392B"}
+                    color={
+                      selectedDays.includes(day.key) ? "$primary" : "#36392B"
+                    }
                     fontSize={16}
                     fontWeight="500"
                     opacity={selectedDays.includes(day.key) ? 1 : 0.4}
@@ -514,12 +645,23 @@ export default function GardenRequestScreen() {
         )}
 
         {Platform.OS === "web" && showPicker && (
-          <YStack gap={8} backgroundColor="#F1F1F1" padding={16} borderRadius={12}>
-            <Text fontSize={14} color="#929292">Selecteer een datum:</Text>
+          <YStack
+            gap={8}
+            backgroundColor="#F1F1F1"
+            padding={16}
+            borderRadius={12}
+          >
+            <Text fontSize={14} color="#929292">
+              Selecteer een datum:
+            </Text>
             <input
               type="date"
               min={minDate.toISOString().split("T")[0]}
-              value={startDate ? `${startDate.getFullYear()}-${(startDate.getMonth() + 1).toString().padStart(2, "0")}-${startDate.getDate().toString().padStart(2, "0")}` : ""}
+              value={
+                startDate
+                  ? `${startDate.getFullYear()}-${(startDate.getMonth() + 1).toString().padStart(2, "0")}-${startDate.getDate().toString().padStart(2, "0")}`
+                  : ""
+              }
               onChange={(e) => {
                 const date = new Date(e.target.value);
                 if (!isNaN(date.getTime())) {
@@ -541,12 +683,12 @@ export default function GardenRequestScreen() {
             checkingRequest
               ? "Laden..."
               : hasExistingRequest
-              ? "Aanvraag al verstuurd"
-              : isOwnGarden
-              ? "Dit is je eigen tuin"
-              : loading
-              ? "Bezig..."
-              : "Verzoek sturen"
+                ? "Aanvraag al verstuurd"
+                : isOwnGarden
+                  ? "Dit is je eigen tuin"
+                  : loading
+                    ? "Bezig..."
+                    : "Verzoek sturen"
           }
           variant="secondary"
           backgroundColor={isDisabled ? "#d1d5db" : undefined}
