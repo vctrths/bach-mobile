@@ -73,29 +73,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let active = true;
 
-    async function initAuth() {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) {
-          console.error("[AuthContext] getSession error from Supabase:", error);
-        }
-        if (!active) return;
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await fetchProfile(session.user.id);
-        }
-      } catch (error) {
-        console.error("[AuthContext] initAuth caught error:", error);
-      } finally {
-        if (active) {
-          setLoading(false);
-        }
-      }
-    }
-
-    initAuth();
-
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
@@ -104,6 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         hasSession: !!session,
         userId: session?.user?.id,
       });
+      
       if (!active) return;
       
       // Prevent child components from mounting and making concurrent 
