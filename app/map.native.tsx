@@ -81,7 +81,7 @@ export default function MapScreen() {
         </MapView>
       )}
 
-      <TopNavPill title="Kaart" />
+      <TopNavPill title="Kaart" hideBack />
 
       <BottomNav activeTab="map" />
     </View>

@@ -26,7 +26,7 @@ export default function MapScreen() {
         </Text>
       </YStack>
 
-      <TopNavPill title="Kaart" />
+      <TopNavPill title="Kaart" hideBack />
     </View>
   );
 }

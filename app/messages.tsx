@@ -119,6 +119,7 @@ export default function Messages() {
       topNavTitle="Chats"
       activeTab="message"
       scrollable={false}
+      hideBack
     >
       {loading ? (
         <YStack flex={1} justifyContent="center" alignItems="center">
