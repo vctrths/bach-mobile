@@ -2,6 +2,7 @@ import Button from "@/components/ui/Button";
 import GardenCard from "@/components/ui/GardenCard";
 import { type Garden } from "@/types/garden";
 import { supabase, toCamelCase } from "@/utils/supabase";
+import { useAuth } from "@/context/AuthContext";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
@@ -59,7 +60,15 @@ function getActiveDayIndices(days: string[]): Set<number> {
   return indices;
 }
 
+const fetchWithTimeout = async <T,>(promise: Promise<T>, ms: number = 8000): Promise<T> => {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error('Supabase fetch timeout')), ms))
+  ]);
+};
+
 export default function OwnerView() {
+  const { user } = useAuth();
   const [gardens, setGardens] = useState<Garden[]>([]);
   const [gardeners, setGardeners] = useState<ApprovedGardener[]>([]);
   const [requests, setRequests] = useState<GardenRequest[]>([]);
@@ -71,20 +80,16 @@ export default function OwnerView() {
 
   const fetchData = useCallback(async () => {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
       if (!user) {
         setLoading(false);
         return;
       }
 
-      const gardensRes = await supabase
+      const gardensRes = await fetchWithTimeout(supabase
         .from("gardens")
         .select("id, name, location, image_url, owner:profiles!owner_id(rating)")
         .eq("owner_id", user.id)
-        .limit(10);
+        .limit(10));
 
       if (gardensRes.data) {
         setGardens(gardensRes.data.map((g) => toCamelCase(g)) as Garden[]);
@@ -98,7 +103,7 @@ export default function OwnerView() {
         return;
       }
 
-      const [collaborationsRes, requestsRes] = await Promise.all([
+      const [collaborationsRes, requestsRes] = await fetchWithTimeout(Promise.all([
         supabase
           .from("collaborations")
           .select(
@@ -116,7 +121,7 @@ export default function OwnerView() {
           .in("garden_id", gardenIds)
           .order("created_at", { ascending: false })
           .limit(10),
-      ]);
+      ]));
 
       if (collaborationsRes.data) {
         const mappedGardeners = (collaborationsRes.data as any[]).map((r) => {

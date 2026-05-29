@@ -21,6 +21,13 @@ interface SeekerViewProps {
   onSearchBlur?: () => void;
 }
 
+const fetchWithTimeout = async <T,>(promise: Promise<T>, ms: number = 8000): Promise<T> => {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error('Supabase fetch timeout')), ms))
+  ]);
+};
+
 export default function SeekerView({
   searchQuery = "",
   searchResults = [],
@@ -38,7 +45,7 @@ export default function SeekerView({
 
   const fetchData = useCallback(async () => {
     try {
-      const [gardensRes, logsRes] = await Promise.all([
+      const [gardensRes, logsRes] = await fetchWithTimeout(Promise.all([
         supabase
           .from("gardens")
           .select("id, name, location, image_url, appliances, owner:profiles!owner_id(rating)")
@@ -47,7 +54,7 @@ export default function SeekerView({
           .from("garden_logs")
           .select("id, title, status")
           .limit(5),
-      ]);
+      ]));
 
       if (gardensRes.data) setGardens(toCamelCase<Garden[]>(gardensRes.data));
       if (logsRes.data) setLogs(toCamelCase<GardenLog[]>(logsRes.data));
