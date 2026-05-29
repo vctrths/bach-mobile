@@ -1,7 +1,6 @@
 import { pages } from "@/types/app";
 import { ReactNode } from "react";
 import { RefreshControlProps } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScrollView, YStack } from "tamagui";
 import BottomNav from "./BottomNav";
 import ThemedSafeArea from "./ThemedSafeArea";
@@ -44,14 +43,14 @@ export default function PageContainer({
   scrollable = true,
   refreshControl,
 }: PageContainerProps) {
-  const insets = useSafeAreaInsets();
-
   const effectiveTopNavHeight = topNavHeight + (topNavChildren ? 50 : 0);
 
   const calculatedPaddingBottom =
     contentPaddingBottom !== undefined
       ? contentPaddingBottom
-      : DEFAULT_BOTTOM_NAV_HEIGHT + bottomNavExtraMargin + GAP;
+      : showBottomNav
+      ? DEFAULT_BOTTOM_NAV_HEIGHT + bottomNavExtraMargin + GAP + 30
+      : GAP;
 
   return (
     <ThemedSafeArea>
@@ -71,13 +70,14 @@ export default function PageContainer({
           flex={1}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{
+            flexGrow: 1,
             paddingTop: effectiveTopNavHeight + GAP,
             paddingBottom: calculatedPaddingBottom,
           }}
           scrollEventThrottle={16}
           refreshControl={refreshControl}
         >
-          <YStack flex={1}>{children}</YStack>
+          <YStack>{children}</YStack>
         </ScrollView>
       ) : (
         <YStack
