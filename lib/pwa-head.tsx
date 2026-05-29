@@ -58,7 +58,8 @@ export function PwaHead() {
           padding: 0;
           overflow: hidden;
         }
-        body {
+        body, input, button, select, textarea {
+          font-family: Satoshi, Helvetica, Arial, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }

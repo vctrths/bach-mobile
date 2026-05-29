@@ -47,6 +47,7 @@ const groeneVingersThema = {
 };
 
 export const config = createTamagui({
+  defaultFont: "body",
   shorthands,
   fonts: {
     heading: satoshiFont,
