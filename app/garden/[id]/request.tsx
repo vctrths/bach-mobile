@@ -518,6 +518,9 @@ export default function GardenRequestScreen() {
                 Gewenste start datum:
               </Text>
               <YStack
+                width="100%"
+                maxWidth={300}
+                alignSelf="flex-start"
                 backgroundColor="white"
                 borderWidth={1}
                 borderColor={errors.startDate ? "red" : "#E3E3E3"}
@@ -561,10 +564,12 @@ export default function GardenRequestScreen() {
                   }}
                   style={{
                     width: "100%",
+                    maxWidth: 300,
                     minHeight: 44,
                     padding: "10px 12px",
                     borderRadius: "8px",
                     border: "1px solid #E3E3E3",
+                    outline: "none",
                     fontSize: "16px",
                     backgroundColor: "#fff",
                     color: "#000",
