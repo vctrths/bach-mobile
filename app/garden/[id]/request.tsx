@@ -1,5 +1,6 @@
 import Button from "@/components/ui/Button";
 import PageContainer from "@/components/ui/PageContainer";
+import WeekdayPicker from "@/components/ui/WeekdayPicker";
 import { useAlerts } from "@/context/AlertContext";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/utils/supabase";
@@ -8,20 +9,10 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Platform } from "react-native";
-import { Circle, Select, Text, TextArea, XStack, YStack } from "tamagui";
+import { Select, Text, TextArea, XStack, YStack } from "tamagui";
 import { z } from "zod";
 
 const REQUEST_TIMEOUT_MS = 12000;
-
-const DAYS = [
-  { key: "M", label: "M" },
-  { key: "D", label: "D" },
-  { key: "W", label: "W" },
-  { key: "Do", label: "D" },
-  { key: "V", label: "V" },
-  { key: "Za", label: "Z" },
-  { key: "Zo", label: "Z" },
-];
 
 const COLLABORATION_TYPES = [
   { value: "weekly_maintenance", label: "Wekelijks onderhoud" },
@@ -80,6 +71,7 @@ function withTimeout<T>(
 export default function GardenRequestScreen() {
   const { id } = useLocalSearchParams();
   const gardenId = Array.isArray(id) ? id[0] : id;
+  const isWeb = Platform.OS === "web";
   const { alert } = useAlerts();
   const { loading: authLoading, profile } = useAuth();
   const [gardenName, setGardenName] = useState("Aanvraag");
@@ -97,6 +89,17 @@ export default function GardenRequestScreen() {
 
   const minDate = new Date();
   minDate.setHours(0, 0, 0, 0);
+  const minDateValue = minDate.toISOString().split("T")[0];
+  const startDateValue = startDate
+    ? `${startDate.getFullYear()}-${(startDate.getMonth() + 1).toString().padStart(2, "0")}-${startDate.getDate().toString().padStart(2, "0")}`
+    : "";
+  const startDateLabel = startDate
+    ? startDate.toLocaleDateString("nl-NL", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
+    : "Kies een datum";
 
   useEffect(() => {
     async function fetchGarden() {
@@ -171,10 +174,14 @@ export default function GardenRequestScreen() {
     setShowPicker(Platform.OS === "ios");
     if (selectedDate) {
       if (selectedDate < minDate) {
-        setStartDate(minDate);
-      } else {
-        setStartDate(selectedDate);
+        setStartDate(null);
+        setErrors((e) => ({
+          ...e,
+          startDate: "Startdatum kan niet in het verleden liggen",
+        }));
+        return;
       }
+      setStartDate(selectedDate);
       setErrors((e) => ({ ...e, startDate: "" }));
     }
   };
@@ -454,7 +461,13 @@ export default function GardenRequestScreen() {
                   backgroundColor="transparent"
                   borderWidth={0}
                   padding={0}
-                  iconAfter={null}
+                  iconAfter={
+                    <MaterialCommunityIcons
+                      name="chevron-down"
+                      size={20}
+                      color="#000000"
+                    />
+                  }
                 >
                   <Select.Value placeholder="Kies een samenwerkingstype" />
                 </Select.Trigger>
@@ -472,11 +485,6 @@ export default function GardenRequestScreen() {
                   </Select.Viewport>
                 </Select.Content>
               </Select>
-              <MaterialCommunityIcons
-                name="chevron-down"
-                size={20}
-                color="#000000"
-              />
             </XStack>
             {errors.collaborationType && (
               <Text color="red" fontSize={14}>
@@ -485,213 +493,142 @@ export default function GardenRequestScreen() {
             )}
           </YStack>
 
-          <YStack gap={8}>
-            <XStack gap={4} alignItems="flex-start" padding={10}>
-              <YStack width={56} gap={12} alignItems="flex-start">
-                <Text
-                  color="#56594D"
-                  fontSize={16}
-                  fontWeight="500"
-                  opacity={0.4}
-                >
-                  Dag
-                </Text>
-                <Text
-                  color="#56594D"
-                  fontSize={16}
-                  fontWeight="500"
-                  opacity={0.4}
-                >
-                  Aanw.
+          <WeekdayPicker
+            selectedDays={selectedDays}
+            onToggleDay={toggleDay}
+            error={errors.days}
+          />
+
+          {isWeb ? (
+            <YStack gap={16}>
+              <Text color="#000000" fontSize={16} fontWeight="400">
+                Gewenste start datum:
+              </Text>
+              <YStack
+                backgroundColor="white"
+                borderWidth={1}
+                borderColor={errors.startDate ? "red" : "#E3E3E3"}
+                borderRadius={12}
+                padding={16}
+                gap={10}
+              >
+                <input
+                  type="date"
+                  min={minDateValue}
+                  value={startDateValue}
+                  onChange={(e) => {
+                    if (!e.target.value) {
+                      setStartDate(null);
+                      setErrors((current) => ({
+                        ...current,
+                        startDate: "",
+                      }));
+                      return;
+                    }
+
+                    const date = new Date(e.target.value);
+                    if (isNaN(date.getTime())) {
+                      return;
+                    }
+
+                    if (date < minDate) {
+                      setStartDate(null);
+                      setErrors((current) => ({
+                        ...current,
+                        startDate: "Startdatum kan niet in het verleden liggen",
+                      }));
+                      return;
+                    }
+
+                    setStartDate(date);
+                    setErrors((current) => ({
+                      ...current,
+                      startDate: "",
+                    }));
+                  }}
+                  style={{
+                    width: "100%",
+                    minHeight: 44,
+                    padding: "10px 12px",
+                    borderRadius: "8px",
+                    border: "1px solid #E3E3E3",
+                    fontSize: "16px",
+                    backgroundColor: "#fff",
+                    color: "#000",
+                  }}
+                />
+                <Text color="#929292" fontSize={14}>
+                  Kies vandaag of later.
                 </Text>
               </YStack>
-
-              {DAYS.map((day) => (
-                <YStack
-                  key={day.key}
-                  flex={1}
+              {errors.startDate && (
+                <Text color="red" fontSize={14}>
+                  {errors.startDate}
+                </Text>
+              )}
+            </YStack>
+          ) : (
+            <YStack gap={16}>
+              <Text color="#000000" fontSize={16} fontWeight="400">
+                Gewenste start datum:
+              </Text>
+              <YStack gap={12}>
+                <XStack
+                  width="100%"
+                  backgroundColor="#F1F1F1"
+                  borderWidth={1}
+                  borderColor={errors.startDate ? "red" : "#E3E3E3"}
+                  borderRadius={12}
+                  paddingVertical={14}
+                  paddingHorizontal={16}
                   alignItems="center"
-                  gap={12}
-                  onPress={() => toggleDay(day.key)}
+                  justifyContent="space-between"
+                  onPress={() => setShowPicker((prev) => !prev)}
+                  pressStyle={{
+                    scale: 0.98,
+                    opacity: 0.9,
+                  }}
                 >
                   <Text
-                    color={
-                      selectedDays.includes(day.key) ? "$primary" : "#36392B"
-                    }
+                    color={startDate ? "#000000" : "#929292"}
                     fontSize={16}
-                    fontWeight="500"
-                    opacity={selectedDays.includes(day.key) ? 1 : 0.4}
+                    fontWeight="600"
                   >
-                    {day.label}
+                    {startDateLabel}
                   </Text>
-                  <Circle
-                    size={8}
-                    backgroundColor={
-                      selectedDays.includes(day.key)
-                        ? "$primary"
-                        : "rgba(0, 0, 0, 0.25)"
-                    }
+                  <MaterialCommunityIcons
+                    name="calendar"
+                    size={18}
+                    color="#000000"
                   />
-                </YStack>
-              ))}
-            </XStack>
-            {errors.days && (
-              <Text color="red" fontSize={14}>
-                {errors.days}
-              </Text>
-            )}
-          </YStack>
-
-          <YStack gap={16}>
-            <Text color="#000000" fontSize={16} fontWeight="400">
-              Gewenste start datum:
-            </Text>
-            <XStack gap={8}>
-              <XStack
-                flex={1}
-                backgroundColor="#F1F1F1"
-                borderWidth={1}
-                borderColor={errors.startDate ? "red" : "#E3E3E3"}
-                borderRadius={50}
-                padding={8}
-                paddingHorizontal={16}
-                alignItems="center"
-                justifyContent="center"
-                gap={12}
-                onPress={() => setShowPicker((prev) => !prev)}
-                pressStyle={{
-                  scale: 0.98,
-                  opacity: 0.9,
-                }}
-              >
-                <Text
-                  color={startDate ? "#000000" : "#929292"}
-                  fontSize={16}
-                  fontWeight="600"
-                >
-                  {startDate
-                    ? `${startDate.getDate().toString().padStart(2, "0")}`
-                    : "DD"}
+                </XStack>
+                <Text color="#929292" fontSize={14}>
+                  Kies vandaag of later.
                 </Text>
-                <MaterialCommunityIcons
-                  name="calendar"
-                  size={16}
-                  color="#000000"
-                />
-              </XStack>
-              <XStack
-                flex={1}
-                backgroundColor="#F1F1F1"
-                borderWidth={1}
-                borderColor={errors.startDate ? "red" : "#E3E3E3"}
-                borderRadius={50}
-                padding={8}
-                paddingHorizontal={16}
-                alignItems="center"
-                justifyContent="center"
-                gap={12}
-                onPress={() => setShowPicker((prev) => !prev)}
-                pressStyle={{
-                  scale: 0.98,
-                  opacity: 0.9,
-                }}
-              >
-                <Text
-                  color={startDate ? "#000000" : "#929292"}
-                  fontSize={16}
-                  fontWeight="600"
-                >
-                  {startDate
-                    ? `${(startDate.getMonth() + 1).toString().padStart(2, "0")}`
-                    : "MM"}
+              </YStack>
+              {errors.startDate && (
+                <Text color="red" fontSize={14}>
+                  {errors.startDate}
                 </Text>
-                <MaterialCommunityIcons
-                  name="calendar"
-                  size={16}
-                  color="#000000"
-                />
-              </XStack>
-              <XStack
-                flex={1}
-                backgroundColor="#F1F1F1"
-                borderWidth={1}
-                borderColor={errors.startDate ? "red" : "#E3E3E3"}
-                borderRadius={50}
-                padding={8}
-                paddingHorizontal={16}
-                alignItems="center"
-                justifyContent="center"
-                gap={12}
-                onPress={() => setShowPicker((prev) => !prev)}
-                pressStyle={{
-                  scale: 0.98,
-                  opacity: 0.9,
-                }}
-              >
-                <Text
-                  color={startDate ? "#000000" : "#929292"}
-                  fontSize={16}
-                  fontWeight="600"
-                >
-                  {startDate ? `${startDate.getFullYear()}` : "YYYY"}
-                </Text>
-                <MaterialCommunityIcons
-                  name="calendar"
-                  size={16}
-                  color="#000000"
-                />
-              </XStack>
-            </XStack>
-            {errors.startDate && (
-              <Text color="red" fontSize={14}>
-                {errors.startDate}
-              </Text>
-            )}
-          </YStack>
+              )}
+            </YStack>
+          )}
         </YStack>
 
-        {showPicker && Platform.OS !== "web" && (
+        {!isWeb && showPicker && (
           <DateTimePicker
             value={startDate || new Date()}
             mode="date"
             display={Platform.OS === "ios" ? "spinner" : "default"}
             minimumDate={minDate}
             onChange={handleDateChange}
+            style={{
+              width: "100%",
+              maxWidth: "100%",
+              alignSelf: "stretch",
+              backgroundColor: "transparent",
+            }}
           />
-        )}
-
-        {Platform.OS === "web" && showPicker && (
-          <YStack
-            gap={8}
-            backgroundColor="#F1F1F1"
-            padding={16}
-            borderRadius={12}
-          >
-            <Text fontSize={14} color="#929292">
-              Selecteer een datum:
-            </Text>
-            <input
-              type="date"
-              min={minDate.toISOString().split("T")[0]}
-              value={
-                startDate
-                  ? `${startDate.getFullYear()}-${(startDate.getMonth() + 1).toString().padStart(2, "0")}-${startDate.getDate().toString().padStart(2, "0")}`
-                  : ""
-              }
-              onChange={(e) => {
-                const date = new Date(e.target.value);
-                if (!isNaN(date.getTime())) {
-                  handleDateChange(null, date);
-                }
-              }}
-              style={{
-                padding: "8px",
-                borderRadius: "8px",
-                border: "1px solid #E3E3E3",
-                fontSize: "16px",
-              }}
-            />
-          </YStack>
         )}
 
         <Button
