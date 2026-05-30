@@ -1,4 +1,4 @@
-const CACHE_NAME = "groen-v4";
+const CACHE_NAME = "groen-v5";
 const APP_SHELL_ASSETS = [
   "/manifest.json",
   "/icons/icon-192x192.png",
@@ -36,18 +36,11 @@ async function networkFirst(request) {
 }
 
 async function navigationNetworkFirst(request) {
-  const cache = await caches.open(CACHE_NAME);
-
   try {
     const freshRequest = new Request(request, { cache: "no-store" });
-    const response = await fetch(freshRequest);
-
-    if (shouldCacheResponse(response)) {
-      await cache.put(request, response.clone());
-    }
-
-    return response;
+    return await fetch(freshRequest);
   } catch {
+    const cache = await caches.open(CACHE_NAME);
     return (
       (await cache.match(request)) ||
       (await cache.match("/index.html")) ||
