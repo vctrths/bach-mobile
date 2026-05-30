@@ -405,7 +405,7 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
                 borderRadius={16}
                 paddingTop={12}
                 paddingHorizontal={12}
-                paddingBottom={10}
+                paddingBottom={6}
                 width="100%"
                 boxShadow="0px 4px 20px rgba(23, 51, 0, 0.06)"
                 onPress={() =>
@@ -429,7 +429,7 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
                       }}
                       contentFit="cover"
                     />
-                    <YStack flex={1} minWidth={0} gap="$1">
+                    <YStack flex={1} minWidth={0} gap={0}>
                       <Text
                         fontSize={16}
                         lineHeight={18}
