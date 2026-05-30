@@ -3,6 +3,60 @@ import { Platform } from 'react-native'
 import { Database } from '@/types/supabase'
 
 const fallbackStorage: Record<string, string> = {}
+const SUPABASE_FETCH_TIMEOUT_MS = 8000
+
+const getFetchUrl = (input: Parameters<typeof fetch>[0]) => {
+  if (typeof input === 'string') return input
+  if (input instanceof URL) return input.toString()
+  return input.url
+}
+
+const supabaseFetch = async (
+  input: Parameters<typeof fetch>[0],
+  init?: Parameters<typeof fetch>[1],
+): Promise<Response> => {
+  if (typeof AbortController === 'undefined') {
+    return fetch(input, init)
+  }
+
+  const controller = new AbortController()
+  const originalSignal = init?.signal
+  let didTimeout = false
+
+  const timeoutId = setTimeout(() => {
+    didTimeout = true
+    controller.abort()
+  }, SUPABASE_FETCH_TIMEOUT_MS)
+
+  if (originalSignal) {
+    if (originalSignal.aborted) {
+      controller.abort()
+    } else {
+      originalSignal.addEventListener('abort', () => controller.abort(), {
+        once: true,
+      })
+    }
+  }
+
+  try {
+    return await fetch(input, {
+      ...init,
+      signal: controller.signal,
+    })
+  } catch (error) {
+    if (didTimeout) {
+      console.warn("[supabase] fetch timed out and was aborted", {
+        timeoutMs: SUPABASE_FETCH_TIMEOUT_MS,
+        url: getFetchUrl(input),
+      })
+      throw new Error("Supabase fetch timeout")
+    }
+
+    throw error
+  } finally {
+    clearTimeout(timeoutId)
+  }
+}
 
 function getAsyncStorage() {
   if (Platform.OS === 'web') return null
@@ -98,6 +152,9 @@ function getSupabase(): SupabaseClient<Database> {
   }
 
   _client = createClient<Database>(url, key, {
+    global: {
+      fetch: supabaseFetch as typeof fetch,
+    },
     auth: {
       storage: Platform.OS === 'web' ? undefined : safeStorage,
       autoRefreshToken: true,
@@ -134,4 +191,3 @@ export function toCamelCase<T>(obj: any): T {
   }
   return obj;
 }
-
