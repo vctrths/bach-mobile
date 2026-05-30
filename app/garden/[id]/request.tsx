@@ -161,6 +161,12 @@ export default function GardenRequestScreen() {
     checkExistingRequest();
   }, [gardenId]);
 
+  useEffect(() => {
+    if (!authLoading && profile && !profile.isPremium) {
+      router.replace("/pro");
+    }
+  }, [authLoading, profile]);
+
   const toggleDay = (dayKey: string) => {
     setSelectedDays((prev) =>
       prev.includes(dayKey)
@@ -248,16 +254,7 @@ export default function GardenRequestScreen() {
       }
 
       if (!profile?.isPremium) {
-        alert(
-          "Pro vereist",
-          "Je hebt een Pro-abonnement nodig om aanvragen te versturen.",
-          [
-            {
-              text: "Bekijk Pro",
-              onPress: () => router.push("/pro"),
-            },
-          ],
-        );
+        router.replace("/pro");
         return;
       }
 
