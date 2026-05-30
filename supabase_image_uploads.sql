@@ -18,11 +18,6 @@ SET
 ALTER TABLE public.garden_logs
   ADD COLUMN IF NOT EXISTS image_url text;
 
-DROP POLICY IF EXISTS "App images are publicly readable" ON storage.objects;
-CREATE POLICY "App images are publicly readable"
-  ON storage.objects FOR SELECT
-  USING (bucket_id = 'app-images');
-
 DROP POLICY IF EXISTS "Users can upload own app images" ON storage.objects;
 CREATE POLICY "Users can upload own app images"
   ON storage.objects FOR INSERT
