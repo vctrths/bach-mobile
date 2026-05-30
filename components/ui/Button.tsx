@@ -26,6 +26,7 @@ interface ButtonProps {
   backgroundColor?: string;
   borderWidth?: number;
   borderColor?: string;
+  width?: number | string;
 }
 
 const VARIANT_STYLES: Record<ButtonVariant, {
@@ -97,6 +98,7 @@ export default function Button({
   backgroundColor,
   borderWidth,
   borderColor,
+  width,
 }: ButtonProps) {
   const styles = VARIANT_STYLES[variant];
 
@@ -114,6 +116,7 @@ export default function Button({
       backgroundColor={backgroundColor ?? styles.backgroundColor}
       borderWidth={borderWidth ?? styles.borderWidth}
       borderColor={borderColor ?? styles.borderColor}
+      width={width}
       paddingVertical={paddingVertical ?? styles.paddingVertical}
       paddingHorizontal={paddingHorizontal ?? styles.paddingHorizontal}
       alignItems="center"
