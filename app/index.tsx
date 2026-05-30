@@ -88,35 +88,45 @@ export default function Dashboard() {
         setCheckingGardenerConnection(false);
       }, DASHBOARD_CHECK_TIMEOUT_MS);
 
-      const { data, error } = await supabase
-        .from("collaborations")
-        .select("id")
-        .eq("gardener_id", userId)
-        .eq("status", "active")
-        .limit(1);
+      try {
+        const { data, error } = await supabase
+          .from("collaborations")
+          .select("id")
+          .eq("gardener_id", userId)
+          .eq("status", "active")
+          .limit(1);
 
-      if (!active) return;
+        if (!active) return;
 
-      if (queryTimeoutId) {
-        clearTimeout(queryTimeoutId);
-        queryTimeoutId = null;
-      }
+        if (timedOut) {
+          console.warn(
+            "[Dashboard] active gardener connection check completed after timeout",
+            { userId },
+          );
+          return;
+        }
 
-      if (timedOut) {
-        console.warn(
-          "[Dashboard] active gardener connection check completed after timeout",
-          { userId },
-        );
-      }
+        if (error) {
+          console.error("Error checking active gardener connection:", error);
+          setHasActiveGardenerConnection(false);
+        } else {
+          setHasActiveGardenerConnection((data?.length ?? 0) > 0);
+        }
+      } catch (error) {
+        if (!active) return;
 
-      if (error) {
         console.error("Error checking active gardener connection:", error);
         setHasActiveGardenerConnection(false);
-      } else {
-        setHasActiveGardenerConnection((data?.length ?? 0) > 0);
-      }
+      } finally {
+        if (queryTimeoutId) {
+          clearTimeout(queryTimeoutId);
+          queryTimeoutId = null;
+        }
 
-      setCheckingGardenerConnection(false);
+        if (active && !timedOut) {
+          setCheckingGardenerConnection(false);
+        }
+      }
     };
 
     checkGardenerConnection();
