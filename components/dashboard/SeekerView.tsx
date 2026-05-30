@@ -1,6 +1,6 @@
 import ApplianceBadges from "@/components/ui/ApplianceBadges";
 import GardenCard from "@/components/ui/GardenCard";
-import { LogCard, type GardenLog } from "@/components/ui/LogCard";
+import { type GardenLog } from "@/components/ui/LogCard";
 import { Image as ExpoImage } from "@/lib/image";
 import { type Garden } from "@/types/garden";
 import { supabase, toCamelCase } from "@/utils/supabase";
@@ -197,24 +197,6 @@ export default function SeekerView({
                     garden={garden}
                     onPress={() => router.push(("/garden/" + garden.id) as any)}
                   />
-                ))}
-              </XStack>
-            </ScrollView>
-          </YStack>
-
-          <YStack marginTop="$6" paddingHorizontal="$2">
-            <Text
-              fontSize="$4"
-              fontWeight="bold"
-              color="$text_dark"
-              marginBottom="$3"
-            >
-              Recente logboek entries
-            </Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <XStack gap="$3">
-                {logs.map((log) => (
-                  <LogCard key={log.id} log={log} />
                 ))}
               </XStack>
             </ScrollView>
