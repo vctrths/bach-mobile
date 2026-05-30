@@ -3,6 +3,7 @@ import OwnerView from "@/components/dashboard/OwnerView";
 import SeekerView from "@/components/dashboard/SeekerView";
 import NotificationBell from "@/components/ui/NotificationBell";
 import PageContainer from "@/components/ui/PageContainer";
+import SearchBar from "@/components/ui/SearchBar";
 import { useAuth } from "@/context/AuthContext";
 import { OnboardingContext } from "@/context/OnboardingContext";
 import { Image as ExpoImage } from "@/lib/image";
@@ -197,6 +198,7 @@ export default function Dashboard() {
       : baseRole;
 
   const showingSearch = !!(searchQuery.trim() || isSearchFocused);
+  const isSeekerDashboard = role === UserRole.TUIN_ZOEKER || !role;
 
   console.log("[Dashboard] render:", {
     loading,
@@ -246,19 +248,27 @@ export default function Dashboard() {
         </XStack>
       }
       hideBack
+      topNavChildren={
+        isSeekerDashboard ? (
+          <SearchBar
+            active
+            value={searchQuery}
+            onChangeText={onSearchChange}
+            onFocus={() => setIsSearchFocused(true)}
+            onBlur={() => setIsSearchFocused(false)}
+            placeholder="Zoeken naar een tuin"
+          />
+        ) : undefined
+      }
     >
       {role === UserRole.TUIN_EIGENAAR && <OwnerView />}
       {role === UserRole.TUIN_ZOEKER_MET_TUIN && <GardenerView />}
-      {(role === UserRole.TUIN_ZOEKER || !role) && (
+      {isSeekerDashboard && (
         <SeekerView
           searchQuery={searchQuery}
           searchResults={searchResults}
           searchLoading={searchLoading}
-          isSearchFocused={isSearchFocused}
           showingSearch={showingSearch}
-          onSearchChange={onSearchChange}
-          onSearchFocus={() => setIsSearchFocused(true)}
-          onSearchBlur={() => setIsSearchFocused(false)}
         />
       )}
     </PageContainer>
