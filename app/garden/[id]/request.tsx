@@ -455,7 +455,7 @@ export default function GardenRequestScreen() {
               >
                 <Select.Trigger
                   flex={1}
-                  backgroundColor="#FDFBF7"
+                  backgroundColor="white"
                   borderWidth={0}
                   borderRadius={8}
                   padding={0}
@@ -475,13 +475,13 @@ export default function GardenRequestScreen() {
                   />
                 </Select.Trigger>
                 <Select.Content>
-                  <Select.Viewport backgroundColor="#FDFBF7" borderRadius={8}>
+                  <Select.Viewport backgroundColor="white" borderRadius={8}>
                     {COLLABORATION_TYPES.map((type, index) => (
                       <Select.Item
                         key={type.value}
                         index={index}
                         value={type.value}
-                        backgroundColor="#FDFBF7"
+                        backgroundColor="white"
                         borderRadius={6}
                         hoverStyle={{ backgroundColor: "#F1F3EC" }}
                         pressStyle={{ backgroundColor: "#EAF0D8" }}
