@@ -16,31 +16,39 @@ export default function AccountSelect() {
     const [error, setError] = useState<string | null>(null);
 
     const handleOAuth = async (provider: "google" | "facebook") => {
+        if (loading) return;
         setLoading(true);
         setError(null);
 
-        const redirectTo = Linking.createURL("auth/callback");
+        try {
+            const redirectTo = Linking.createURL("auth/callback");
 
-        const { data, error } = await supabase.auth.signInWithOAuth({
-            provider,
-            options: { redirectTo, skipBrowserRedirect: true },
-        });
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider,
+                options: { redirectTo, skipBrowserRedirect: true },
+            });
 
-        if (error) {
-            setError(error.message);
-            setLoading(false);
-            return;
-        }
-
-        if (data?.url) {
-            const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
-
-            if (result.type === "success") {
-                router.replace("/auth/callback");
+            if (error) {
+                setError(error.message);
+                return;
             }
-        }
 
-        setLoading(false);
+            if (data?.url) {
+                const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+
+                if (result.type === "success") {
+                    router.replace("/auth/callback");
+                }
+            }
+        } catch (oauthError) {
+            setError(
+                oauthError instanceof Error
+                    ? oauthError.message
+                    : "Kon inloggen niet starten",
+            );
+        } finally {
+            setLoading(false);
+        }
     };
     return (
         <ThemedSafeArea>
