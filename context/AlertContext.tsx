@@ -15,8 +15,8 @@ import {
   Keyboard,
   Platform,
   StyleSheet,
+  Pressable,
   TouchableOpacity,
-  TouchableWithoutFeedback,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Circle, Text, XStack, YStack } from "tamagui";
@@ -89,6 +89,7 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
 
   const insets = useSafeAreaInsets();
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isHandlingButtonPressRef = useRef(false);
 
   // Animations
   const toastAnim = useRef(new Animated.Value(0)).current;
@@ -201,11 +202,17 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
   };
 
   const handleButtonPress = async (onPress?: () => void | Promise<void>) => {
+    if (isHandlingButtonPressRef.current) return;
+    isHandlingButtonPressRef.current = true;
     triggerHaptics("light");
-    if (onPress) {
-      await onPress();
+    try {
+      if (onPress) {
+        await onPress();
+      }
+      setModalState((prev) => ({ ...prev, show: false }));
+    } finally {
+      isHandlingButtonPressRef.current = false;
     }
-    setModalState((prev) => ({ ...prev, show: false }));
   };
 
   // Colors & Icons for Toast
@@ -331,12 +338,15 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
         <Animated.View
           style={[styles.modalOverlay, { opacity: modalOpacityAnim }]}
         >
-          {/* Dismiss keyboard on tap outside, but don't close modal unless requested */}
-          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <Pressable
+            style={StyleSheet.absoluteFill}
+            onPress={Keyboard.dismiss}
+          >
             <YStack
               style={StyleSheet.absoluteFill}
               justifyContent="center"
               alignItems="center"
+              pointerEvents="box-none"
             >
               {/* Backdrop Blur */}
               <BlurView
@@ -346,88 +356,90 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
                 style={StyleSheet.absoluteFill}
               />
 
-              <Animated.View
-                style={[
-                  styles.modalContent,
-                  {
-                    transform: [{ scale: modalScaleAnim }],
-                  },
-                ]}
-              >
-                {/* Modal Container with inner blur */}
-                <YStack
-                  borderRadius={24}
-                  borderWidth={1}
-                  borderColor="rgba(0, 0, 0, 0.06)"
-                  backgroundColor="rgba(255, 255, 255, 0.9)"
-                  overflow="hidden"
-                  boxShadow="0px 10px 30px rgba(23, 51, 0, 0.15)"
-                  padding="$5"
-                  gap="$4"
+              <Pressable onPress={() => {}} style={styles.modalPressTrap}>
+                <Animated.View
+                  style={[
+                    styles.modalContent,
+                    {
+                      transform: [{ scale: modalScaleAnim }],
+                    },
+                  ]}
                 >
-                  <BlurView
-                    intensity={80}
-                    tint="light"
-                    experimentalBlurMethod="dimezisBlurView"
-                    style={StyleSheet.absoluteFill}
-                  />
-
-                  {/* Header Title */}
-                  <Text
-                    color="$text_dark"
-                    fontSize="$6"
-                    fontWeight="bold"
-                    textAlign="center"
-                    fontFamily="$heading"
+                  {/* Modal Container with inner blur */}
+                  <YStack
+                    borderRadius={24}
+                    borderWidth={1}
+                    borderColor="rgba(0, 0, 0, 0.06)"
+                    backgroundColor="rgba(255, 255, 255, 0.9)"
+                    overflow="hidden"
+                    boxShadow="0px 10px 30px rgba(23, 51, 0, 0.15)"
+                    padding="$5"
+                    gap="$4"
                   >
-                    {modalState.title}
-                  </Text>
+                    <BlurView
+                      intensity={80}
+                      tint="light"
+                      experimentalBlurMethod="dimezisBlurView"
+                      style={StyleSheet.absoluteFill}
+                    />
 
-                  {/* Message Body */}
-                  <Text
-                    color="$secondary"
-                    fontSize="$3"
-                    fontWeight="500"
-                    lineHeight={22}
-                    textAlign="center"
-                    fontFamily="$body"
-                  >
-                    {modalState.message}
-                  </Text>
+                    {/* Header Title */}
+                    <Text
+                      color="$text_dark"
+                      fontSize="$6"
+                      fontWeight="bold"
+                      textAlign="center"
+                      fontFamily="$heading"
+                    >
+                      {modalState.title}
+                    </Text>
 
-                  {/* Action Buttons */}
-                  <XStack
-                    gap="$3"
-                    flexDirection={
-                      modalState.buttons.length === 2 ? "row" : "column"
-                    }
-                    marginTop="$2"
-                  >
-                    {modalState.buttons.map((btn, index) => {
-                      // Map native style to custom Button variants
-                      let variant: "primary" | "secondary" | "decline" =
-                        "primary";
-                      if (btn.style === "cancel") {
-                        variant = "secondary";
-                      } else if (btn.style === "destructive") {
-                        variant = "decline";
+                    {/* Message Body */}
+                    <Text
+                      color="$secondary"
+                      fontSize="$3"
+                      fontWeight="500"
+                      lineHeight={22}
+                      textAlign="center"
+                      fontFamily="$body"
+                    >
+                      {modalState.message}
+                    </Text>
+
+                    {/* Action Buttons */}
+                    <XStack
+                      gap="$3"
+                      flexDirection={
+                        modalState.buttons.length === 2 ? "row" : "column"
                       }
+                      marginTop="$2"
+                    >
+                      {modalState.buttons.map((btn, index) => {
+                        // Map native style to custom Button variants
+                        let variant: "primary" | "secondary" | "decline" =
+                          "primary";
+                        if (btn.style === "cancel") {
+                          variant = "secondary";
+                        } else if (btn.style === "destructive") {
+                          variant = "decline";
+                        }
 
-                      return (
-                        <Button
-                          key={index}
-                          label={btn.text}
-                          variant={variant}
-                          flex={modalState.buttons.length === 2 ? 1 : undefined}
-                          onPress={() => handleButtonPress(btn.onPress)}
-                        />
-                      );
-                    })}
-                  </XStack>
-                </YStack>
-              </Animated.View>
+                        return (
+                          <Button
+                            key={index}
+                            label={btn.text}
+                            variant={variant}
+                            flex={modalState.buttons.length === 2 ? 1 : undefined}
+                            onPress={() => handleButtonPress(btn.onPress)}
+                          />
+                        );
+                      })}
+                    </XStack>
+                  </YStack>
+                </Animated.View>
+              </Pressable>
             </YStack>
-          </TouchableWithoutFeedback>
+          </Pressable>
         </Animated.View>
       )}
     </AlertContext.Provider>
@@ -471,5 +483,10 @@ const styles = StyleSheet.create({
   modalContent: {
     width: "88%",
     maxWidth: 420,
+  },
+  modalPressTrap: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
