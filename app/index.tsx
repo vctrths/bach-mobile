@@ -12,7 +12,10 @@ import { supabase, toCamelCase } from "@/utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useCallback, useContext, useEffect, useState } from "react";
+import { Platform } from "react-native";
 import { Circle, Spinner, Text, XStack, YStack } from "tamagui";
+
+const DASHBOARD_CHECK_TIMEOUT_MS = 2500;
 
 export default function Dashboard() {
   const { profile, loading, session } = useAuth();
@@ -22,6 +25,10 @@ export default function Dashboard() {
     useState(false);
   const [checkingGardenerConnection, setCheckingGardenerConnection] =
     useState(true);
+  const showLoadingDebug =
+    Platform.OS === "web" &&
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).has("debugLoading");
 
   useEffect(() => {
     if (!loading && !session) {
@@ -36,6 +43,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     let active = true;
+    let queryTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
     const checkGardenerConnection = async () => {
       if (loading) return;
@@ -61,6 +69,23 @@ export default function Dashboard() {
       }
 
       setCheckingGardenerConnection(true);
+      console.log("[Dashboard] checking active gardener connection:", {
+        userId,
+        profileRole,
+      });
+
+      let timedOut = false;
+      queryTimeoutId = setTimeout(() => {
+        timedOut = true;
+        if (!active) return;
+
+        console.warn(
+          "[Dashboard] active gardener connection check timed out; showing dashboard fallback",
+          { userId },
+        );
+        setHasActiveGardenerConnection(false);
+        setCheckingGardenerConnection(false);
+      }, DASHBOARD_CHECK_TIMEOUT_MS);
 
       const { data, error } = await supabase
         .from("collaborations")
@@ -70,6 +95,18 @@ export default function Dashboard() {
         .limit(1);
 
       if (!active) return;
+
+      if (queryTimeoutId) {
+        clearTimeout(queryTimeoutId);
+        queryTimeoutId = null;
+      }
+
+      if (timedOut) {
+        console.warn(
+          "[Dashboard] active gardener connection check completed after timeout",
+          { userId },
+        );
+      }
 
       if (error) {
         console.error("Error checking active gardener connection:", error);
@@ -85,6 +122,9 @@ export default function Dashboard() {
 
     return () => {
       active = false;
+      if (queryTimeoutId) {
+        clearTimeout(queryTimeoutId);
+      }
     };
   }, [loading, profile?.role, userId]);
 
@@ -120,6 +160,8 @@ export default function Dashboard() {
   };
 
   if (loading || checkingGardenerConnection) {
+    const loadingSource = loading ? "auth.loading" : "checkingGardenerConnection";
+
     return (
       <PageContainer showTopNav={false}>
         <YStack flex={1} justifyContent="center" alignItems="center" gap="$4">
@@ -127,6 +169,11 @@ export default function Dashboard() {
           <Text color="$secondary" fontSize="$4">
             Laden...
           </Text>
+          {showLoadingDebug && (
+            <Text color="$secondary" fontSize="$2">
+              Debug: {loadingSource}
+            </Text>
+          )}
         </YStack>
       </PageContainer>
     );
