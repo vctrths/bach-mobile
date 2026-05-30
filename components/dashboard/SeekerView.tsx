@@ -2,6 +2,7 @@ import ApplianceBadges from "@/components/ui/ApplianceBadges";
 import Button from "@/components/ui/Button";
 import GardenCard from "@/components/ui/GardenCard";
 import { type GardenLog } from "@/components/ui/LogCard";
+import SearchBar from "@/components/ui/SearchBar";
 import { Image as ExpoImage } from "@/lib/image";
 import { type Garden } from "@/types/garden";
 import { supabase, toCamelCase } from "@/utils/supabase";
@@ -84,6 +85,17 @@ export default function SeekerView({
 
   return (
     <YStack paddingHorizontal="$4" paddingBottom="$4">
+      <YStack marginTop="$2" paddingHorizontal="$2">
+        <SearchBar
+          active
+          value={searchQuery}
+          onChangeText={onSearchChange}
+          onFocus={onSearchFocus}
+          onBlur={onSearchBlur}
+          placeholder="Zoeken naar een tuin"
+        />
+      </YStack>
+
       {loading ? (
         <XStack padding="$10" justifyContent="center">
           <Spinner size="large" color="$primary" />
