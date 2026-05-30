@@ -404,45 +404,50 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
                 borderWidth={1}
                 borderRadius={16}
                 padding={12}
-                justifyContent="space-between"
-                alignItems="center"
+                width="100%"
                 boxShadow="0px 4px 20px rgba(23, 51, 0, 0.06)"
                 onPress={() =>
                   router.push(`/logbook/${log.id}` as any)
                 }
                 pressStyle={{ scale: 0.98, opacity: 0.9 }}
               >
-                <XStack alignItems="center" gap="$3" flex={1}>
-                  <ExpoImage
-                    source={require("@/assets/images/hero.png")}
-                    style={{
-                      width: 64,
-                      height: 64,
-                      borderRadius: 12,
-                    }}
-                    contentFit="cover"
-                  />
-                  <YStack gap="$2" flex={1} minWidth={0}>
-                    <Text
-                      fontSize={16}
-                      lineHeight={18}
-                      fontWeight="700"
-                      color="#000000"
-                      fontFamily="$Satoshi"
-                    >
-                      {log.date}
-                    </Text>
-                    <Text
-                      fontSize={14}
-                      color="rgba(0,0,0,0.6)"
-                      fontFamily="$Satoshi"
-                      numberOfLines={2}
-                    >
-                      {log.description}
-                    </Text>
-                  </YStack>
-                </XStack>
-                <XStack width={32} height={32} justifyContent="center" alignItems="center">
+                <XStack
+                  width="100%"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  gap="$3"
+                >
+                  <XStack flex={1} alignItems="center" gap="$3" minWidth={0}>
+                    <ExpoImage
+                      source={require("@/assets/images/hero.png")}
+                      style={{
+                        width: 64,
+                        height: 64,
+                        borderRadius: 12,
+                      }}
+                      contentFit="cover"
+                    />
+                    <YStack flex={1} minWidth={0} gap="$1">
+                      <Text
+                        fontSize={16}
+                        lineHeight={18}
+                        fontWeight="700"
+                        color="#000000"
+                        fontFamily="$Satoshi"
+                      >
+                        {log.date}
+                      </Text>
+                      <Text
+                        fontSize={14}
+                        color="rgba(0,0,0,0.6)"
+                        fontFamily="$Satoshi"
+                        numberOfLines={2}
+                      >
+                        {log.description}
+                      </Text>
+                    </YStack>
+                  </XStack>
+
                   <Circle
                     size={40}
                     backgroundColor="white"
