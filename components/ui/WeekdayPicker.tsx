@@ -46,7 +46,7 @@ export default function WeekdayPicker({
             >
               <YStack alignItems="center" gap="$3" paddingVertical="$1">
                 <Text
-                  color={isSelected ? "$primary" : "#36392B"}
+                  color={isSelected ? "#FFEDB3" : "#36392B"}
                   fontSize={16}
                   fontWeight={isSelected ? "900" : "500"}
                   opacity={isSelected ? 1 : 0.4}
@@ -55,7 +55,9 @@ export default function WeekdayPicker({
                 </Text>
                 <Circle
                   size={8}
-                  backgroundColor={isSelected ? "$primary" : "rgba(0, 0, 0, 0.25)"}
+                  backgroundColor={
+                    isSelected ? "#FFEDB3" : "rgba(0, 0, 0, 0.25)"
+                  }
                 />
               </YStack>
             </Pressable>
