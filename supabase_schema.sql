@@ -119,10 +119,6 @@ SET
   file_size_limit = EXCLUDED.file_size_limit,
   allowed_mime_types = EXCLUDED.allowed_mime_types;
 
-CREATE POLICY "App images are publicly readable"
-  ON storage.objects FOR SELECT
-  USING (bucket_id = 'app-images');
-
 CREATE POLICY "Users can upload own app images"
   ON storage.objects FOR INSERT
   TO authenticated

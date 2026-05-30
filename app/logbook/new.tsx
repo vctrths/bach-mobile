@@ -9,7 +9,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { safeBack } from "@/utils/navigation";
 import React, { useState } from "react";
 import { Platform } from "react-native";
-import { Card, Spinner, Text, TextArea, XStack, YStack } from "tamagui";
+import { Spinner, Text, TextArea, XStack, YStack } from "tamagui";
 import { useAlerts } from "@/context/AlertContext";
 
 export default function NewLogScreen() {
@@ -185,14 +185,18 @@ export default function NewLogScreen() {
           </YStack>
 
           {/* Upload image */}
-          <Card
+          <XStack
+            backgroundColor="transparent"
             borderRadius="$6"
-            borderWidth={1}
-            borderColor="rgba(23, 51, 0, 0.2)"
+            borderWidth={2}
+            borderStyle="dotted"
+            borderColor="rgba(23, 51, 0, 0.35)"
             overflow="hidden"
             height={180}
+            justifyContent="center"
+            alignItems="center"
             onPress={pickImage}
-            pressStyle={{ scale: 0.98, opacity: 0.9 }}
+            pressStyle={{ scale: 0.98, opacity: 0.75 }}
           >
             {image ? (
               <>
@@ -217,19 +221,17 @@ export default function NewLogScreen() {
                 </YStack>
               </>
             ) : (
-              <YStack
-                flex={1}
-                justifyContent="center"
-                alignItems="center"
-                gap="$2"
-              >
-                <Ionicons name="camera-outline" size={28} color="#173300" />
-                <Text fontSize="$4" fontWeight="600" color="#173300">
+              <YStack alignItems="center" gap="$2">
+                <Ionicons name="cloud-upload-outline" size={30} color="#173300" />
+                <Text fontSize="$4" fontWeight="700" color="#173300">
                   Upload image
+                </Text>
+                <Text fontSize="$2" color="rgba(23, 51, 0, 0.65)">
+                  JPG, PNG of WebP
                 </Text>
               </YStack>
             )}
-          </Card>
+          </XStack>
 
           {/* Log opslaan */}
           <XStack
