@@ -1,5 +1,6 @@
 import { supabase, toCamelCase } from "@/utils/supabase";
 import { Session, User } from "@supabase/supabase-js";
+import { Platform } from "react-native";
 import {
   createContext,
   useContext,
@@ -48,6 +49,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const hardReloadWeb = useCallback((reason: string) => {
+    console.warn(`[AuthContext] ${reason}`);
+
+    if (Platform.OS === "web" && typeof window !== "undefined") {
+      window.location.reload();
+      return true;
+    }
+
+    return false;
+  }, []);
+
   const fetchProfile = useCallback(async (userId: string): Promise<Profile | null> => {
     try {
       const { data, error } = await supabase
@@ -86,6 +98,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
+    let initialSessionTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    const clearInitialSessionTimeout = () => {
+      if (initialSessionTimeout) {
+        clearTimeout(initialSessionTimeout);
+        initialSessionTimeout = null;
+      }
+    };
+
+    const initializeSession = async () => {
+      initialSessionTimeout = setTimeout(() => {
+        hardReloadWeb(
+          "Initial session fetch timed out after 2500ms; forcing hard reload."
+        );
+      }, 2500);
+
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        clearInitialSessionTimeout();
+
+        if (!active) return;
+
+        setSession(session);
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          await fetchProfile(session.user.id);
+        } else {
+          setProfile(null);
+        }
+      } catch (error) {
+        clearInitialSessionTimeout();
+        console.error("[AuthContext] initial getSession error:", error);
+
+        if (hardReloadWeb("Initial session fetch failed; forcing hard reload.")) {
+          return;
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    };
+
+    initializeSession();
 
     const {
       data: { subscription },
@@ -126,9 +185,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       active = false;
+      clearInitialSessionTimeout();
       subscription.unsubscribe();
     };
-  }, [fetchProfile]);
+  }, [fetchProfile, hardReloadWeb]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
