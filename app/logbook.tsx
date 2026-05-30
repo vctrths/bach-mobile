@@ -403,7 +403,9 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
                 borderColor="#E3ECD7"
                 borderWidth={1}
                 borderRadius={16}
-                padding={12}
+                paddingTop={12}
+                paddingHorizontal={12}
+                paddingBottom={10}
                 width="100%"
                 boxShadow="0px 4px 20px rgba(23, 51, 0, 0.06)"
                 onPress={() =>
