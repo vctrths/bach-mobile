@@ -15,11 +15,7 @@ interface SeekerViewProps {
   searchQuery?: string;
   searchResults?: Garden[];
   searchLoading?: boolean;
-  isSearchFocused?: boolean;
   showingSearch?: boolean;
-  onSearchChange?: (text: string) => void;
-  onSearchFocus?: () => void;
-  onSearchBlur?: () => void;
 }
 
 const fetchWithTimeout = async <T,>(
@@ -38,11 +34,7 @@ export default function SeekerView({
   searchQuery = "",
   searchResults = [],
   searchLoading = false,
-  isSearchFocused = false,
   showingSearch = false,
-  onSearchChange,
-  onSearchFocus,
-  onSearchBlur,
 }: SeekerViewProps) {
   const [gardens, setGardens] = useState<Garden[]>([]);
   const [logs, setLogs] = useState<GardenLog[]>([]);
