@@ -1,6 +1,5 @@
 import { supabase, toCamelCase } from "@/utils/supabase";
 import { Session, User } from "@supabase/supabase-js";
-import { Platform } from "react-native";
 import {
   createContext,
   useContext,
@@ -9,6 +8,8 @@ import {
   useState,
   ReactNode,
 } from "react";
+
+const AUTH_SESSION_TIMEOUT_MS = 7000;
 
 export interface Profile {
   id: string;
@@ -49,17 +50,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const hardReloadWeb = useCallback((reason: string) => {
-    console.warn(`[AuthContext] ${reason}`);
-
-    if (Platform.OS === "web" && typeof window !== "undefined") {
-      window.location.reload();
-      return true;
-    }
-
-    return false;
-  }, []);
-
   const fetchProfile = useCallback(async (userId: string): Promise<Profile | null> => {
     try {
       const { data, error } = await supabase
@@ -98,48 +88,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
-    let initialSessionTimeout: ReturnType<typeof setTimeout> | null = null;
-    let authStateTimeout: ReturnType<typeof setTimeout> | null = null;
+    let profileRequestId = 0;
 
-    const clearInitialSessionTimeout = () => {
-      if (initialSessionTimeout) {
-        clearTimeout(initialSessionTimeout);
-        initialSessionTimeout = null;
+    const withTimeout = async <T,>(
+      promise: Promise<T>,
+      label: string,
+    ): Promise<T | null> => {
+      let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+      const timeout = new Promise<null>((resolve) => {
+        timeoutId = setTimeout(() => {
+          console.warn(
+            `[AuthContext] ${label} timed out after ${AUTH_SESSION_TIMEOUT_MS}ms; continuing without blocking the UI.`,
+          );
+          resolve(null);
+        }, AUTH_SESSION_TIMEOUT_MS);
+      });
+
+      try {
+        return await Promise.race([promise, timeout]);
+      } finally {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
       }
     };
 
-    const clearAuthStateTimeout = () => {
-      if (authStateTimeout) {
-        clearTimeout(authStateTimeout);
-        authStateTimeout = null;
-      }
-    };
+    const scheduleProfileFetch = (userId: string, source: string) => {
+      const requestId = ++profileRequestId;
 
-    const startAuthStateTimeout = (event: string) => {
-      clearAuthStateTimeout();
-      authStateTimeout = setTimeout(() => {
-        hardReloadWeb(
-          `Auth state change "${event}" timed out after 2500ms; forcing hard reload.`
-        );
-      }, 2500);
+      setTimeout(() => {
+        fetchProfile(userId).catch((error) => {
+          if (active && requestId === profileRequestId) {
+            console.error(`[AuthContext] ${source} profile fetch error:`, error);
+            setProfile(null);
+          }
+        });
+      }, 0);
     };
 
     const initializeSession = async () => {
-      initialSessionTimeout = setTimeout(() => {
-        hardReloadWeb(
-          "Initial session fetch timed out after 2500ms; forcing hard reload."
-        );
-      }, 2500);
-
       try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
-        clearInitialSessionTimeout();
+        const result = await withTimeout(
+          supabase.auth.getSession(),
+          "Initial session fetch",
+        );
 
         if (!active) return;
 
+        const session = result?.data.session ?? null;
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
@@ -148,12 +145,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setProfile(null);
         }
       } catch (error) {
-        clearInitialSessionTimeout();
         console.error("[AuthContext] initial getSession error:", error);
-
-        if (hardReloadWeb("Initial session fetch failed; forcing hard reload.")) {
-          return;
-        }
+        setSession(null);
+        setUser(null);
+        setProfile(null);
       } finally {
         if (active) {
           setLoading(false);
@@ -165,7 +160,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       console.log("[AuthContext] onAuthStateChange:", {
         event: _event,
         hasSession: !!session,
@@ -173,51 +168,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       if (!active) return;
-      
-      // Initial auth loading is handled by initializeSession above.
-      // Do not block the UI for INITIAL_SESSION or SIGNED_IN here: Supabase can
-      // re-emit those when a PWA resumes, which can trap the app on the spinner.
-      // This prevents the entire app from unmounting and remounting (which refetches all data)
-      // whenever the user tabs back into the browser and triggers auth restoration events.
-      const shouldBlockUI = _event === 'SIGNED_OUT';
-      
-      if (shouldBlockUI) {
-        startAuthStateTimeout(_event);
-        setLoading(true);
+
+      setSession(session);
+      setUser(session?.user ?? null);
+
+      if (session?.user) {
+        scheduleProfileFetch(session.user.id, `Auth state change "${_event}"`);
+      } else {
+        profileRequestId += 1;
+        setProfile(null);
       }
-      
-      try {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await fetchProfile(session.user.id);
-        } else {
-          setProfile(null);
-        }
-      } catch (error) {
-        console.error("[AuthContext] onAuthStateChange callback error:", error);
 
-        if (shouldBlockUI) {
-          hardReloadWeb(`Auth state change "${_event}" failed; forcing hard reload.`);
-        }
-      } finally {
-        if (shouldBlockUI) {
-          clearAuthStateTimeout();
-        }
-
-        if (active) {
-          setLoading(false);
-        }
+      if (active) {
+        setLoading(false);
       }
     });
 
     return () => {
       active = false;
-      clearInitialSessionTimeout();
-      clearAuthStateTimeout();
       subscription.unsubscribe();
     };
-  }, [fetchProfile, hardReloadWeb]);
+  }, [fetchProfile]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
