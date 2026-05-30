@@ -145,6 +145,7 @@ export type Database = {
           created_at: string
           garden_id: string | null
           id: string
+          image_url: string | null
           status: Json | null
           title: string
           user_id: string | null
@@ -153,6 +154,7 @@ export type Database = {
           created_at?: string
           garden_id?: string | null
           id?: string
+          image_url?: string | null
           status?: Json | null
           title: string
           user_id?: string | null
@@ -161,6 +163,7 @@ export type Database = {
           created_at?: string
           garden_id?: string | null
           id?: string
+          image_url?: string | null
           status?: Json | null
           title?: string
           user_id?: string | null

@@ -3,8 +3,10 @@ import ProgressDots from "@/components/ui/ProgressDots";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import { OnboardingContext } from "@/context/OnboardingContext";
 import { supabase } from "@/utils/supabase";
+import { uploadImageAsset, validatePickedImage } from "@/utils/uploadImage";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import type { ImagePickerAsset } from "expo-image-picker";
 import { Image as ExpoImage } from "@/lib/image";
 import { router } from "expo-router";
 import { useContext, useState } from "react";
@@ -13,7 +15,7 @@ import { Circle, H1, Text, YStack } from "tamagui";
 
 export default function Photo() {
   const { data: onboardingData, reset } = useContext(OnboardingContext);
-  const [image, setImage] = useState<string | null>(null);
+  const [image, setImage] = useState<ImagePickerAsset | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,7 +40,15 @@ export default function Photo() {
     });
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      const selectedImage = result.assets[0];
+      const validationError = validatePickedImage(selectedImage);
+      if (validationError) {
+        setError(validationError);
+        return;
+      }
+
+      setError(null);
+      setImage(selectedImage);
     }
   };
 
@@ -71,32 +81,20 @@ export default function Photo() {
 
       // 2. Upload profile image if provided
       if (image) {
-        const fileName = `${userId}_profile_${Date.now()}.jpg`;
-        try {
-          const response = await fetch(image);
-          const arrayBuffer = await response.arrayBuffer();
-          const { data: uploadData, error: uploadError } =
-            await supabase.storage
-              .from("profile-images")
-              .upload(fileName, arrayBuffer, {
-                contentType: "image/jpeg",
-                upsert: true,
-              });
-
-          if (uploadError) {
-            console.warn("Failed to upload profile image:", uploadError);
-          } else if (uploadData) {
-            const { data: urlData } = supabase.storage
-              .from("profile-images")
-              .getPublicUrl(fileName);
-            profileImageUrl = urlData?.publicUrl;
-          }
-        } catch (uploadFetchErr) {
-          console.warn(
-            "Error reading or uploading the local file:",
-            uploadFetchErr,
+        if (!authData.session) {
+          setError(
+            "Bevestig eerst je e-mailadres en upload daarna je profielfoto.",
           );
+          setIsLoading(false);
+          return;
         }
+
+        const upload = await uploadImageAsset({
+          asset: image,
+          folder: "profiles",
+          userId,
+        });
+        profileImageUrl = upload.publicUrl;
       }
 
       // 3. Save user profile to Supabase
@@ -151,7 +149,7 @@ export default function Photo() {
             >
               {image ? (
                 <ExpoImage
-                  source={{ uri: image }}
+                  source={{ uri: image.uri }}
                   style={{ width: "100%", height: "100%" }}
                   contentFit="cover"
                 />
