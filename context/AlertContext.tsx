@@ -14,9 +14,9 @@ import {
   Dimensions,
   Keyboard,
   Platform,
+  Pressable,
   StyleSheet,
   TouchableOpacity,
-  TouchableWithoutFeedback,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Circle, Text, XStack, YStack } from "tamagui";
@@ -86,6 +86,7 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
     message: "",
     buttons: [],
   });
+  const [modalActionPending, setModalActionPending] = useState(false);
 
   const insets = useSafeAreaInsets();
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -176,6 +177,7 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
   ) => {
     Keyboard.dismiss();
     triggerHaptics("light");
+    setModalActionPending(false);
 
     const defaultButtons: AlertButton[] = [
       {
@@ -201,11 +203,20 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
   };
 
   const handleButtonPress = async (onPress?: () => void | Promise<void>) => {
-    triggerHaptics("light");
-    if (onPress) {
-      await onPress();
+    if (modalActionPending) return;
+
+    setModalActionPending(true);
+    try {
+      await triggerHaptics("light");
+      if (onPress) {
+        await onPress();
+      }
+    } catch (error) {
+      console.error("[AlertContext] Modal action failed", error);
+    } finally {
+      setModalState((prev) => ({ ...prev, show: false }));
+      setModalActionPending(false);
     }
-    setModalState((prev) => ({ ...prev, show: false }));
   };
 
   // Colors & Icons for Toast
@@ -331,46 +342,46 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
         <Animated.View
           style={[styles.modalOverlay, { opacity: modalOpacityAnim }]}
         >
-          {/* Dismiss keyboard on tap outside, but don't close modal unless requested */}
-          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <YStack
-              style={StyleSheet.absoluteFill}
-              justifyContent="center"
-              alignItems="center"
-            >
-              {/* Backdrop Blur */}
+          <YStack
+            style={StyleSheet.absoluteFill}
+            justifyContent="center"
+            alignItems="center"
+          >
+            {/* Dismiss keyboard on backdrop press, but keep the modal open */}
+            <Pressable onPress={Keyboard.dismiss} style={StyleSheet.absoluteFill}>
               <BlurView
                 intensity={35}
                 tint="dark"
                 experimentalBlurMethod="dimezisBlurView"
                 style={StyleSheet.absoluteFill}
               />
+            </Pressable>
 
-              <Animated.View
-                style={[
-                  styles.modalContent,
-                  {
-                    transform: [{ scale: modalScaleAnim }],
-                  },
-                ]}
+            <Animated.View
+              style={[
+                styles.modalContent,
+                {
+                  transform: [{ scale: modalScaleAnim }],
+                },
+              ]}
+            >
+              {/* Modal Container with inner blur */}
+              <YStack
+                borderRadius={24}
+                borderWidth={1}
+                borderColor="rgba(0, 0, 0, 0.06)"
+                backgroundColor="rgba(255, 255, 255, 0.9)"
+                overflow="hidden"
+                boxShadow="0px 10px 30px rgba(23, 51, 0, 0.15)"
+                padding="$5"
+                gap="$4"
               >
-                {/* Modal Container with inner blur */}
-                <YStack
-                  borderRadius={24}
-                  borderWidth={1}
-                  borderColor="rgba(0, 0, 0, 0.06)"
-                  backgroundColor="rgba(255, 255, 255, 0.9)"
-                  overflow="hidden"
-                  boxShadow="0px 10px 30px rgba(23, 51, 0, 0.15)"
-                  padding="$5"
-                  gap="$4"
-                >
-                  <BlurView
-                    intensity={80}
-                    tint="light"
-                    experimentalBlurMethod="dimezisBlurView"
-                    style={StyleSheet.absoluteFill}
-                  />
+                <BlurView
+                  intensity={80}
+                  tint="light"
+                  experimentalBlurMethod="dimezisBlurView"
+                  style={StyleSheet.absoluteFill}
+                />
 
                   {/* Header Title */}
                   <Text
@@ -419,6 +430,8 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
                           label={btn.text}
                           variant={variant}
                           flex={modalState.buttons.length === 2 ? 1 : undefined}
+                          disabled={modalActionPending}
+                          opacity={modalActionPending ? 0.65 : undefined}
                           onPress={() => handleButtonPress(btn.onPress)}
                         />
                       );
@@ -427,7 +440,6 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
                 </YStack>
               </Animated.View>
             </YStack>
-          </TouchableWithoutFeedback>
         </Animated.View>
       )}
     </AlertContext.Provider>
