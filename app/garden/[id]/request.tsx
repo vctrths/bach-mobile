@@ -521,11 +521,6 @@ export default function GardenRequestScreen() {
                 width="100%"
                 maxWidth={300}
                 alignSelf="flex-start"
-                backgroundColor="white"
-                borderWidth={1}
-                borderColor={errors.startDate ? "red" : "#E3E3E3"}
-                borderRadius={12}
-                padding={16}
                 gap={10}
               >
                 <input
@@ -565,10 +560,11 @@ export default function GardenRequestScreen() {
                   style={{
                     width: "100%",
                     maxWidth: 300,
+                    boxSizing: "border-box",
                     minHeight: 44,
                     padding: "10px 12px",
                     borderRadius: "8px",
-                    border: "1px solid #E3E3E3",
+                    border: `1px solid ${errors.startDate ? "red" : "#E3E3E3"}`,
                     outline: "none",
                     fontSize: "16px",
                     backgroundColor: "#fff",
