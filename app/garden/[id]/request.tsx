@@ -616,28 +616,19 @@ export default function GardenRequestScreen() {
         </YStack>
 
         {!isWeb && showPicker && (
-          <YStack
-            width="100%"
-            borderRadius={12}
-            borderWidth={1}
-            borderColor="#E3E3E3"
-            backgroundColor="white"
-            overflow="hidden"
-            alignSelf="stretch"
-          >
-            <DateTimePicker
-              value={startDate || new Date()}
-              mode="date"
-              display={Platform.OS === "ios" ? "spinner" : "default"}
-              minimumDate={minDate}
-              onChange={handleDateChange}
-              style={{
-                width: "100%",
-                alignSelf: "stretch",
-                backgroundColor: "white",
-              }}
-            />
-          </YStack>
+          <DateTimePicker
+            value={startDate || new Date()}
+            mode="date"
+            display={Platform.OS === "ios" ? "spinner" : "default"}
+            minimumDate={minDate}
+            onChange={handleDateChange}
+            style={{
+              width: "100%",
+              maxWidth: "100%",
+              alignSelf: "stretch",
+              backgroundColor: "transparent",
+            }}
+          />
         )}
 
         <Button
