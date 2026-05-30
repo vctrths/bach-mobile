@@ -1,9 +1,28 @@
 import Button from "@/components/ui/Button";
 import PageContainer from "@/components/ui/PageContainer";
+import { useAlerts } from "@/context/AlertContext";
 import { useAuth } from "@/context/AuthContext";
-import { router } from "expo-router";
-import React from "react";
+import * as WebBrowser from "expo-web-browser";
+import React, { useState } from "react";
+import { Platform } from "react-native";
 import { Text, YStack } from "tamagui";
+
+const PAYMENT_LINK_URL = process.env.EXPO_PUBLIC_STRIPE_PAYMENT_LINK_URL;
+
+function buildPaymentLink(userId: string, email?: string | null) {
+  if (!PAYMENT_LINK_URL) {
+    throw new Error("Stripe Payment Link ontbreekt in de configuratie.");
+  }
+
+  const url = new URL(PAYMENT_LINK_URL);
+  url.searchParams.set("client_reference_id", userId);
+  if (email) {
+    url.searchParams.set("locked_prefilled_email", email);
+  }
+  url.searchParams.set("locale", "nl");
+
+  return url.toString();
+}
 
 interface PlanFeatureProps {
   children: React.ReactNode;
@@ -22,10 +41,18 @@ interface PlanCardProps {
   features: React.ReactNode[];
   buttonLabel: string;
   buttonVariant?: "primary" | "secondary";
+  disabled?: boolean;
   onButtonPress: () => void;
 }
 
-function PlanCard({ title, features, buttonLabel, buttonVariant = "primary", onButtonPress }: PlanCardProps) {
+function PlanCard({
+  title,
+  features,
+  buttonLabel,
+  buttonVariant = "primary",
+  disabled = false,
+  onButtonPress,
+}: PlanCardProps) {
   const isPrimary = buttonVariant === "primary";
 
   return (
@@ -72,6 +99,7 @@ function PlanCard({ title, features, buttonLabel, buttonVariant = "primary", onB
           label={buttonLabel}
           variant={isPrimary ? "primary" : "secondary"}
           onPress={onButtonPress}
+          disabled={disabled}
         />
       </YStack>
     </YStack>
@@ -79,8 +107,38 @@ function PlanCard({ title, features, buttonLabel, buttonVariant = "primary", onB
 }
 
 export default function ProScreen() {
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
+  const { alert } = useAlerts();
+  const [loading, setLoading] = useState(false);
   const isPremium = !!profile?.isPremium;
+
+  const openPaymentLink = async () => {
+    if (!user) {
+      alert("Fout", "Log eerst in om Pro te activeren.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const paymentLink = buildPaymentLink(user.id, profile?.email ?? user.email);
+
+      if (Platform.OS === "web") {
+        window.location.assign(paymentLink);
+        return;
+      }
+
+      await WebBrowser.openBrowserAsync(paymentLink);
+    } catch (error) {
+      alert(
+        "Fout",
+        error instanceof Error
+          ? error.message
+          : "Kon Stripe niet openen. Probeer het opnieuw.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <PageContainer
@@ -99,11 +157,12 @@ export default function ProScreen() {
             "",
             "€7 / Per maand",
           ]}
-          buttonLabel={isPremium ? "Huidig plan" : "Registreer nu"}
+          buttonLabel={
+            isPremium ? "Huidig plan" : loading ? "Stripe openen..." : "Registreer nu"
+          }
           buttonVariant="primary"
-          onButtonPress={() => {
-            if (!isPremium) router.push("/pro/payment");
-          }}
+          disabled={isPremium || loading}
+          onButtonPress={openPaymentLink}
         />
 
         {/* Free Plan Card */}
