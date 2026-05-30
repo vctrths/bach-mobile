@@ -5,7 +5,7 @@ import React from "react";
 import { StyleSheet } from "react-native";
 import { Card, Text, XStack, YStack } from "tamagui";
 import Button from "./Button";
-import ApplianceBadges from "./ApplianceBadges";
+import { APPLIANCE_MAP } from "./ApplianceBadges";
 
 interface GardenCardProps {
   garden: Garden;
@@ -19,6 +19,8 @@ export default function GardenCard({
   onFavoritePress,
 }: GardenCardProps) {
   const imageSource = garden.imageUrl ? { uri: garden.imageUrl } : require("@/assets/images/hero.png");
+  const firstApplianceKey = garden.appliances?.find((appliance) => APPLIANCE_MAP[appliance]);
+  const amenityBadge = firstApplianceKey ? APPLIANCE_MAP[firstApplianceKey] : APPLIANCE_MAP.water;
 
   return (
     <Card
@@ -28,70 +30,78 @@ export default function GardenCard({
       borderWidth={1}
       borderRadius={16}
       padding={12}
-      gap={10}
+      gap={6}
       overflow="hidden"
       onPress={onPress}
       pressStyle={{ scale: 0.98, opacity: 0.9 }}
     >
       <YStack
-        height={168}
+        aspectRatio={4096 / 2731}
         borderRadius={8}
         overflow="hidden"
         position="relative"
+        width="100%"
       >
         <ExpoImage
           source={imageSource as any}
           style={StyleSheet.absoluteFillObject}
           contentFit="cover"
         />
-
-        <YStack
-          style={StyleSheet.absoluteFillObject}
-          backgroundColor="rgba(0, 0, 0, 0.45)"
-          padding={12}
-          justifyContent="space-between"
-        >
-          <XStack justifyContent="flex-end">
-            <XStack
-              alignItems="center"
-              gap={4}
-              backgroundColor="rgba(0, 0, 0, 0.38)"
-              borderRadius={999}
-              paddingHorizontal={8}
-              paddingVertical={4}
-            >
-              <MaterialCommunityIcons name="star" size={14} color="#FFF2B3" />
-              <Text fontSize={12} fontWeight="700" color="#FFFFFF">
-                {garden.owner?.rating ? garden.owner.rating.toFixed(1) : "Nieuw"}
-              </Text>
-            </XStack>
-          </XStack>
-
-          <YStack gap={4}>
-            <Text
-              fontSize={18}
-              fontWeight="800"
-              color="#FFFFFF"
-              numberOfLines={2}
-            >
-              {garden.name}
-            </Text>
-            <XStack gap={4} alignItems="center">
-              <MaterialCommunityIcons
-                name="map-marker"
-                size={16}
-                color="#F5FFF3"
-              />
-              <Text fontSize={13} color="#F5FFF3" numberOfLines={1}>
-                {garden.location ?? "Onbekend"}
-              </Text>
-            </XStack>
-          </YStack>
-        </YStack>
       </YStack>
 
-      <YStack gap={6}>
-        <ApplianceBadges appliances={garden.appliances} />
+      <YStack gap={4}>
+        <XStack alignItems="center" justifyContent="space-between" gap={8}>
+          <Text
+            flex={1}
+            minWidth={0}
+            fontSize={14}
+            lineHeight={14}
+            color="#000000"
+            fontWeight="400"
+          >
+            {garden.name}
+          </Text>
+
+          <XStack alignItems="center" gap={4} flexShrink={0}>
+            <MaterialCommunityIcons name="star" size={14} color="#D0A500" />
+            <Text fontSize={14} lineHeight={14} color="#000000" fontWeight="400">
+              {garden.owner?.rating ? garden.owner.rating.toFixed(1) : "Nieuw"}
+            </Text>
+          </XStack>
+        </XStack>
+
+        <XStack alignItems="center" justifyContent="space-between" gap={8}>
+          <XStack alignItems="center" gap={4} flex={1} minWidth={0}>
+            <MaterialCommunityIcons name="map-marker" size={16} color="#173300" />
+            <Text
+              flex={1}
+              minWidth={0}
+              fontSize={14}
+              lineHeight={14}
+              color="#000000"
+              fontWeight="400"
+              numberOfLines={1}
+            >
+              {garden.location ?? "Onbekend"}
+            </Text>
+          </XStack>
+
+          <Card
+            width={20}
+            height={20}
+            borderRadius={999}
+            backgroundColor="#173300"
+            alignItems="center"
+            justifyContent="center"
+            overflow="hidden"
+          >
+            <MaterialCommunityIcons
+              name={amenityBadge.icon}
+              size={12}
+              color="#F0F3EC"
+            />
+          </Card>
+        </XStack>
 
         <XStack gap={6} marginTop={2}>
           <Button
@@ -115,7 +125,11 @@ export default function GardenCard({
             justifyContent="center"
             alignItems="center"
           >
-            <MaterialCommunityIcons name="heart" size={20} color="#FAFAFA" />
+            <MaterialCommunityIcons
+              name="heart-outline"
+              size={20}
+              color="#FAFAFA"
+            />
           </Card>
         </XStack>
       </YStack>
