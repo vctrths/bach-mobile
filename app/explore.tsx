@@ -1,4 +1,4 @@
-import GardenCard from "@/components/ui/GardenCard";
+import GardenListCard from "@/components/ui/GardenListCard";
 import PageContainer from "@/components/ui/PageContainer";
 import { Garden } from "@/types/garden";
 import { supabase, toCamelCase } from "@/utils/supabase";
@@ -17,7 +17,7 @@ export default function ExploreScreen() {
     try {
       const { data, error } = await supabase
         .from("gardens")
-        .select("id, name, location, image_url, appliances, owner:profiles!owner_id(rating)")
+        .select("id, name, location, description, image_url, appliances, owner:profiles!owner_id(rating)")
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -92,7 +92,7 @@ export default function ExploreScreen() {
           ) : (
             <YStack gap="$4">
               {gardens.map((garden) => (
-                <GardenCard
+                <GardenListCard
                   key={garden.id}
                   garden={garden}
                   onPress={() => router.push(("/garden/" + garden.id) as any)}

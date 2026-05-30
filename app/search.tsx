@@ -1,6 +1,5 @@
 import PageContainer from "@/components/ui/PageContainer";
-import Button from "@/components/ui/Button";
-import ApplianceBadges from "@/components/ui/ApplianceBadges";
+import GardenListCard from "@/components/ui/GardenListCard";
 import NotificationBell from "@/components/ui/NotificationBell";
 import SearchBar from "@/components/ui/SearchBar";
 import { supabase, toCamelCase } from "@/utils/supabase";
@@ -8,7 +7,7 @@ import { Image as ExpoImage } from "@/lib/image";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { Card, Circle, Spinner, Text, XStack, YStack } from "tamagui";
+import { Circle, Spinner, Text, XStack, YStack } from "tamagui";
 import { type Garden } from "@/types/garden";
 import { useAuth } from "@/context/AuthContext";
 
@@ -54,10 +53,6 @@ export default function SearchScreen() {
 
     return () => clearTimeout(timeoutId);
   }, [searchQuery, fetchGardens]);
-
-  const formatLocation = (garden: Garden) => {
-    return garden.location || "Onbekende locatie";
-  };
 
   return (
     <PageContainer
@@ -124,88 +119,12 @@ export default function SearchScreen() {
           </YStack>
         ) : (
           searchResults.map((garden) => (
-            <Card
+            <GardenListCard
               key={garden.id}
-              elevation={2}
-              backgroundColor="$canvas"
-              borderColor="$borderColor"
-              borderWidth={1}
-              borderRadius="$6"
-              overflow="hidden"
-              padding="$3"
+              garden={garden}
               onPress={() => router.push(("/garden/" + garden.id) as any)}
-              pressStyle={{ scale: 0.98, opacity: 0.9 }}
-            >
-              <XStack gap="$3" height={150}>
-                <ExpoImage
-                  source={
-                    garden.imageUrl
-                      ? { uri: garden.imageUrl }
-                      : require("@/assets/images/hero.png")
-                  }
-                  style={{ width: 150, height: "100%", borderRadius: 8 }}
-                  contentFit="cover"
-                />
-
-                <YStack flex={1} justifyContent="space-between" gap="$2">
-                  <YStack gap="$1">
-                    <XStack justifyContent="space-between" alignItems="center">
-                      <Text fontSize="$4" fontWeight="bold" color="$text_dark" flex={1}>
-                        {garden.name}
-                      </Text>
-                      <XStack gap="$1" alignItems="center">
-                        <MaterialCommunityIcons name="star" size={16} color="#FFB800" />
-                        <Text fontSize="$3" fontWeight="bold" color="$text_dark">
-                          {garden.owner?.rating ? garden.owner.rating.toFixed(1) : "Nieuw"}
-                        </Text>
-                      </XStack>
-                    </XStack>
-
-                    <XStack gap="$2" alignItems="center">
-                      <MaterialCommunityIcons name="map-marker" size={14} color="$primary" />
-                      <Text fontSize="$3" color="$text_dark">
-                        {formatLocation(garden)}
-                      </Text>
-                    </XStack>
-
-                    <ApplianceBadges appliances={garden.appliances} />
-
-                    {garden.description && (
-                      <Text
-                        fontSize="$2"
-                        color="$text_light"
-                        numberOfLines={2}
-                        lineHeight="$3"
-                      >
-                        {garden.description}
-                      </Text>
-                    )}
-                  </YStack>
-
-                  <XStack gap="$2">
-                    <Button
-                      label="Details"
-                      flex={1}
-                      onPress={() => router.push(("/garden/" + garden.id) as any)}
-                      paddingVertical="$2"
-                    />
-                    <Card
-                      width={40}
-                      height={40}
-                      borderRadius={20}
-                      backgroundColor="$background"
-                      padding="$2"
-                      justifyContent="center"
-                      alignItems="center"
-                      onPress={() => {}}
-                      pressStyle={{ scale: 0.94, opacity: 0.85 }}
-                    >
-                      <MaterialCommunityIcons name="heart" size={20} color="white" />
-                    </Card>
-                  </XStack>
-                </YStack>
-              </XStack>
-            </Card>
+              onFavoritePress={() => {}}
+            />
           ))
         )}
       </YStack>
