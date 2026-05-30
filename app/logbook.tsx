@@ -207,7 +207,7 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
   const hasLogs = logs.length > 0;
 
   const content = (
-    <YStack gap="$4" paddingBottom="$4">
+    <YStack gap="$4" paddingBottom="$4" paddingHorizontal="$5">
       {/* Weekly Progress Card */}
       <Card
         backgroundColor="#F0F3EC"
