@@ -1,4 +1,4 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { createClient, processLock, SupabaseClient } from '@supabase/supabase-js'
 import { Platform } from 'react-native'
 import { Database } from '@/types/supabase'
 
@@ -272,6 +272,7 @@ function getSupabase(): SupabaseClient<Database> {
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: false,
+      lock: processLock,
     },
   })
 

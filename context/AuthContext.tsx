@@ -6,6 +6,7 @@ import {
   useContext,
   useCallback,
   useEffect,
+  useRef,
   useState,
   ReactNode,
 } from "react";
@@ -48,6 +49,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const profileRef = useRef<Profile | null>(null);
+  const profileRequestRef = useRef<Promise<Profile | null> | null>(null);
 
   const hardReloadWeb = useCallback((reason: string) => {
     console.warn(`[AuthContext] ${reason}`);
@@ -60,41 +63,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return false;
   }, []);
 
-  const fetchProfile = useCallback(async (userId: string): Promise<Profile | null> => {
-    try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .single();
-      
-      console.log("[AuthContext] fetchProfile:", {
-        userId,
-        hasData: !!data,
-        error: error?.message,
-        fullData: JSON.stringify(data),
-      });
-
-      if (data) {
-        const nextProfile = toCamelCase<Profile>(data);
-        const normalizedProfile = {
-          ...nextProfile,
-          isPremium: Boolean(nextProfile.isPremium),
-        };
-        setProfile({
-          ...normalizedProfile,
-        });
-        return normalizedProfile;
-      } else {
-        setProfile(null);
-        return null;
-      }
-    } catch (error) {
-      console.error("[AuthContext] fetchProfile error:", error);
-      setProfile(null);
-      return null;
-    }
+  const setCurrentProfile = useCallback((nextProfile: Profile | null) => {
+    profileRef.current = nextProfile;
+    setProfile(nextProfile);
   }, []);
+
+  const fetchProfile = useCallback(async (userId: string): Promise<Profile | null> => {
+    if (profileRequestRef.current) {
+      return profileRequestRef.current;
+    }
+
+    const request = (async () => {
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", userId)
+          .single();
+
+        console.log("[AuthContext] fetchProfile:", {
+          userId,
+          hasData: !!data,
+          error: error?.message,
+          fullData: JSON.stringify(data),
+        });
+
+        if (data) {
+          const nextProfile = toCamelCase<Profile>(data);
+          const normalizedProfile = {
+            ...nextProfile,
+            isPremium: Boolean(nextProfile.isPremium),
+          };
+          setCurrentProfile({ ...normalizedProfile });
+          return normalizedProfile;
+        } else {
+          setCurrentProfile(null);
+          return null;
+        }
+      } catch (error) {
+        console.error("[AuthContext] fetchProfile error:", error);
+        return profileRef.current;
+      } finally {
+        profileRequestRef.current = null;
+      }
+    })();
+
+    profileRequestRef.current = request;
+    return request;
+  }, [setCurrentProfile]);
 
   useEffect(() => {
     let active = true;
@@ -145,7 +161,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (session?.user) {
           await fetchProfile(session.user.id);
         } else {
-          setProfile(null);
+          setCurrentProfile(null);
         }
       } catch (error) {
         clearInitialSessionTimeout();
@@ -192,7 +208,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (session?.user) {
           await fetchProfile(session.user.id);
         } else {
-          setProfile(null);
+          setCurrentProfile(null);
         }
       } catch (error) {
         console.error("[AuthContext] onAuthStateChange callback error:", error);
@@ -217,13 +233,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clearAuthStateTimeout();
       subscription.unsubscribe();
     };
-  }, [fetchProfile, hardReloadWeb]);
+  }, [fetchProfile, hardReloadWeb, setCurrentProfile]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
     setSession(null);
     setUser(null);
-    setProfile(null);
+    setCurrentProfile(null);
   };
 
   const refreshProfile = useCallback(async () => {
