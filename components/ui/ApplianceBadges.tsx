@@ -51,14 +51,21 @@ export default function ApplianceBadges({ appliances, detailMode = false }: Appl
         return (
           <Card
             key={key}
-            width={25}
-            height={25}
+            width={24}
+            height={24}
             backgroundColor="#F0EADC"
-            borderRadius={4}
+            borderRadius={12}
+            borderColor="#E3ECD7"
+            borderWidth={1}
             justifyContent="center"
             alignItems="center"
+            overflow="hidden"
           >
-            <MaterialCommunityIcons name={appliance.icon} size={14} color="#172211" />
+            <MaterialCommunityIcons
+              name={appliance.icon}
+              size={13}
+              color="#172211"
+            />
           </Card>
         );
       })}
