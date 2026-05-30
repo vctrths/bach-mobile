@@ -43,6 +43,7 @@ export default function Photo() {
   };
 
   const handleNext = async () => {
+    if (isLoading) return;
     setIsLoading(true);
     setError(null);
 
@@ -117,13 +118,12 @@ export default function Photo() {
 
       // 4. Clear onboarding context and navigate to dashboard
       reset();
-      setTimeout(() => {
-        router.replace("/");
-      }, 0);
+      router.replace("/");
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "An unexpected error occurred",
       );
+    } finally {
       setIsLoading(false);
     }
   };
