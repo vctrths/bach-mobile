@@ -99,12 +99,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let active = true;
     let initialSessionTimeout: ReturnType<typeof setTimeout> | null = null;
+    let authStateTimeout: ReturnType<typeof setTimeout> | null = null;
 
     const clearInitialSessionTimeout = () => {
       if (initialSessionTimeout) {
         clearTimeout(initialSessionTimeout);
         initialSessionTimeout = null;
       }
+    };
+
+    const clearAuthStateTimeout = () => {
+      if (authStateTimeout) {
+        clearTimeout(authStateTimeout);
+        authStateTimeout = null;
+      }
+    };
+
+    const startAuthStateTimeout = (event: string) => {
+      clearAuthStateTimeout();
+      authStateTimeout = setTimeout(() => {
+        hardReloadWeb(
+          `Auth state change "${event}" timed out after 2500ms; forcing hard reload.`
+        );
+      }, 2500);
     };
 
     const initializeSession = async () => {
@@ -157,12 +174,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (!active) return;
       
-      // Only block the UI on initial load or explicit sign in/out.
+      // Initial auth loading is handled by initializeSession above.
+      // Do not block the UI for INITIAL_SESSION or SIGNED_IN here: Supabase can
+      // re-emit those when a PWA resumes, which can trap the app on the spinner.
       // This prevents the entire app from unmounting and remounting (which refetches all data)
-      // whenever the user tabs back into the browser and triggers a TOKEN_REFRESHED event.
-      const shouldBlockUI = _event === 'INITIAL_SESSION' || _event === 'SIGNED_IN' || _event === 'SIGNED_OUT';
+      // whenever the user tabs back into the browser and triggers auth restoration events.
+      const shouldBlockUI = _event === 'SIGNED_OUT';
       
       if (shouldBlockUI) {
+        startAuthStateTimeout(_event);
         setLoading(true);
       }
       
@@ -176,7 +196,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } catch (error) {
         console.error("[AuthContext] onAuthStateChange callback error:", error);
+
+        if (shouldBlockUI) {
+          hardReloadWeb(`Auth state change "${_event}" failed; forcing hard reload.`);
+        }
       } finally {
+        if (shouldBlockUI) {
+          clearAuthStateTimeout();
+        }
+
         if (active) {
           setLoading(false);
         }
@@ -186,6 +214,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       active = false;
       clearInitialSessionTimeout();
+      clearAuthStateTimeout();
       subscription.unsubscribe();
     };
   }, [fetchProfile, hardReloadWeb]);
