@@ -4,6 +4,8 @@ import { Database } from '@/types/supabase'
 
 const fallbackStorage: Record<string, string> = {}
 const SUPABASE_FETCH_TIMEOUT_MS = 8000
+const SUPABASE_RELOAD_GUARD_MS = 10000
+const SUPABASE_RELOAD_GUARD_KEY = "groen:last-supabase-timeout-reload"
 
 const getFetchUrl = (input: Parameters<typeof fetch>[0]) => {
   if (typeof input === 'string') return input
@@ -49,6 +51,7 @@ const supabaseFetch = async (
         timeoutMs: SUPABASE_FETCH_TIMEOUT_MS,
         url: getFetchUrl(input),
       })
+      hardReloadWebAfterSupabaseTimeout("Supabase fetch timed out")
       throw new Error("Supabase fetch timeout")
     }
 
@@ -56,6 +59,37 @@ const supabaseFetch = async (
   } finally {
     clearTimeout(timeoutId)
   }
+}
+
+export function hardReloadWebAfterSupabaseTimeout(reason: string) {
+  if (Platform.OS !== 'web' || typeof window === 'undefined') {
+    return false
+  }
+
+  try {
+    const now = Date.now()
+    const lastReload = Number(
+      window.sessionStorage.getItem(SUPABASE_RELOAD_GUARD_KEY) ?? 0,
+    )
+
+    if (now - lastReload < SUPABASE_RELOAD_GUARD_MS) {
+      console.warn("[supabase] skipped hard reload to avoid a reload loop", {
+        reason,
+        msSinceLastReload: now - lastReload,
+      })
+      return false
+    }
+
+    window.sessionStorage.setItem(SUPABASE_RELOAD_GUARD_KEY, String(now))
+  } catch (error) {
+    console.warn("[supabase] reload guard storage failed:", error)
+  }
+
+  console.warn("[supabase] forcing hard reload after stalled request", {
+    reason,
+  })
+  window.location.reload()
+  return true
 }
 
 function getAsyncStorage() {

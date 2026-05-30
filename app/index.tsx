@@ -8,7 +8,11 @@ import { OnboardingContext } from "@/context/OnboardingContext";
 import { Image as ExpoImage } from "@/lib/image";
 import { type Garden } from "@/types/garden";
 import { UserRole } from "@/utils/role";
-import { supabase, toCamelCase } from "@/utils/supabase";
+import {
+  hardReloadWebAfterSupabaseTimeout,
+  supabase,
+  toCamelCase,
+} from "@/utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useCallback, useContext, useEffect, useState } from "react";
@@ -80,7 +84,19 @@ export default function Dashboard() {
         if (!active) return;
 
         console.warn(
-          "[Dashboard] active gardener connection check timed out; showing dashboard fallback",
+          "[Dashboard] active gardener connection check timed out; forcing hard reload",
+          { userId },
+        );
+        if (
+          hardReloadWebAfterSupabaseTimeout(
+            "Dashboard active gardener connection check timed out",
+          )
+        ) {
+          return;
+        }
+
+        console.warn(
+          "[Dashboard] hard reload skipped; showing dashboard fallback",
           { userId },
         );
         setHasActiveGardenerConnection(false);
