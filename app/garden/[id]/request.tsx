@@ -455,28 +455,44 @@ export default function GardenRequestScreen() {
               >
                 <Select.Trigger
                   flex={1}
-                  backgroundColor="transparent"
+                  backgroundColor="white"
                   borderWidth={0}
+                  borderRadius={8}
                   padding={0}
+                  paddingHorizontal={12}
+                  minHeight={44}
                   iconAfter={
                     <MaterialCommunityIcons
                       name="chevron-down"
                       size={20}
-                      color="#000000"
+                      color="#37392B"
                     />
                   }
                 >
-                  <Select.Value placeholder="Kies een samenwerkingstype" />
+                  <Select.Value
+                    color={collabType ? "#172211" : "#929292"}
+                    placeholder="Kies een samenwerkingstype"
+                  />
                 </Select.Trigger>
                 <Select.Content>
-                  <Select.Viewport backgroundColor="white" borderRadius={8}>
+                  <Select.Viewport
+                    backgroundColor="white"
+                    borderColor="#E3ECD7"
+                    borderRadius={8}
+                    borderWidth={1}
+                  >
                     {COLLABORATION_TYPES.map((type, index) => (
                       <Select.Item
                         key={type.value}
                         index={index}
                         value={type.value}
+                        backgroundColor="white"
+                        borderRadius={6}
+                        hoverStyle={{ backgroundColor: "#F1F3EC" }}
+                        pressStyle={{ backgroundColor: "#EAF0D8" }}
+                        focusStyle={{ backgroundColor: "#F1F3EC" }}
                       >
-                        <Select.ItemText>{type.label}</Select.ItemText>
+                        <Select.ItemText color="#172211">{type.label}</Select.ItemText>
                       </Select.Item>
                     ))}
                   </Select.Viewport>
