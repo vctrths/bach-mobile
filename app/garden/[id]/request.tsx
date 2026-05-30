@@ -93,6 +93,13 @@ export default function GardenRequestScreen() {
   const startDateValue = startDate
     ? `${startDate.getFullYear()}-${(startDate.getMonth() + 1).toString().padStart(2, "0")}-${startDate.getDate().toString().padStart(2, "0")}`
     : "";
+  const startDateLabel = startDate
+    ? startDate.toLocaleDateString("nl-NL", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
+    : "Kies een datum";
 
   useEffect(() => {
     async function fetchGarden() {
@@ -565,18 +572,17 @@ export default function GardenRequestScreen() {
               <Text color="#000000" fontSize={16} fontWeight="400">
                 Gewenste start datum:
               </Text>
-              <XStack gap={8}>
+              <YStack gap={12}>
                 <XStack
-                  flex={1}
+                  width="100%"
                   backgroundColor="#F1F1F1"
                   borderWidth={1}
                   borderColor={errors.startDate ? "red" : "#E3E3E3"}
-                  borderRadius={50}
-                  padding={8}
+                  borderRadius={12}
+                  paddingVertical={14}
                   paddingHorizontal={16}
                   alignItems="center"
-                  justifyContent="center"
-                  gap={12}
+                  justifyContent="space-between"
                   onPress={() => setShowPicker((prev) => !prev)}
                   pressStyle={{
                     scale: 0.98,
@@ -588,82 +594,18 @@ export default function GardenRequestScreen() {
                     fontSize={16}
                     fontWeight="600"
                   >
-                    {startDate
-                      ? `${startDate.getDate().toString().padStart(2, "0")}`
-                      : "DD"}
+                    {startDateLabel}
                   </Text>
                   <MaterialCommunityIcons
                     name="calendar"
-                    size={16}
+                    size={18}
                     color="#000000"
                   />
                 </XStack>
-                <XStack
-                  flex={1}
-                  backgroundColor="#F1F1F1"
-                  borderWidth={1}
-                  borderColor={errors.startDate ? "red" : "#E3E3E3"}
-                  borderRadius={50}
-                  padding={8}
-                  paddingHorizontal={16}
-                  alignItems="center"
-                  justifyContent="center"
-                  gap={12}
-                  onPress={() => setShowPicker((prev) => !prev)}
-                  pressStyle={{
-                    scale: 0.98,
-                    opacity: 0.9,
-                  }}
-                >
-                  <Text
-                    color={startDate ? "#000000" : "#929292"}
-                    fontSize={16}
-                    fontWeight="600"
-                  >
-                    {startDate
-                      ? `${(startDate.getMonth() + 1).toString().padStart(2, "0")}`
-                      : "MM"}
-                  </Text>
-                  <MaterialCommunityIcons
-                    name="calendar"
-                    size={16}
-                    color="#000000"
-                  />
-                </XStack>
-                <XStack
-                  flex={1}
-                  backgroundColor="#F1F1F1"
-                  borderWidth={1}
-                  borderColor={errors.startDate ? "red" : "#E3E3E3"}
-                  borderRadius={50}
-                  padding={8}
-                  paddingHorizontal={16}
-                  alignItems="center"
-                  justifyContent="center"
-                  gap={12}
-                  onPress={() => setShowPicker((prev) => !prev)}
-                  pressStyle={{
-                    scale: 0.98,
-                    opacity: 0.9,
-                  }}
-                >
-                  <Text
-                    color={startDate ? "#000000" : "#929292"}
-                    fontSize={16}
-                    fontWeight="600"
-                  >
-                    {startDate ? `${startDate.getFullYear()}` : "YYYY"}
-                  </Text>
-                  <MaterialCommunityIcons
-                    name="calendar"
-                    size={16}
-                    color="#000000"
-                  />
-                </XStack>
-              </XStack>
-              <Text color="#929292" fontSize={14}>
-                Kies vandaag of later.
-              </Text>
+                <Text color="#929292" fontSize={14}>
+                  Kies vandaag of later.
+                </Text>
+              </YStack>
               {errors.startDate && (
                 <Text color="red" fontSize={14}>
                   {errors.startDate}
@@ -674,13 +616,28 @@ export default function GardenRequestScreen() {
         </YStack>
 
         {!isWeb && showPicker && (
-          <DateTimePicker
-            value={startDate || new Date()}
-            mode="date"
-            display={Platform.OS === "ios" ? "spinner" : "default"}
-            minimumDate={minDate}
-            onChange={handleDateChange}
-          />
+          <YStack
+            width="100%"
+            borderRadius={12}
+            borderWidth={1}
+            borderColor="#E3E3E3"
+            backgroundColor="white"
+            overflow="hidden"
+            alignSelf="stretch"
+          >
+            <DateTimePicker
+              value={startDate || new Date()}
+              mode="date"
+              display={Platform.OS === "ios" ? "spinner" : "default"}
+              minimumDate={minDate}
+              onChange={handleDateChange}
+              style={{
+                width: "100%",
+                alignSelf: "stretch",
+                backgroundColor: "white",
+              }}
+            />
+          </YStack>
         )}
 
         <Button
