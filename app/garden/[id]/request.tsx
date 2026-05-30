@@ -475,7 +475,12 @@ export default function GardenRequestScreen() {
                   />
                 </Select.Trigger>
                 <Select.Content>
-                  <Select.Viewport backgroundColor="white" borderRadius={8}>
+                  <Select.Viewport
+                    backgroundColor="white"
+                    borderColor="#E3ECD7"
+                    borderRadius={8}
+                    borderWidth={1}
+                  >
                     {COLLABORATION_TYPES.map((type, index) => (
                       <Select.Item
                         key={type.value}
