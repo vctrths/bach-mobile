@@ -1,15 +1,14 @@
-import ApplianceBadges from "@/components/ui/ApplianceBadges";
 import Button from "@/components/ui/Button";
 import GardenCard from "@/components/ui/GardenCard";
+import GardenListCard from "@/components/ui/GardenListCard";
 import { type GardenLog } from "@/components/ui/LogCard";
-import { Image as ExpoImage } from "@/lib/image";
 import { type Garden } from "@/types/garden";
 import { supabase, toCamelCase } from "@/utils/supabase";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { ScrollView } from "react-native";
-import { Card, Spinner, Text, XStack, YStack } from "tamagui";
+import { Spinner, Text, XStack, YStack } from "tamagui";
 
 interface SeekerViewProps {
   searchQuery?: string;
@@ -48,7 +47,7 @@ export default function SeekerView({
           supabase
             .from("gardens")
             .select(
-              "id, name, location, image_url, appliances, owner:profiles!owner_id(rating)",
+              "id, name, location, description, image_url, appliances, owner:profiles!owner_id(rating)",
             )
             .limit(5),
           supabase.from("garden_logs").select("id, title, status").limit(5),
@@ -118,56 +117,12 @@ export default function SeekerView({
             </YStack>
           ) : (
             searchResults.map((garden) => (
-              <Card
+              <GardenListCard
                 key={garden.id}
-                elevation={2}
-                backgroundColor="$canvas"
-                borderColor="$borderColor"
-                borderWidth={1}
-                borderRadius="$6"
-                overflow="hidden"
-                padding="$3"
+                garden={garden}
                 onPress={() => router.push(("/garden/" + garden.id) as any)}
-                pressStyle={{ scale: 0.98, opacity: 0.9 }}
-              >
-                <XStack gap="$3" height={150}>
-                  <ExpoImage
-                    source={
-                      (garden.imageUrl
-                        ? { uri: garden.imageUrl }
-                        : undefined) as any
-                    }
-                    style={{
-                      width: 120,
-                      height: "100%",
-                      backgroundColor: "$borderColor",
-                    }}
-                    contentFit="cover"
-                  />
-                  <YStack flex={1} justifyContent="center" padding="$2">
-                    <Text fontSize="$4" fontWeight="bold" color="$text_dark">
-                      {garden.name}
-                    </Text>
-                    <XStack alignItems="center" gap="$1" marginTop="$1">
-                      <Ionicons name="star" size={14} color="#f59e0b" />
-                      <Text fontSize="$3" color="$text_dark">
-                        {garden.owner?.rating
-                          ? garden.owner.rating.toFixed(1)
-                          : "Nieuw"}
-                      </Text>
-                    </XStack>
-                    <XStack alignItems="center" gap="$1" marginTop="$1">
-                      <Ionicons name="location" size={14} color="$text_light" />
-                      <Text fontSize="$3" color="$text_light">
-                        {garden.location}
-                      </Text>
-                    </XStack>
-                    <XStack marginTop="$2">
-                      <ApplianceBadges appliances={garden.appliances} />
-                    </XStack>
-                  </YStack>
-                </XStack>
-              </Card>
+                onFavoritePress={() => {}}
+              />
             ))
           )}
         </YStack>
