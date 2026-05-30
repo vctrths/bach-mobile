@@ -1,20 +1,18 @@
-import PageContainer from "@/components/ui/PageContainer";
-import TopNavPill from "@/components/ui/TopNavPill";
-import SearchBar from "@/components/ui/SearchBar";
+import GardenerView from "@/components/dashboard/GardenerView";
+import OwnerView from "@/components/dashboard/OwnerView";
+import SeekerView from "@/components/dashboard/SeekerView";
 import NotificationBell from "@/components/ui/NotificationBell";
+import PageContainer from "@/components/ui/PageContainer";
 import { useAuth } from "@/context/AuthContext";
 import { OnboardingContext } from "@/context/OnboardingContext";
-import { UserRole } from "@/utils/role";
-import SeekerView from "@/components/dashboard/SeekerView";
-import OwnerView from "@/components/dashboard/OwnerView";
-import GardenerView from "@/components/dashboard/GardenerView";
-import React, { useCallback, useContext, useEffect, useState } from "react";
-import { Circle, Spinner, Text, XStack, YStack } from "tamagui";
-import { supabase, toCamelCase } from "@/utils/supabase";
 import { Image as ExpoImage } from "@/lib/image";
+import { type Garden } from "@/types/garden";
+import { UserRole } from "@/utils/role";
+import { supabase, toCamelCase } from "@/utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { type Garden } from "@/types/garden";
+import React, { useCallback, useContext, useEffect, useState } from "react";
+import { Circle, Spinner, Text, XStack, YStack } from "tamagui";
 
 export default function Dashboard() {
   const { profile, loading, session } = useAuth();
@@ -41,8 +39,12 @@ export default function Dashboard() {
     try {
       const response = await supabase
         .from("gardens")
-        .select("id, name, location, image_url, appliances, owner:profiles!owner_id(rating)")
-        .or(`name.ilike.%${query}%,location.ilike.%${query}%,description.ilike.%${query}%`)
+        .select(
+          "id, name, location, image_url, appliances, owner:profiles!owner_id(rating)",
+        )
+        .or(
+          `name.ilike.%${query}%,location.ilike.%${query}%,description.ilike.%${query}%`,
+        )
         .limit(10);
 
       if (response.data) setSearchResults(toCamelCase<Garden[]>(response.data));
@@ -63,7 +65,9 @@ export default function Dashboard() {
       <PageContainer showTopNav={false}>
         <YStack flex={1} justifyContent="center" alignItems="center" gap="$4">
           <Spinner size="large" color="$primary" />
-          <Text color="$secondary" fontSize="$4">Laden...</Text>
+          <Text color="$secondary" fontSize="$4">
+            Laden...
+          </Text>
         </YStack>
       </PageContainer>
     );
@@ -87,14 +91,21 @@ export default function Dashboard() {
       topNavTitle={
         <XStack alignItems="center" gap="$2">
           <Ionicons name="location" size={20} color="$primary" />
-          <Text color="$text_dark" fontWeight="600">Groene Vingers</Text>
+          <Text color="$text_dark" fontWeight="600">
+            Groene Vingers
+          </Text>
         </XStack>
       }
       rightElement={
         <XStack gap="$3" alignItems="center">
           <NotificationBell />
           {profile?.profileImage ? (
-            <Circle size={50} onPress={() => router.push("/profile")} pressStyle={{ scale: 0.94, opacity: 0.85 }} overflow="hidden">
+            <Circle
+              size={50}
+              onPress={() => router.push("/profile")}
+              pressStyle={{ scale: 0.94, opacity: 0.85 }}
+              overflow="hidden"
+            >
               <ExpoImage
                 source={{ uri: profile.profileImage }}
                 style={{ width: "100%", height: "100%" }}
@@ -111,14 +122,6 @@ export default function Dashboard() {
             />
           )}
         </XStack>
-      }
-      topNavChildren={
-        <SearchBar
-          active
-          value={searchQuery}
-          onChangeText={onSearchChange}
-          placeholder="Zoeken naar een tuin"
-        />
       }
       hideBack
     >
