@@ -397,33 +397,35 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
         ) : (
           <YStack gap="$3">
             {logs.map((log) => (
-              <XStack
+              <Card
                 key={log.id}
                 backgroundColor="#F0F3EC"
-                borderColor="#EAF0D8"
+                borderColor="#E3ECD7"
                 borderWidth={1}
-                borderRadius={12}
-                padding={8}
+                borderRadius={16}
+                padding={12}
                 justifyContent="space-between"
                 alignItems="center"
+                boxShadow="0px 4px 20px rgba(23, 51, 0, 0.06)"
                 onPress={() =>
                   router.push(`/logbook/${log.id}` as any)
                 }
                 pressStyle={{ scale: 0.98, opacity: 0.9 }}
               >
-                <XStack alignItems="center" gap="$2">
+                <XStack alignItems="center" gap="$3" flex={1}>
                   <ExpoImage
                     source={require("@/assets/images/hero.png")}
                     style={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 7,
+                      width: 64,
+                      height: 64,
+                      borderRadius: 12,
                     }}
                     contentFit="cover"
                   />
-                  <YStack gap="$2" width={175}>
+                  <YStack gap="$2" flex={1} minWidth={0}>
                     <Text
-                      fontSize={18}
+                      fontSize={16}
+                      lineHeight={18}
                       fontWeight="700"
                       color="#000000"
                       fontFamily="$Satoshi"
@@ -440,15 +442,9 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
                     </Text>
                   </YStack>
                 </XStack>
-                <XStack
-                  width={32}
-                  height={32}
-                  borderRadius={8}
-                  justifyContent="center"
-                  alignItems="center"
-                >
+                <XStack width={32} height={32} justifyContent="center" alignItems="center">
                   <Circle
-                    size={48}
+                    size={40}
                     backgroundColor="white"
                     borderWidth={1}
                     borderColor="#E3ECD7"
@@ -465,7 +461,7 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
                     </Text>
                   </Circle>
                 </XStack>
-              </XStack>
+              </Card>
             ))}
           </YStack>
         )}

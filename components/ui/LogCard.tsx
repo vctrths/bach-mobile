@@ -15,41 +15,60 @@ interface LogCardProps {
 }
 
 export function LogCard({ log, onPress }: LogCardProps) {
+  const createdLabel = log.created_at
+    ? new Date(log.created_at).toLocaleDateString("nl-BE", {
+        day: "2-digit",
+        month: "short",
+      })
+    : null;
+
   return (
     <Card
-      elevation={2}
-      margin="$2"
       overflow="hidden"
-      width={220}
-      height={140}
-      backgroundColor="rgba(240, 243, 236, 0.8)"
-      borderColor="$borderColor"
+      width={228}
+      height={146}
+      backgroundColor="#F0F3EC"
+      borderColor="#E3ECD7"
       borderWidth={1}
-      justifyContent="space-between"
-      padding="$3"
+      borderRadius={16}
+      padding={12}
+      boxShadow="0px 4px 20px rgba(23, 51, 0, 0.06)"
       onPress={onPress}
       pressStyle={onPress ? { scale: 0.98, opacity: 0.9 } : undefined}
     >
-      <YStack justifyContent="space-between" height="100%">
-        <XStack justifyContent="space-between" alignItems="flex-start">
-          <YStack flex={1}>
+      <YStack justifyContent="space-between" height="100%" gap={10}>
+        <XStack justifyContent="space-between" alignItems="flex-start" gap={8}>
+          <YStack flex={1} gap={4}>
             <Text
-              fontSize="$3"
-              fontWeight="bold"
-              color="$primary"
+              fontSize={16}
+              lineHeight={18}
+              fontWeight="700"
+              color="#000000"
               numberOfLines={2}
             >
               {log.title}
             </Text>
+            {createdLabel && (
+              <Text fontSize={12} color="rgba(0,0,0,0.55)" numberOfLines={1}>
+                {createdLabel}
+              </Text>
+            )}
           </YStack>
-          <Ionicons name="checkmark-done" size={18} color="$primary" />
+          <Circle
+            size={28}
+            backgroundColor="#173300"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <Ionicons name="checkmark-done" size={16} color="#F0F3EC" />
+          </Circle>
         </XStack>
 
-        <XStack gap="$2">
+        <XStack gap={6} alignItems="center">
           {log.status.map((status, index) => (
             <Circle
               key={index}
-              size={14}
+              size={12}
               backgroundColor={
                 status === "completed"
                   ? "rgba(23, 51, 0, 0.8)"
