@@ -17,6 +17,11 @@ import { Circle, Spinner, Text, XStack, YStack } from "tamagui";
 export default function Dashboard() {
   const { profile, loading, session } = useAuth();
   const { data: onboardingData } = useContext(OnboardingContext);
+  const userId = session?.user?.id ?? null;
+  const [hasActiveGardenerConnection, setHasActiveGardenerConnection] =
+    useState(false);
+  const [checkingGardenerConnection, setCheckingGardenerConnection] =
+    useState(true);
 
   useEffect(() => {
     if (!loading && !session) {
@@ -28,6 +33,60 @@ export default function Dashboard() {
   const [searchResults, setSearchResults] = useState<Garden[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    const checkGardenerConnection = async () => {
+      if (loading) return;
+
+      if (!userId) {
+        setHasActiveGardenerConnection(false);
+        setCheckingGardenerConnection(false);
+        return;
+      }
+
+      const profileRole = profile?.role?.toLowerCase() ?? null;
+
+      if (profileRole === UserRole.TUIN_EIGENAAR) {
+        setHasActiveGardenerConnection(false);
+        setCheckingGardenerConnection(false);
+        return;
+      }
+
+      if (profileRole === UserRole.TUIN_ZOEKER_MET_TUIN) {
+        setHasActiveGardenerConnection(true);
+        setCheckingGardenerConnection(false);
+        return;
+      }
+
+      setCheckingGardenerConnection(true);
+
+      const { data, error } = await supabase
+        .from("collaborations")
+        .select("id")
+        .eq("gardener_id", userId)
+        .eq("status", "active")
+        .limit(1);
+
+      if (!active) return;
+
+      if (error) {
+        console.error("Error checking active gardener connection:", error);
+        setHasActiveGardenerConnection(false);
+      } else {
+        setHasActiveGardenerConnection((data?.length ?? 0) > 0);
+      }
+
+      setCheckingGardenerConnection(false);
+    };
+
+    checkGardenerConnection();
+
+    return () => {
+      active = false;
+    };
+  }, [loading, profile?.role, userId]);
 
   const handleSearch = useCallback(async (query: string) => {
     if (!query.trim()) {
@@ -60,7 +119,7 @@ export default function Dashboard() {
     handleSearch(text);
   };
 
-  if (loading) {
+  if (loading || checkingGardenerConnection) {
     return (
       <PageContainer showTopNav={false}>
         <YStack flex={1} justifyContent="center" alignItems="center" gap="$4">
@@ -73,7 +132,11 @@ export default function Dashboard() {
     );
   }
 
-  const role = (profile?.role ?? onboardingData.role)?.toLowerCase() ?? null;
+  const baseRole = (profile?.role ?? onboardingData.role)?.toLowerCase() ?? null;
+  const role =
+    hasActiveGardenerConnection && baseRole !== UserRole.TUIN_EIGENAAR
+      ? UserRole.TUIN_ZOEKER_MET_TUIN
+      : baseRole;
 
   const showingSearch = !!(searchQuery.trim() || isSearchFocused);
 
@@ -82,6 +145,7 @@ export default function Dashboard() {
     hasProfile: !!profile,
     dbRole: profile?.role,
     ctxRole: onboardingData.role,
+    hasActiveGardenerConnection,
     resolvedRole: role,
   });
 
