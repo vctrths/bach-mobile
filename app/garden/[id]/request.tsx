@@ -519,7 +519,6 @@ export default function GardenRequestScreen() {
               </Text>
               <YStack
                 width="100%"
-                maxWidth={300}
                 alignSelf="flex-start"
                 gap={10}
               >
@@ -559,7 +558,6 @@ export default function GardenRequestScreen() {
                   }}
                   style={{
                     width: "100%",
-                    maxWidth: 300,
                     boxSizing: "border-box",
                     minHeight: 44,
                     padding: "10px 12px",
