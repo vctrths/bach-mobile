@@ -6,6 +6,10 @@ const fallbackStorage: Record<string, string> = {}
 const SUPABASE_FETCH_TIMEOUT_MS = 8000
 const SUPABASE_RELOAD_GUARD_MS = 10000
 const SUPABASE_RELOAD_GUARD_KEY = "groen:last-supabase-timeout-reload"
+const SUPABASE_RESUME_RELOAD_MS = 2500
+const activeSupabaseFetches = new Set<number>()
+let nextSupabaseFetchId = 0
+let resumeRecoveryRegistered = false
 
 const getFetchUrl = (input: Parameters<typeof fetch>[0]) => {
   if (typeof input === 'string') return input
@@ -17,8 +21,15 @@ const supabaseFetch = async (
   input: Parameters<typeof fetch>[0],
   init?: Parameters<typeof fetch>[1],
 ): Promise<Response> => {
+  const fetchId = nextSupabaseFetchId++
+  activeSupabaseFetches.add(fetchId)
+
   if (typeof AbortController === 'undefined') {
-    return fetch(input, init)
+    try {
+      return await fetch(input, init)
+    } finally {
+      activeSupabaseFetches.delete(fetchId)
+    }
   }
 
   const controller = new AbortController()
@@ -58,6 +69,7 @@ const supabaseFetch = async (
     throw error
   } finally {
     clearTimeout(timeoutId)
+    activeSupabaseFetches.delete(fetchId)
   }
 }
 
@@ -90,6 +102,72 @@ export function hardReloadWebAfterSupabaseTimeout(reason: string) {
   })
   window.location.reload()
   return true
+}
+
+export function registerSupabaseResumeRecovery() {
+  if (
+    resumeRecoveryRegistered ||
+    Platform.OS !== 'web' ||
+    typeof window === 'undefined' ||
+    typeof document === 'undefined'
+  ) {
+    return
+  }
+
+  resumeRecoveryRegistered = true
+  let resumeTimeoutId: ReturnType<typeof setTimeout> | null = null
+
+  const clearResumeTimeout = () => {
+    if (resumeTimeoutId) {
+      clearTimeout(resumeTimeoutId)
+      resumeTimeoutId = null
+    }
+  }
+
+  const checkForStalledSupabaseFetches = (eventName: string) => {
+    clearResumeTimeout()
+
+    if (document.visibilityState === 'hidden') {
+      return
+    }
+
+    const pendingAtResume = activeSupabaseFetches.size
+
+    if (pendingAtResume === 0) {
+      return
+    }
+
+    console.warn("[supabase] page resumed with pending Supabase fetches", {
+      eventName,
+      pendingAtResume,
+    })
+
+    resumeTimeoutId = setTimeout(() => {
+      const pendingAfterDelay = activeSupabaseFetches.size
+
+      if (pendingAfterDelay === 0) {
+        return
+      }
+
+      console.warn(
+        "[supabase] pending Supabase fetches still stuck after resume; forcing hard reload",
+        { eventName, pendingAfterDelay },
+      )
+      window.location.replace(window.location.href)
+    }, SUPABASE_RESUME_RELOAD_MS)
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      checkForStalledSupabaseFetches("visibilitychange")
+    } else {
+      clearResumeTimeout()
+    }
+  })
+
+  window.addEventListener("pageshow", () => {
+    checkForStalledSupabaseFetches("pageshow")
+  })
 }
 
 function getAsyncStorage() {
