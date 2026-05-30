@@ -23,12 +23,10 @@ export default function GardenListCard({
     ? { uri: garden.imageUrl }
     : require("@/assets/images/garden-details/garden_image_1.png");
 
-  const visibleAppliances = (garden.appliances?.length
-    ? garden.appliances
-    : FALLBACK_APPLIANCES
-  )
-    .filter((appliance) => APPLIANCE_MAP[appliance])
-    .slice(0, 2);
+  const visibleAppliances = (
+    garden.appliances?.length ? garden.appliances : FALLBACK_APPLIANCES
+  ).filter((appliance) => APPLIANCE_MAP[appliance]);
+  // .slice(0, 2);
 
   return (
     <Card
@@ -107,6 +105,7 @@ export default function GardenListCard({
                   alignItems="center"
                   justifyContent="center"
                   overflow="hidden"
+                  flexWrap="wrap"
                 >
                   <MaterialCommunityIcons
                     name={appliance.icon}
