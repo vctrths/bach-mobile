@@ -30,7 +30,7 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   signOut: () => Promise<void>;
-  refreshProfile: () => Promise<void>;
+  refreshProfile: () => Promise<Profile | null>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -39,7 +39,7 @@ const AuthContext = createContext<AuthContextType>({
   profile: null,
   loading: true,
   signOut: async () => {},
-  refreshProfile: async () => {},
+  refreshProfile: async () => null,
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = useCallback(async (userId: string) => {
+  const fetchProfile = useCallback(async (userId: string): Promise<Profile | null> => {
     try {
       const { data, error } = await supabase
         .from("profiles")
@@ -65,16 +65,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (data) {
         const nextProfile = toCamelCase<Profile>(data);
-        setProfile({
+        const normalizedProfile = {
           ...nextProfile,
           isPremium: Boolean(nextProfile.isPremium),
+        };
+        setProfile({
+          ...normalizedProfile,
         });
+        return normalizedProfile;
       } else {
         setProfile(null);
+        return null;
       }
     } catch (error) {
       console.error("[AuthContext] fetchProfile error:", error);
       setProfile(null);
+      return null;
     }
   }, []);
 
@@ -133,8 +139,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshProfile = useCallback(async () => {
     if (user) {
-      await fetchProfile(user.id);
+      return await fetchProfile(user.id);
     }
+    return null;
   }, [fetchProfile, user]);
 
   return (
