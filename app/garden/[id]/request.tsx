@@ -572,7 +572,7 @@ export default function GardenRequestScreen() {
               <Text color="#000000" fontSize={16} fontWeight="400">
                 Gewenste start datum:
               </Text>
-              <YStack gap={12}>
+              <YStack gap={12} width="100%" alignSelf="stretch">
                 <XStack
                   width="100%"
                   backgroundColor="#F1F1F1"
@@ -602,9 +602,6 @@ export default function GardenRequestScreen() {
                     color="#000000"
                   />
                 </XStack>
-                <Text color="#929292" fontSize={14}>
-                  Kies vandaag of later.
-                </Text>
               </YStack>
               {errors.startDate && (
                 <Text color="red" fontSize={14}>
