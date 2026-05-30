@@ -207,11 +207,15 @@ export default function NewLogScreen() {
                 />
                 <YStack
                   position="absolute"
-                  top={8}
-                  right={8}
+                  top={10}
+                  right={10}
+                  width={32}
+                  height={32}
                   backgroundColor="rgba(0,0,0,0.6)"
-                  borderRadius={20}
-                  padding={6}
+                  borderRadius={16}
+                  justifyContent="center"
+                  alignItems="center"
+                  zIndex={1}
                   onPress={(e) => {
                     e?.stopPropagation?.();
                     setImage(null);

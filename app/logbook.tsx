@@ -403,9 +403,7 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
                 borderColor="#E3ECD7"
                 borderWidth={1}
                 borderRadius={16}
-                paddingTop={12}
-                paddingHorizontal={12}
-                paddingBottom={6}
+                padding={10}
                 width="100%"
                 boxShadow="0px 4px 20px rgba(23, 51, 0, 0.06)"
                 onPress={() =>
@@ -416,10 +414,11 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
                 <XStack
                   width="100%"
                   justifyContent="space-between"
-                  alignItems="center"
+                  alignItems="stretch"
                   gap="$3"
+                  minHeight={76}
                 >
-                  <XStack flex={1} alignItems="center" gap="$3" minWidth={0}>
+                  <XStack flex={1} alignItems="flex-start" gap="$3" minWidth={0}>
                     <ExpoImage
                       source={
                         log.imageUrl
@@ -427,16 +426,16 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
                           : require("@/assets/images/hero.png")
                       }
                       style={{
-                        width: 64,
-                        height: 64,
-                        borderRadius: 12,
+                        width: 76,
+                        height: 76,
+                        borderRadius: 10,
                       }}
                       contentFit="cover"
                     />
-                    <YStack flex={1} minWidth={0} gap={0}>
+                    <YStack flex={1} minWidth={0} gap={1} paddingTop={0}>
                       <Text
                         fontSize={16}
-                        lineHeight={18}
+                        lineHeight={17}
                         fontWeight="700"
                         color="#000000"
                         fontFamily="$Satoshi"
@@ -445,6 +444,7 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
                       </Text>
                       <Text
                         fontSize={14}
+                        lineHeight={16}
                         color="rgba(0,0,0,0.6)"
                         fontFamily="$Satoshi"
                         numberOfLines={2}
@@ -459,6 +459,7 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
                     backgroundColor="white"
                     borderWidth={1}
                     borderColor="#E3ECD7"
+                    alignSelf="center"
                     justifyContent="center"
                     alignItems="center"
                   >
