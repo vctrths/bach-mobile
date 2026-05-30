@@ -3,6 +3,172 @@ import { Platform } from 'react-native'
 import { Database } from '@/types/supabase'
 
 const fallbackStorage: Record<string, string> = {}
+const SUPABASE_FETCH_TIMEOUT_MS = 8000
+const SUPABASE_RELOAD_GUARD_MS = 10000
+const SUPABASE_RELOAD_GUARD_KEY = "groen:last-supabase-timeout-reload"
+const SUPABASE_RESUME_RELOAD_MS = 2500
+const activeSupabaseFetches = new Set<number>()
+let nextSupabaseFetchId = 0
+let resumeRecoveryRegistered = false
+
+const getFetchUrl = (input: Parameters<typeof fetch>[0]) => {
+  if (typeof input === 'string') return input
+  if (input instanceof URL) return input.toString()
+  return input.url
+}
+
+const supabaseFetch = async (
+  input: Parameters<typeof fetch>[0],
+  init?: Parameters<typeof fetch>[1],
+): Promise<Response> => {
+  const fetchId = nextSupabaseFetchId++
+  activeSupabaseFetches.add(fetchId)
+
+  if (typeof AbortController === 'undefined') {
+    try {
+      return await fetch(input, init)
+    } finally {
+      activeSupabaseFetches.delete(fetchId)
+    }
+  }
+
+  const controller = new AbortController()
+  const originalSignal = init?.signal
+  let didTimeout = false
+
+  const timeoutId = setTimeout(() => {
+    didTimeout = true
+    controller.abort()
+  }, SUPABASE_FETCH_TIMEOUT_MS)
+
+  if (originalSignal) {
+    if (originalSignal.aborted) {
+      controller.abort()
+    } else {
+      originalSignal.addEventListener('abort', () => controller.abort(), {
+        once: true,
+      })
+    }
+  }
+
+  try {
+    return await fetch(input, {
+      ...init,
+      signal: controller.signal,
+    })
+  } catch (error) {
+    if (didTimeout) {
+      console.warn("[supabase] fetch timed out and was aborted", {
+        timeoutMs: SUPABASE_FETCH_TIMEOUT_MS,
+        url: getFetchUrl(input),
+      })
+      hardReloadWebAfterSupabaseTimeout("Supabase fetch timed out")
+      throw new Error("Supabase fetch timeout")
+    }
+
+    throw error
+  } finally {
+    clearTimeout(timeoutId)
+    activeSupabaseFetches.delete(fetchId)
+  }
+}
+
+export function hardReloadWebAfterSupabaseTimeout(reason: string) {
+  if (Platform.OS !== 'web' || typeof window === 'undefined') {
+    return false
+  }
+
+  try {
+    const now = Date.now()
+    const lastReload = Number(
+      window.sessionStorage.getItem(SUPABASE_RELOAD_GUARD_KEY) ?? 0,
+    )
+
+    if (now - lastReload < SUPABASE_RELOAD_GUARD_MS) {
+      console.warn("[supabase] skipped hard reload to avoid a reload loop", {
+        reason,
+        msSinceLastReload: now - lastReload,
+      })
+      return false
+    }
+
+    window.sessionStorage.setItem(SUPABASE_RELOAD_GUARD_KEY, String(now))
+  } catch (error) {
+    console.warn("[supabase] reload guard storage failed:", error)
+  }
+
+  console.warn("[supabase] forcing hard reload after stalled request", {
+    reason,
+  })
+  window.location.reload()
+  return true
+}
+
+export function registerSupabaseResumeRecovery() {
+  if (
+    resumeRecoveryRegistered ||
+    Platform.OS !== 'web' ||
+    typeof window === 'undefined' ||
+    typeof document === 'undefined'
+  ) {
+    return
+  }
+
+  resumeRecoveryRegistered = true
+  let resumeTimeoutId: ReturnType<typeof setTimeout> | null = null
+
+  const clearResumeTimeout = () => {
+    if (resumeTimeoutId) {
+      clearTimeout(resumeTimeoutId)
+      resumeTimeoutId = null
+    }
+  }
+
+  const checkForStalledSupabaseFetches = (eventName: string) => {
+    clearResumeTimeout()
+
+    if (document.visibilityState === 'hidden') {
+      return
+    }
+
+    const pendingAtResume = activeSupabaseFetches.size
+
+    if (pendingAtResume === 0) {
+      return
+    }
+
+    console.warn("[supabase] page resumed with pending Supabase fetches", {
+      eventName,
+      pendingAtResume,
+    })
+
+    resumeTimeoutId = setTimeout(() => {
+      const pendingAfterDelay = activeSupabaseFetches.size
+
+      if (pendingAfterDelay === 0) {
+        return
+      }
+
+      console.warn(
+        "[supabase] pending Supabase fetches still stuck after resume; forcing hard reload",
+        { eventName, pendingAfterDelay },
+      )
+      window.location.replace(window.location.href)
+    }, SUPABASE_RESUME_RELOAD_MS)
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      checkForStalledSupabaseFetches("visibilitychange")
+    } else {
+      clearResumeTimeout()
+    }
+  })
+
+  window.addEventListener("pageshow", () => {
+    checkForStalledSupabaseFetches("pageshow")
+  })
+}
 
 function getAsyncStorage() {
   if (Platform.OS === 'web') return null
@@ -98,6 +264,9 @@ function getSupabase(): SupabaseClient<Database> {
   }
 
   _client = createClient<Database>(url, key, {
+    global: {
+      fetch: supabaseFetch as typeof fetch,
+    },
     auth: {
       storage: Platform.OS === 'web' ? undefined : safeStorage,
       autoRefreshToken: true,
@@ -134,4 +303,3 @@ export function toCamelCase<T>(obj: any): T {
   }
   return obj;
 }
-

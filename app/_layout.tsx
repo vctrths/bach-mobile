@@ -4,6 +4,7 @@ import { OnboardingProvider } from "@/context/OnboardingContext";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useFonts } from "@/lib/font-hooks";
 import tamaConfig from "@/tamagui.config";
+import { registerSupabaseResumeRecovery } from "@/utils/supabase";
 import { SplashScreen, Stack } from "expo-router";
 import { useEffect } from "react";
 import { Platform } from "react-native";
@@ -67,6 +68,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (Platform.OS === "web") {
+      registerSupabaseResumeRecovery();
       import("@/lib/register-sw").then((m) => m.registerServiceWorker());
     }
   }, []);
