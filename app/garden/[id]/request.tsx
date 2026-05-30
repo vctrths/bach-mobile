@@ -1,5 +1,6 @@
 import Button from "@/components/ui/Button";
 import PageContainer from "@/components/ui/PageContainer";
+import WeekdayPicker from "@/components/ui/WeekdayPicker";
 import { useAlerts } from "@/context/AlertContext";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/utils/supabase";
@@ -8,20 +9,10 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Platform } from "react-native";
-import { Circle, Select, Text, TextArea, XStack, YStack } from "tamagui";
+import { Select, Text, TextArea, XStack, YStack } from "tamagui";
 import { z } from "zod";
 
 const REQUEST_TIMEOUT_MS = 12000;
-
-const DAYS = [
-  { key: "M", label: "M" },
-  { key: "D", label: "D" },
-  { key: "W", label: "W" },
-  { key: "Do", label: "D" },
-  { key: "V", label: "V" },
-  { key: "Za", label: "Z" },
-  { key: "Zo", label: "Z" },
-];
 
 const COLLABORATION_TYPES = [
   { value: "weekly_maintenance", label: "Wekelijks onderhoud" },
@@ -97,6 +88,7 @@ export default function GardenRequestScreen() {
 
   const minDate = new Date();
   minDate.setHours(0, 0, 0, 0);
+  const minDateValue = minDate.toISOString().split("T")[0];
 
   useEffect(() => {
     async function fetchGarden() {
@@ -171,10 +163,14 @@ export default function GardenRequestScreen() {
     setShowPicker(Platform.OS === "ios");
     if (selectedDate) {
       if (selectedDate < minDate) {
-        setStartDate(minDate);
-      } else {
-        setStartDate(selectedDate);
+        setStartDate(null);
+        setErrors((e) => ({
+          ...e,
+          startDate: "Startdatum kan niet in het verleden liggen",
+        }));
+        return;
       }
+      setStartDate(selectedDate);
       setErrors((e) => ({ ...e, startDate: "" }));
     }
   };
@@ -454,7 +450,13 @@ export default function GardenRequestScreen() {
                   backgroundColor="transparent"
                   borderWidth={0}
                   padding={0}
-                  iconAfter={null}
+                  iconAfter={
+                    <MaterialCommunityIcons
+                      name="chevron-down"
+                      size={20}
+                      color="#000000"
+                    />
+                  }
                 >
                   <Select.Value placeholder="Kies een samenwerkingstype" />
                 </Select.Trigger>
@@ -472,11 +474,6 @@ export default function GardenRequestScreen() {
                   </Select.Viewport>
                 </Select.Content>
               </Select>
-              <MaterialCommunityIcons
-                name="chevron-down"
-                size={20}
-                color="#000000"
-              />
             </XStack>
             {errors.collaborationType && (
               <Text color="red" fontSize={14}>
@@ -485,62 +482,11 @@ export default function GardenRequestScreen() {
             )}
           </YStack>
 
-          <YStack gap={8}>
-            <XStack gap={4} alignItems="flex-start" padding={10}>
-              <YStack width={56} gap={12} alignItems="flex-start">
-                <Text
-                  color="#56594D"
-                  fontSize={16}
-                  fontWeight="500"
-                  opacity={0.4}
-                >
-                  Dag
-                </Text>
-                <Text
-                  color="#56594D"
-                  fontSize={16}
-                  fontWeight="500"
-                  opacity={0.4}
-                >
-                  Aanw.
-                </Text>
-              </YStack>
-
-              {DAYS.map((day) => (
-                <YStack
-                  key={day.key}
-                  flex={1}
-                  alignItems="center"
-                  gap={12}
-                  onPress={() => toggleDay(day.key)}
-                >
-                  <Text
-                    color={
-                      selectedDays.includes(day.key) ? "$primary" : "#36392B"
-                    }
-                    fontSize={16}
-                    fontWeight="500"
-                    opacity={selectedDays.includes(day.key) ? 1 : 0.4}
-                  >
-                    {day.label}
-                  </Text>
-                  <Circle
-                    size={8}
-                    backgroundColor={
-                      selectedDays.includes(day.key)
-                        ? "$primary"
-                        : "rgba(0, 0, 0, 0.25)"
-                    }
-                  />
-                </YStack>
-              ))}
-            </XStack>
-            {errors.days && (
-              <Text color="red" fontSize={14}>
-                {errors.days}
-              </Text>
-            )}
-          </YStack>
+          <WeekdayPicker
+            selectedDays={selectedDays}
+            onToggleDay={toggleDay}
+            error={errors.days}
+          />
 
           <YStack gap={16}>
             <Text color="#000000" fontSize={16} fontWeight="400">
@@ -642,6 +588,9 @@ export default function GardenRequestScreen() {
                 />
               </XStack>
             </XStack>
+            <Text color="#929292" fontSize={14}>
+              Kies vandaag of later.
+            </Text>
             {errors.startDate && (
               <Text color="red" fontSize={14}>
                 {errors.startDate}
@@ -672,17 +621,37 @@ export default function GardenRequestScreen() {
             </Text>
             <input
               type="date"
-              min={minDate.toISOString().split("T")[0]}
+              min={minDateValue}
               value={
                 startDate
                   ? `${startDate.getFullYear()}-${(startDate.getMonth() + 1).toString().padStart(2, "0")}-${startDate.getDate().toString().padStart(2, "0")}`
                   : ""
               }
               onChange={(e) => {
-                const date = new Date(e.target.value);
-                if (!isNaN(date.getTime())) {
-                  handleDateChange(null, date);
+                if (!e.target.value) {
+                  setStartDate(null);
+                  setErrors((current) => ({
+                    ...current,
+                    startDate: "",
+                  }));
+                  return;
                 }
+
+                const date = new Date(e.target.value);
+                if (isNaN(date.getTime())) {
+                  return;
+                }
+
+                if (date < minDate) {
+                  setStartDate(null);
+                  setErrors((current) => ({
+                    ...current,
+                    startDate: "Startdatum kan niet in het verleden liggen",
+                  }));
+                  return;
+                }
+
+                handleDateChange(null, date);
               }}
               style={{
                 padding: "8px",
