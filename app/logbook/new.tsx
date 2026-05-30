@@ -5,7 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { safeBack } from "@/utils/navigation";
 import React, { useState } from "react";
-import { Input, Spinner, Text, TextArea, XStack, YStack } from "tamagui";
+import { Spinner, Text, TextArea, XStack, YStack } from "tamagui";
 import { useAlerts } from "@/context/AlertContext";
 
 export default function NewLogScreen() {
@@ -13,9 +13,6 @@ export default function NewLogScreen() {
   const [tasks, setTasks] = useState("");
   const [observations, setObservations] = useState("");
   const [followUps, setFollowUps] = useState("");
-  const [day, setDay] = useState(new Date().getDate().toString());
-  const [month, setMonth] = useState((new Date().getMonth() + 1).toString());
-  const [year, setYear] = useState(new Date().getFullYear().toString());
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
@@ -34,7 +31,6 @@ export default function NewLogScreen() {
         return;
       }
 
-      const dateStr = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
       const taskList = tasks
         .split("\n")
         .map((t) => t.trim())
@@ -51,7 +47,6 @@ export default function NewLogScreen() {
             .map((f) => f.trim())
             .filter(Boolean),
         },
-        created_at: new Date(dateStr).toISOString(),
       });
 
       if (error) {
@@ -156,110 +151,6 @@ export default function NewLogScreen() {
               Upload image
             </Text>
           </XStack>
-
-          {/* Datum log */}
-          <YStack gap="$2">
-            <Text color="$text_dark" fontSize="$4" fontWeight="600">
-              Datum log:
-            </Text>
-            <XStack gap="$3" justifyContent="center">
-              {/* Day */}
-              <YStack alignItems="center" gap="$1" flex={1}>
-                <Text fontSize="$3" color="$secondary" fontWeight="500">
-                  Dag
-                </Text>
-                <XStack
-                  backgroundColor="rgba(23, 51, 0, 0.06)"
-                  borderRadius="$4"
-                  paddingHorizontal="$4"
-                  paddingVertical="$3"
-                  alignItems="center"
-                  gap="$2"
-                  width="100%"
-                  justifyContent="center"
-                >
-                  <Input
-                    value={day}
-                    onChangeText={setDay}
-                    keyboardType="number-pad"
-                    textAlign="center"
-                    fontSize="$5"
-                    fontWeight="600"
-                    color="$text_dark"
-                    backgroundColor="transparent"
-                    borderWidth={0}
-                    width={40}
-                    padding={0}
-                  />
-                  <Ionicons name="chevron-down" size={16} color="#57594D" />
-                </XStack>
-              </YStack>
-
-              {/* Month */}
-              <YStack alignItems="center" gap="$1" flex={1}>
-                <Text fontSize="$3" color="$secondary" fontWeight="500">
-                  Maand
-                </Text>
-                <XStack
-                  backgroundColor="rgba(23, 51, 0, 0.06)"
-                  borderRadius="$4"
-                  paddingHorizontal="$4"
-                  paddingVertical="$3"
-                  alignItems="center"
-                  gap="$2"
-                  width="100%"
-                  justifyContent="center"
-                >
-                  <Input
-                    value={month}
-                    onChangeText={setMonth}
-                    keyboardType="number-pad"
-                    textAlign="center"
-                    fontSize="$5"
-                    fontWeight="600"
-                    color="$text_dark"
-                    backgroundColor="transparent"
-                    borderWidth={0}
-                    width={40}
-                    padding={0}
-                  />
-                  <Ionicons name="chevron-down" size={16} color="#57594D" />
-                </XStack>
-              </YStack>
-
-              {/* Year */}
-              <YStack alignItems="center" gap="$1" flex={1}>
-                <Text fontSize="$3" color="$secondary" fontWeight="500">
-                  Jaar
-                </Text>
-                <XStack
-                  backgroundColor="rgba(23, 51, 0, 0.06)"
-                  borderRadius="$4"
-                  paddingHorizontal="$4"
-                  paddingVertical="$3"
-                  alignItems="center"
-                  gap="$2"
-                  width="100%"
-                  justifyContent="center"
-                >
-                  <Input
-                    value={year}
-                    onChangeText={setYear}
-                    keyboardType="number-pad"
-                    textAlign="center"
-                    fontSize="$5"
-                    fontWeight="600"
-                    color="$text_dark"
-                    backgroundColor="transparent"
-                    borderWidth={0}
-                    width={60}
-                    padding={0}
-                  />
-                  <Ionicons name="chevron-down" size={16} color="#57594D" />
-                </XStack>
-              </YStack>
-            </XStack>
-          </YStack>
 
           {/* Log opslaan */}
           <XStack
