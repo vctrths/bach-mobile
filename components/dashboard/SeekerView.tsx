@@ -1,4 +1,5 @@
 import ApplianceBadges from "@/components/ui/ApplianceBadges";
+import Button from "@/components/ui/Button";
 import GardenCard from "@/components/ui/GardenCard";
 import { type GardenLog } from "@/components/ui/LogCard";
 import { Image as ExpoImage } from "@/lib/image";
@@ -202,26 +203,14 @@ export default function SeekerView({
             </ScrollView>
           </YStack>
 
-          <Card
+          <Button
+            label="Ontdek alle tuinen"
+            variant="secondary"
+            width="100%"
             marginTop="$6"
-            backgroundColor="$primary"
-            borderRadius="$6"
-            padding="$4"
             onPress={() => router.push("/explore")}
-            pressStyle={{ scale: 0.98, opacity: 0.9 }}
-          >
-            <XStack justifyContent="space-between" alignItems="center">
-              <YStack flex={1}>
-                <Text fontSize="$4" fontWeight="bold" color="$white">
-                  Ontdek alle tuinen
-                </Text>
-                <Text fontSize="$3" color="$white" opacity={0.9}>
-                  Bekijk alle beschikbare tuinen in jouw buurt
-                </Text>
-              </YStack>
-              <Ionicons name="arrow-forward" size={24} color="$white" />
-            </XStack>
-          </Card>
+            icon={<Ionicons name="arrow-forward" size={20} color="$button_secondary_text" />}
+          />
         </>
       )}
     </YStack>
