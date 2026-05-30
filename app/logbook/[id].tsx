@@ -3,7 +3,7 @@ import ScreenContent from "@/components/ui/ScreenContent";
 import { supabase, toCamelCase } from "@/utils/supabase";
 import { Image as ExpoImage } from "@/lib/image";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Card, H2, Spinner, Text, XStack, YStack } from "tamagui";
 
@@ -32,6 +32,7 @@ export default function LogDetailScreen() {
   const [log, setLog] = useState<{
     date: string;
     title: string;
+    imageUrl: string | null;
     tasks: string[];
     observations: string;
     followUps: string[];
@@ -43,7 +44,7 @@ export default function LogDetailScreen() {
       try {
         const { data, error } = await supabase
           .from("garden_logs")
-          .select("id, title, status, created_at")
+          .select("id, title, status, image_url, created_at")
           .eq("id", id as string)
           .single();
 
@@ -56,6 +57,7 @@ export default function LogDetailScreen() {
         const status = camelData.status || {};
         setLog({
           title: camelData.title,
+          imageUrl: camelData.imageUrl ?? null,
           date: new Date(camelData.createdAt).toLocaleDateString("nl-BE"),
           tasks: status.tasks || DEFAULT_FALLBACK.tasks,
           observations: status.observations || DEFAULT_FALLBACK.observations,
@@ -73,6 +75,7 @@ export default function LogDetailScreen() {
     } else if (typeof id === "string") {
       setLog({
         title: `Log van dag ${id}`,
+        imageUrl: null,
         date: `${id}/01/2025`,
         ...DEFAULT_FALLBACK,
       });
@@ -110,7 +113,11 @@ export default function LogDetailScreen() {
               height={200}
             >
               <ExpoImage
-                source={require("@/assets/images/hero.png")}
+                source={
+                  log?.imageUrl
+                    ? { uri: log.imageUrl }
+                    : require("@/assets/images/hero.png")
+                }
                 style={{ width: "100%", height: 200 }}
                 contentFit="cover"
               />

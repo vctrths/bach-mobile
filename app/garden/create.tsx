@@ -2,8 +2,10 @@ import PageContainer from "@/components/ui/PageContainer";
 import Button from "@/components/ui/Button";
 import ScreenContent from "@/components/ui/ScreenContent";
 import { supabase } from "@/utils/supabase";
+import { uploadImageAsset, validatePickedImage } from "@/utils/uploadImage";
 import { APPLIANCE_MAP } from "@/components/ui/ApplianceBadges";
 import * as ImagePicker from "expo-image-picker";
+import type { ImagePickerAsset } from "expo-image-picker";
 import { Image as ExpoImage } from "@/lib/image";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -37,7 +39,7 @@ export default function GardenCreateScreen() {
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
   const [appliances, setAppliances] = useState<string[]>([]);
-  const [imageUri, setImageUri] = useState<string | null>(null);
+  const [image, setImage] = useState<ImagePickerAsset | null>(null);
   const [saving, setSaving] = useState(false);
 
   const toggleAppliance = (key: string) => {
@@ -68,7 +70,14 @@ export default function GardenCreateScreen() {
     });
 
     if (!result.canceled) {
-      setImageUri(result.assets[0].uri);
+      const selectedImage = result.assets[0];
+      const validationError = validatePickedImage(selectedImage);
+      if (validationError) {
+        alert("Fout", validationError);
+        return;
+      }
+
+      setImage(selectedImage);
     }
   };
 
@@ -97,30 +106,13 @@ export default function GardenCreateScreen() {
       let imageUrl: string | null = null;
 
       // Upload garden image if provided
-      if (imageUri) {
-        const fileName = `${user.id}_garden_${Date.now()}.jpg`;
-        try {
-          const response = await fetch(imageUri);
-          const arrayBuffer = await response.arrayBuffer();
-          const { data: uploadData, error: uploadError } =
-            await supabase.storage
-              .from("garden-images")
-              .upload(fileName, arrayBuffer, {
-                contentType: "image/jpeg",
-                upsert: true,
-              });
-
-          if (uploadError) {
-            console.warn("Failed to upload garden image:", uploadError);
-          } else if (uploadData) {
-            const { data: urlData } = supabase.storage
-              .from("garden-images")
-              .getPublicUrl(fileName);
-            imageUrl = urlData?.publicUrl ?? null;
-          }
-        } catch (uploadFetchErr) {
-          console.warn("Error reading or uploading the local file:", uploadFetchErr);
-        }
+      if (image) {
+        const upload = await uploadImageAsset({
+          asset: image,
+          folder: "gardens",
+          userId: user.id,
+        });
+        imageUrl = upload.publicUrl;
       }
 
       const insertData = {
@@ -145,8 +137,13 @@ export default function GardenCreateScreen() {
           { text: "OK", onPress: () => router.push("/") },
         ]);
       }
-    } catch {
-      alert("Fout", "Er is iets misgegaan. Probeer het opnieuw.");
+    } catch (error) {
+      alert(
+        "Fout",
+        error instanceof Error
+          ? error.message
+          : "Er is iets misgegaan. Probeer het opnieuw.",
+      );
     } finally {
       setSaving(false);
     }
@@ -269,10 +266,10 @@ export default function GardenCreateScreen() {
               pressStyle={{ scale: 0.98, opacity: 0.9 }}
               onPress={pickImage}
             >
-              {imageUri ? (
+              {image ? (
                 <>
                   <ExpoImage
-                    source={{ uri: imageUri }}
+                    source={{ uri: image.uri }}
                     style={{ width: "100%", height: "100%" }}
                     contentFit="cover"
                   />
@@ -285,7 +282,7 @@ export default function GardenCreateScreen() {
                     padding={6}
                     onPress={(e) => {
                       e?.stopPropagation?.();
-                      setImageUri(null);
+                      setImage(null);
                     }}
                   >
                     <Ionicons name="close" size={16} color="white" />

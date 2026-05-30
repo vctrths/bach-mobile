@@ -149,7 +149,7 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
     try {
       const { data, error } = await supabase
         .from("garden_logs")
-        .select("id, title, created_at")
+        .select("id, title, image_url, created_at")
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -163,7 +163,7 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
         id: log.id,
         date: new Date(log.createdAt).toLocaleDateString("nl-BE"),
         description: log.title || "",
-        imageUrl: null,
+        imageUrl: log.imageUrl ?? null,
       }));
 
       setLogs(formattedLogs);
@@ -421,7 +421,11 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
                 >
                   <XStack flex={1} alignItems="center" gap="$3" minWidth={0}>
                     <ExpoImage
-                      source={require("@/assets/images/hero.png")}
+                      source={
+                        log.imageUrl
+                          ? { uri: log.imageUrl }
+                          : require("@/assets/images/hero.png")
+                      }
                       style={{
                         width: 64,
                         height: 64,

@@ -1,11 +1,15 @@
 import PageContainer from "@/components/ui/PageContainer";
 import ScreenContent from "@/components/ui/ScreenContent";
 import { supabase } from "@/utils/supabase";
+import { uploadImageAsset, validatePickedImage } from "@/utils/uploadImage";
+import * as ImagePicker from "expo-image-picker";
+import type { ImagePickerAsset } from "expo-image-picker";
+import { Image as ExpoImage } from "@/lib/image";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
 import { safeBack } from "@/utils/navigation";
 import React, { useState } from "react";
-import { Spinner, Text, TextArea, XStack, YStack } from "tamagui";
+import { Platform } from "react-native";
+import { Card, Spinner, Text, TextArea, XStack, YStack } from "tamagui";
 import { useAlerts } from "@/context/AlertContext";
 
 export default function NewLogScreen() {
@@ -13,7 +17,41 @@ export default function NewLogScreen() {
   const [tasks, setTasks] = useState("");
   const [observations, setObservations] = useState("");
   const [followUps, setFollowUps] = useState("");
+  const [image, setImage] = useState<ImagePickerAsset | null>(null);
   const [saving, setSaving] = useState(false);
+
+  const pickImage = async () => {
+    if (Platform.OS !== "web") {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        alert(
+          "Toestemming nodig",
+          "We hebben toegang tot je foto's nodig om een logfoto te kunnen kiezen.",
+        );
+        return;
+      }
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      quality: 0.8,
+      ...(Platform.OS !== "web" && {
+        allowsEditing: true,
+        aspect: [4, 3] as [number, number],
+      }),
+    });
+
+    if (!result.canceled) {
+      const selectedImage = result.assets[0];
+      const validationError = validatePickedImage(selectedImage);
+      if (validationError) {
+        alert("Fout", validationError);
+        return;
+      }
+
+      setImage(selectedImage);
+    }
+  };
 
   const handleSave = async () => {
     if (!tasks.trim()) {
@@ -36,9 +74,20 @@ export default function NewLogScreen() {
         .map((t) => t.trim())
         .filter(Boolean);
 
+      let imageUrl: string | null = null;
+      if (image) {
+        const upload = await uploadImageAsset({
+          asset: image,
+          folder: "logs",
+          userId: user.id,
+        });
+        imageUrl = upload.publicUrl;
+      }
+
       const { error } = await supabase.from("garden_logs").insert({
         user_id: user.id,
         title: taskList[0] || "Log",
+        ...(imageUrl && { image_url: imageUrl }),
         status: {
           tasks: taskList,
           observations: observations.trim(),
@@ -56,8 +105,13 @@ export default function NewLogScreen() {
           { text: "OK", onPress: () => safeBack() },
         ]);
       }
-    } catch {
-      alert("Fout", "Er is iets misgegaan. Probeer het opnieuw.");
+    } catch (error) {
+      alert(
+        "Fout",
+        error instanceof Error
+          ? error.message
+          : "Er is iets misgegaan. Probeer het opnieuw.",
+      );
     } finally {
       setSaving(false);
     }
@@ -131,26 +185,51 @@ export default function NewLogScreen() {
           </YStack>
 
           {/* Upload image */}
-          <XStack
-            backgroundColor="transparent"
-            borderRadius="$10"
+          <Card
+            borderRadius="$6"
             borderWidth={1}
             borderColor="rgba(23, 51, 0, 0.2)"
-            paddingVertical="$3"
-            paddingHorizontal="$5"
-            justifyContent="center"
-            alignItems="center"
-            gap="$2"
-            onPress={() => {
-              alert("Upload", "Foto uploaden (placeholder)");
-            }}
-            pressStyle={{ scale: 0.96, opacity: 0.8 }}
+            overflow="hidden"
+            height={180}
+            onPress={pickImage}
+            pressStyle={{ scale: 0.98, opacity: 0.9 }}
           >
-            <Ionicons name="camera-outline" size={20} color="#173300" />
-            <Text fontSize="$4" fontWeight="600" color="#173300">
-              Upload image
-            </Text>
-          </XStack>
+            {image ? (
+              <>
+                <ExpoImage
+                  source={{ uri: image.uri }}
+                  style={{ width: "100%", height: "100%" }}
+                  contentFit="cover"
+                />
+                <YStack
+                  position="absolute"
+                  top={8}
+                  right={8}
+                  backgroundColor="rgba(0,0,0,0.6)"
+                  borderRadius={20}
+                  padding={6}
+                  onPress={(e) => {
+                    e?.stopPropagation?.();
+                    setImage(null);
+                  }}
+                >
+                  <Ionicons name="close" size={16} color="white" />
+                </YStack>
+              </>
+            ) : (
+              <YStack
+                flex={1}
+                justifyContent="center"
+                alignItems="center"
+                gap="$2"
+              >
+                <Ionicons name="camera-outline" size={28} color="#173300" />
+                <Text fontSize="$4" fontWeight="600" color="#173300">
+                  Upload image
+                </Text>
+              </YStack>
+            )}
+          </Card>
 
           {/* Log opslaan */}
           <XStack

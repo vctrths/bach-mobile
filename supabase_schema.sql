@@ -42,8 +42,12 @@ CREATE TABLE IF NOT EXISTS public.garden_logs (
   user_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE,
   title text NOT NULL,
   status jsonb DEFAULT '[]'::jsonb, -- Stores arrays like ["completed", "pending"]
+  image_url text,
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+ALTER TABLE public.garden_logs
+  ADD COLUMN IF NOT EXISTS image_url text;
 
 -- Enable Row Level Security
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
@@ -52,6 +56,7 @@ ALTER TABLE public.garden_logs ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
 CREATE POLICY "Public profiles are viewable by everyone" ON public.profiles FOR SELECT USING (true);
+CREATE POLICY "Users can create own profile" ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
 CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING (auth.uid() = id);
 
 REVOKE UPDATE (
@@ -97,4 +102,55 @@ CREATE POLICY "Users can update own requests"
 CREATE POLICY "Garden owners can update requests for their gardens"
   ON public.garden_requests FOR UPDATE USING (
     auth.uid() IN (SELECT owner_id FROM public.gardens WHERE id = garden_id)
+  );
+
+-- 5. App image storage
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+  'app-images',
+  'app-images',
+  true,
+  5242880,
+  ARRAY['image/jpeg', 'image/png', 'image/webp']
+)
+ON CONFLICT (id) DO UPDATE
+SET
+  public = EXCLUDED.public,
+  file_size_limit = EXCLUDED.file_size_limit,
+  allowed_mime_types = EXCLUDED.allowed_mime_types;
+
+CREATE POLICY "App images are publicly readable"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'app-images');
+
+CREATE POLICY "Users can upload own app images"
+  ON storage.objects FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    bucket_id = 'app-images'
+    AND (storage.foldername(name))[1] IN ('profiles', 'gardens', 'logs')
+    AND (storage.foldername(name))[2] = (SELECT auth.uid()::text)
+    AND storage.extension(name) IN ('jpg', 'jpeg', 'png', 'webp')
+  );
+
+CREATE POLICY "Users can update own app images"
+  ON storage.objects FOR UPDATE
+  TO authenticated
+  USING (
+    bucket_id = 'app-images'
+    AND (storage.foldername(name))[2] = (SELECT auth.uid()::text)
+  )
+  WITH CHECK (
+    bucket_id = 'app-images'
+    AND (storage.foldername(name))[1] IN ('profiles', 'gardens', 'logs')
+    AND (storage.foldername(name))[2] = (SELECT auth.uid()::text)
+    AND storage.extension(name) IN ('jpg', 'jpeg', 'png', 'webp')
+  );
+
+CREATE POLICY "Users can delete own app images"
+  ON storage.objects FOR DELETE
+  TO authenticated
+  USING (
+    bucket_id = 'app-images'
+    AND (storage.foldername(name))[2] = (SELECT auth.uid()::text)
   );
