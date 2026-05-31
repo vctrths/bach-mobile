@@ -131,7 +131,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       console.log("[AuthContext] onAuthStateChange:", {
         event: _event,
         hasSession: !!session,
@@ -139,28 +139,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       if (!active) return;
-      
-      try {
-        setAuthError(null);
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await fetchProfile(session.user.id);
-        } else {
-          setProfile(null);
-        }
-      } catch (error) {
-        console.error("[AuthContext] onAuthStateChange callback error:", error);
-        if (active) {
-          setAuthError(
-            "Er ging iets mis bij het verwerken van je sessie. Probeer opnieuw of log opnieuw in.",
-          );
-        }
-      } finally {
-        if (active) {
-          setLoading(false);
-        }
+
+      setAuthError(null);
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+
+      if (!session?.user) {
+        setProfile(null);
+        return;
       }
+
+      // Supabase can deadlock if another Supabase call is awaited inside this
+      // callback. Defer profile fetching until after the auth lock is released.
+      setTimeout(() => {
+        if (!active) return;
+        fetchProfile(session.user.id).catch((error) => {
+          console.error("[AuthContext] deferred fetchProfile error:", error);
+        });
+      }, 0);
     });
 
     return () => {
