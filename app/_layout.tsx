@@ -1,6 +1,7 @@
 import { AlertProvider } from "@/context/AlertContext";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { OnboardingProvider } from "@/context/OnboardingContext";
+import AuthRecoveryScreen from "@/components/ui/AuthRecoveryScreen";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useFonts } from "@/lib/font-hooks";
 import tamaConfig from "@/tamagui.config";
@@ -16,8 +17,12 @@ import { StripeProvider } from "@/lib/stripe";
 SplashScreen.preventAutoHideAsync();
 
 function AppContent() {
-  const { user } = useAuth();
+  const { authError, user } = useAuth();
   usePushNotifications(user?.id);
+
+  if (authError) {
+    return <AuthRecoveryScreen />;
+  }
 
   return (
     <Stack screenOptions={{ headerShown: false, animation: "none" }}>

@@ -29,7 +29,10 @@ interface AuthContextType {
   user: User | null;
   profile: Profile | null;
   loading: boolean;
+  authError: string | null;
   signOut: () => Promise<void>;
+  retryAuth: () => Promise<void>;
+  resetAuthSession: () => Promise<void>;
   refreshProfile: () => Promise<Profile | null>;
 }
 
@@ -38,7 +41,10 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   profile: null,
   loading: true,
+  authError: null,
   signOut: async () => {},
+  retryAuth: async () => {},
+  resetAuthSession: async () => {},
   refreshProfile: async () => null,
 });
 
@@ -47,6 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const fetchProfile = useCallback(async (userId: string): Promise<Profile | null> => {
     try {
@@ -89,6 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const initializeSession = async () => {
       try {
+        setAuthError(null);
         const {
           data: { session },
         } = await supabase.auth.getSession();
@@ -104,6 +112,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } catch (error) {
         console.error("[AuthContext] initial getSession error:", error);
+        if (active) {
+          setSession(null);
+          setUser(null);
+          setProfile(null);
+          setAuthError(
+            "We konden je sessie niet herstellen. Probeer opnieuw of log opnieuw in.",
+          );
+        }
       } finally {
         if (active) {
           setLoading(false);
@@ -125,6 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!active) return;
       
       try {
+        setAuthError(null);
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
@@ -134,6 +151,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } catch (error) {
         console.error("[AuthContext] onAuthStateChange callback error:", error);
+        if (active) {
+          setAuthError(
+            "Er ging iets mis bij het verwerken van je sessie. Probeer opnieuw of log opnieuw in.",
+          );
+        }
       } finally {
         if (active) {
           setLoading(false);
@@ -152,7 +174,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
     setUser(null);
     setProfile(null);
+    setAuthError(null);
   };
+
+  const retryAuth = useCallback(async () => {
+    setLoading(true);
+    setAuthError(null);
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        await fetchProfile(session.user.id);
+      } else {
+        setProfile(null);
+      }
+    } catch (error) {
+      console.error("[AuthContext] retryAuth error:", error);
+      setSession(null);
+      setUser(null);
+      setProfile(null);
+      setAuthError(
+        "We konden je sessie nog niet herstellen. Controleer je verbinding of log opnieuw in.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchProfile]);
+
+  const resetAuthSession = useCallback(async () => {
+    setLoading(true);
+    setAuthError(null);
+
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error("[AuthContext] resetAuthSession signOut error:", error);
+    } finally {
+      setSession(null);
+      setUser(null);
+      setProfile(null);
+      setLoading(false);
+    }
+  }, []);
 
   const refreshProfile = useCallback(async () => {
     if (user) {
@@ -163,7 +231,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ session, user, profile, loading, signOut, refreshProfile }}
+      value={{
+        session,
+        user,
+        profile,
+        loading,
+        authError,
+        signOut,
+        retryAuth,
+        resetAuthSession,
+        refreshProfile,
+      }}
     >
       {children}
     </AuthContext.Provider>
