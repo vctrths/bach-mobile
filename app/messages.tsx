@@ -2,7 +2,7 @@ import PageContainer from "@/components/ui/PageContainer";
 import MessageItem from "@/components/ui/MessageItem";
 import { supabase } from "@/utils/supabase";
 import { useEffect, useState } from "react";
-import { FlatList } from "react-native";
+import { FlatList, Platform } from "react-native";
 import { Spinner, Text, YStack } from "tamagui";
 
 type ConversationWithPartner = {
@@ -20,21 +20,105 @@ export default function Messages() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchConversations();
+    let active = true;
+    let messagesChannel: ReturnType<typeof supabase.channel> | null = null;
+    let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+    let isReconnecting = false;
 
-    const messagesChannel = supabase
-      .channel(`messages-changes-${Date.now()}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "messages" },
-        () => {
-          fetchConversations();
-        }
-      )
-      .subscribe();
+    const clearReconnectTimeout = () => {
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+        reconnectTimeout = null;
+      }
+    };
+
+    const removeMessagesChannel = () => {
+      if (!messagesChannel) return;
+      const channel = messagesChannel;
+      messagesChannel = null;
+      supabase.removeChannel(channel);
+    };
+
+    const initRealtime = () => {
+      removeMessagesChannel();
+      const channel = supabase
+        .channel("messages-changes")
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "messages" },
+          () => {
+            fetchConversations();
+          }
+        )
+        .subscribe((status) => {
+          if (messagesChannel !== channel) return;
+
+          if (status === "SUBSCRIBED") {
+            isReconnecting = false;
+            return;
+          }
+
+          if (
+            status === "CLOSED" ||
+            status === "CHANNEL_ERROR" ||
+            status === "TIMED_OUT"
+          ) {
+            scheduleReconnect(status);
+          }
+        });
+      messagesChannel = channel;
+    };
+
+    const scheduleReconnect = (status: string) => {
+      if (!active || isReconnecting) return;
+
+      console.warn("[Messages] realtime disconnected; reconnecting soon", {
+        status,
+      });
+      isReconnecting = true;
+      clearReconnectTimeout();
+
+      reconnectTimeout = setTimeout(() => {
+        if (!active) return;
+        initRealtime();
+        fetchConversations();
+      }, 5000);
+    };
+
+    const handleResume = () => {
+      if (
+        Platform.OS !== "web" ||
+        typeof document === "undefined" ||
+        document.visibilityState !== "visible"
+      ) {
+        return;
+      }
+
+      clearReconnectTimeout();
+      isReconnecting = false;
+      initRealtime();
+      fetchConversations();
+    };
+
+    fetchConversations();
+    initRealtime();
+    if (Platform.OS === "web" && typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", handleResume);
+    }
+    if (Platform.OS === "web" && typeof window !== "undefined") {
+      window.addEventListener("pageshow", handleResume);
+    }
 
     return () => {
-      supabase.removeChannel(messagesChannel);
+      active = false;
+      clearReconnectTimeout();
+      removeMessagesChannel();
+      if (Platform.OS === "web" && typeof document !== "undefined") {
+        document.removeEventListener("visibilitychange", handleResume);
+      }
+      if (Platform.OS === "web" && typeof window !== "undefined") {
+        window.removeEventListener("pageshow", handleResume);
+      }
     };
   }, []);
 
@@ -43,7 +127,10 @@ export default function Messages() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        setConversations([]);
+        return;
+      }
 
       const { data: conversationsData, error } = await supabase
         .from("conversations")
@@ -51,7 +138,10 @@ export default function Messages() {
         .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`)
         .order("updated_at", { ascending: false });
 
-      if (error || !conversationsData) return;
+      if (error || !conversationsData) {
+        setConversations([]);
+        return;
+      }
 
       const conversationsWithDetails = await Promise.all(
         conversationsData.map(async (conv) => {
