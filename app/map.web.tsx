@@ -1,42 +1,30 @@
 import BottomNav from "@/components/ui/BottomNav";
 import TopNavPill from "@/components/ui/TopNavPill";
+import {
+  groenLeafletActiveMarkerIcon,
+  groenLeafletMarkerIcon,
+  groenLeafletStyles,
+} from "@/components/ui/leafletPins";
 import { Image as ExpoImage } from "@/lib/image";
 import { type Garden } from "@/types/garden";
 import { supabase, toCamelCase } from "@/utils/supabase";
 import { router } from "expo-router";
-import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { type CSSProperties, useEffect, useMemo, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { MapContainer, Marker, Popup, TileLayer, ZoomControl } from "react-leaflet";
 import { Spinner, Text, XStack, YStack } from "tamagui";
 
 const INITIAL_CENTER: [number, number] = [50.8798, 4.7005];
 const INITIAL_ZOOM = 12;
+const MAP_TOP_OFFSET = 92;
+const MAP_BOTTOM_OFFSET = 118;
+const MAP_VERTICAL_CHROME = MAP_TOP_OFFSET + MAP_BOTTOM_OFFSET;
 
-const markerIcon = L.divIcon({
-  className: "groen-leaflet-marker",
-  html: `
-    <div class="groen-leaflet-pin">
-      <span></span>
-    </div>
-  `,
-  iconSize: [32, 40],
-  iconAnchor: [16, 36],
-  popupAnchor: [0, -34],
-});
-
-const activeMarkerIcon = L.divIcon({
-  className: "groen-leaflet-marker groen-leaflet-marker-active",
-  html: `
-    <div class="groen-leaflet-pin active">
-      <span></span>
-    </div>
-  `,
-  iconSize: [40, 48],
-  iconAnchor: [20, 44],
-  popupAnchor: [0, -42],
-});
+const mapContainerStyle: CSSProperties = {
+  height: `calc(100vh - ${MAP_VERTICAL_CHROME}px)`,
+  width: "100%",
+};
 
 function GardenPopupContent({ garden }: { garden: Garden }) {
   return (
@@ -107,104 +95,50 @@ export default function MapScreen() {
 
   return (
     <View style={StyleSheet.absoluteFillObject}>
-      <style>{`
-        .leaflet-container {
-          width: 100%;
-          height: 100%;
-          font-family: Satoshi, Helvetica, Arial, sans-serif;
-          background: #eef3e8;
-        }
-        .leaflet-control-attribution {
-          font-size: 10px;
-        }
-        .leaflet-popup-content-wrapper {
-          border-radius: 16px;
-          box-shadow: 0 8px 24px rgba(23, 34, 17, 0.18);
-        }
-        .leaflet-popup-content {
-          margin: 12px;
-        }
-        .groen-leaflet-marker {
-          background: transparent;
-          border: 0;
-        }
-        .groen-leaflet-pin {
-          width: 28px;
-          height: 28px;
-          border-radius: 999px;
-          background: #37392B;
-          border: 3px solid #EAF0D8;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          position: relative;
-        }
-        .groen-leaflet-pin.active {
-          width: 36px;
-          height: 36px;
-          transform: translate(-4px, -8px);
-        }
-        .groen-leaflet-pin span {
-          width: 7px;
-          height: 7px;
-          border-radius: 999px;
-          background: #A9D18E;
-        }
-        .groen-leaflet-pin.active span {
-          width: 10px;
-          height: 10px;
-        }
-        .groen-leaflet-pin::after {
-          content: "";
-          position: absolute;
-          bottom: -9px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 0;
-          height: 0;
-          border-left: 7px solid transparent;
-          border-right: 7px solid transparent;
-          border-top: 10px solid #37392B;
-        }
-      `}</style>
+      <style>{groenLeafletStyles}</style>
 
-      {loading ? (
-        <View style={styles.loading}>
-          <Spinner size="large" color="#37392B" />
-        </View>
-      ) : (
-        <MapContainer
-          center={INITIAL_CENTER}
-          zoom={INITIAL_ZOOM}
-          minZoom={6}
-          maxZoom={18}
-          zoomControl={false}
-          scrollWheelZoom
-          style={styles.map}
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          <ZoomControl position="topright" />
-          {gardensWithCoords.map((garden) => (
-            <Marker
-              key={garden.id}
-              position={[garden.latitude, garden.longitude]}
-              icon={selectedGardenId === garden.id ? activeMarkerIcon : markerIcon}
-              eventHandlers={{
-                click: () => setSelectedGardenId(garden.id),
-                popupclose: () => setSelectedGardenId(null),
-              }}
-            >
-              <Popup>
-                <GardenPopupContent garden={garden} />
-              </Popup>
-            </Marker>
-          ))}
-        </MapContainer>
-      )}
+      <View style={styles.mapFrame}>
+        {loading ? (
+          <View style={styles.loading}>
+            <Spinner size="large" color="#37392B" />
+          </View>
+        ) : (
+          <MapContainer
+            center={INITIAL_CENTER}
+            zoom={INITIAL_ZOOM}
+            minZoom={6}
+            maxZoom={18}
+            zoomControl={false}
+            scrollWheelZoom
+            style={mapContainerStyle}
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <ZoomControl position="topright" />
+            {gardensWithCoords.map((garden) => (
+              <Marker
+                key={garden.id}
+                position={[garden.latitude, garden.longitude]}
+                icon={
+                  selectedGardenId === garden.id
+                    ? groenLeafletActiveMarkerIcon
+                    : groenLeafletMarkerIcon
+                }
+                eventHandlers={{
+                  click: () => setSelectedGardenId(garden.id),
+                  popupclose: () => setSelectedGardenId(null),
+                }}
+              >
+                <Popup>
+                  <GardenPopupContent garden={garden} />
+                </Popup>
+              </Marker>
+            ))}
+          </MapContainer>
+        )}
+      </View>
 
       <TopNavPill title="Kaart" hideBack />
       <BottomNav activeTab="map" />
@@ -221,13 +155,18 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   loading: {
-    ...StyleSheet.absoluteFillObject,
     alignItems: "center",
     backgroundColor: "white",
+    height: "100%",
     justifyContent: "center",
   },
-  map: {
-    height: "100%",
-    width: "100%",
+  mapFrame: {
+    backgroundColor: "#eef3e8",
+    bottom: MAP_BOTTOM_OFFSET,
+    left: 0,
+    overflow: "hidden",
+    position: "absolute",
+    right: 0,
+    top: MAP_TOP_OFFSET,
   },
 });
