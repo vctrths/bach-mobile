@@ -17,14 +17,23 @@ import { Spinner, Text, XStack, YStack } from "tamagui";
 
 const INITIAL_CENTER: [number, number] = [50.8798, 4.7005];
 const INITIAL_ZOOM = 12;
-const MAP_TOP_OFFSET = 92;
-const MAP_BOTTOM_OFFSET = 118;
-const MAP_VERTICAL_CHROME = MAP_TOP_OFFSET + MAP_BOTTOM_OFFSET;
 
 const mapContainerStyle: CSSProperties = {
-  height: `calc(100vh - ${MAP_VERTICAL_CHROME}px)`,
+  height: "100vh",
   width: "100%",
 };
+
+const mapScreenStyles = `
+  .leaflet-top {
+    top: 102px;
+  }
+  .leaflet-bottom {
+    bottom: 112px;
+  }
+  .leaflet-control-zoom {
+    margin-top: 0;
+  }
+`;
 
 function GardenPopupContent({ garden }: { garden: Garden }) {
   return (
@@ -94,10 +103,10 @@ export default function MapScreen() {
   );
 
   return (
-    <View style={StyleSheet.absoluteFillObject}>
-      <style>{groenLeafletStyles}</style>
+    <View style={styles.screen}>
+      <style>{`${groenLeafletStyles}${mapScreenStyles}`}</style>
 
-      <View style={styles.mapFrame}>
+      <View style={styles.mapCanvas}>
         {loading ? (
           <View style={styles.loading}>
             <Spinner size="large" color="#37392B" />
@@ -160,13 +169,12 @@ const styles = StyleSheet.create({
     height: "100%",
     justifyContent: "center",
   },
-  mapFrame: {
+  mapCanvas: {
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: "#eef3e8",
-    bottom: MAP_BOTTOM_OFFSET,
-    left: 0,
-    overflow: "hidden",
-    position: "absolute",
-    right: 0,
-    top: MAP_TOP_OFFSET,
+  },
+  screen: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "#eef3e8",
   },
 });
