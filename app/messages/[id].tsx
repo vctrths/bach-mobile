@@ -36,63 +36,177 @@ export default function ChatDetail() {
 
   useEffect(() => {
     if (!id) return;
-    const init = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
-      setCurrentUserId(user.id);
-      const { data: conversation } = await supabase
-        .from("conversations")
-        .select("user1_id, user2_id")
-        .eq("id", id)
-        .single();
-      if (!conversation) return;
-      const partnerId =
-        conversation.user1_id === user.id
-          ? conversation.user2_id
-          : conversation.user1_id;
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("first_name, last_name, profile_image")
-        .eq("id", partnerId)
-        .single();
-      if (profile) setPartner(profile);
-      const { data: msgs } = await supabase
-        .from("messages")
-        .select("id, sender_id, content, created_at")
-        .eq("conversation_id", id)
-        .order("created_at", { ascending: true });
-      if (msgs) {
-        setMessages(msgs);
-        msgs.forEach((m) => messagesSetRef.current.add(m.id));
-        scrollToBottom(false);
+    let active = true;
+    let messagesChannel: ReturnType<typeof supabase.channel> | null = null;
+    let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+    let isReconnecting = false;
+
+    const clearReconnectTimeout = () => {
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+        reconnectTimeout = null;
       }
-      setLoading(false);
     };
-    init();
-    const messagesChannel = supabase
-      .channel(`conversation-${id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-          filter: `conversation_id=eq.${id}`,
-        },
-        (payload) => {
-          const newMessage = payload.new as Message;
-          if (!messagesSetRef.current.has(newMessage.id)) {
-            messagesSetRef.current.add(newMessage.id);
-            setMessages((prev) => [...prev, newMessage]);
-            scrollToBottom();
+
+    const removeMessagesChannel = () => {
+      if (!messagesChannel) return;
+      const channel = messagesChannel;
+      messagesChannel = null;
+      supabase.removeChannel(channel);
+    };
+
+    const scheduleReconnect = (status: string) => {
+      if (!active || isReconnecting) return;
+
+      console.warn("[ChatDetail] realtime disconnected; reconnecting soon", {
+        status,
+        conversationId: id,
+      });
+      isReconnecting = true;
+      clearReconnectTimeout();
+
+      reconnectTimeout = setTimeout(() => {
+        if (!active) return;
+        initRealtime();
+        init();
+      }, 5000);
+    };
+
+    const initRealtime = () => {
+      removeMessagesChannel();
+      const channel = supabase
+        .channel(`conversation-${id}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "messages",
+            filter: `conversation_id=eq.${id}`,
+          },
+          (payload) => {
+            const newMessage = payload.new as Message;
+            if (!messagesSetRef.current.has(newMessage.id)) {
+              messagesSetRef.current.add(newMessage.id);
+              setMessages((prev) => [...prev, newMessage]);
+              scrollToBottom();
+            }
+          },
+        )
+        .subscribe((status) => {
+          if (messagesChannel !== channel) return;
+
+          if (status === "SUBSCRIBED") {
+            isReconnecting = false;
+            return;
           }
-        },
-      )
-      .subscribe();
+
+          if (
+            status === "CLOSED" ||
+            status === "CHANNEL_ERROR" ||
+            status === "TIMED_OUT"
+          ) {
+            scheduleReconnect(status);
+          }
+        });
+      messagesChannel = channel;
+    };
+
+    const init = async () => {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!active) return;
+
+        if (!user) {
+          setCurrentUserId(null);
+          setMessages([]);
+          setPartner(null);
+          return;
+        }
+
+        setCurrentUserId(user.id);
+        const { data: conversation } = await supabase
+          .from("conversations")
+          .select("user1_id, user2_id")
+          .eq("id", id)
+          .single();
+        if (!active) return;
+
+        if (!conversation) {
+          setMessages([]);
+          setPartner(null);
+          return;
+        }
+
+        const partnerId =
+          conversation.user1_id === user.id
+            ? conversation.user2_id
+            : conversation.user1_id;
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("first_name, last_name, profile_image")
+          .eq("id", partnerId)
+          .single();
+        if (!active) return;
+
+        if (profile) setPartner(profile);
+        const { data: msgs } = await supabase
+          .from("messages")
+          .select("id, sender_id, content, created_at")
+          .eq("conversation_id", id)
+          .order("created_at", { ascending: true });
+        if (!active) return;
+
+        if (msgs) {
+          messagesSetRef.current = new Set(msgs.map((m) => m.id));
+          setMessages(msgs);
+          scrollToBottom(false);
+        }
+      } catch (error) {
+        console.error("Error fetching chat detail:", error);
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    };
+
+    const handleResume = () => {
+      if (
+        Platform.OS !== "web" ||
+        typeof document === "undefined" ||
+        document.visibilityState !== "visible"
+      ) {
+        return;
+      }
+
+      clearReconnectTimeout();
+      isReconnecting = false;
+      initRealtime();
+      init();
+    };
+
+    init();
+    initRealtime();
+    if (Platform.OS === "web" && typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", handleResume);
+    }
+    if (Platform.OS === "web" && typeof window !== "undefined") {
+      window.addEventListener("pageshow", handleResume);
+    }
+
     return () => {
-      supabase.removeChannel(messagesChannel);
+      active = false;
+      clearReconnectTimeout();
+      removeMessagesChannel();
+      if (Platform.OS === "web" && typeof document !== "undefined") {
+        document.removeEventListener("visibilitychange", handleResume);
+      }
+      if (Platform.OS === "web" && typeof window !== "undefined") {
+        window.removeEventListener("pageshow", handleResume);
+      }
     };
   }, [id, scrollToBottom]);
 

@@ -81,18 +81,7 @@ export default function Dashboard() {
         if (!active) return;
 
         console.warn(
-          "[Dashboard] active gardener connection check timed out; forcing hard reload",
-          { userId },
-        );
-
-        if (Platform.OS === "web" && typeof window !== "undefined") {
-          console.warn("[Dashboard] calling window.location.replace now");
-          window.location.replace(window.location.href);
-          return;
-        }
-
-        console.warn(
-          "[Dashboard] hard reload unavailable; showing dashboard fallback",
+          "[Dashboard] active gardener connection check timed out; showing fallback dashboard",
           { userId },
         );
         setHasActiveGardenerConnection(false);
