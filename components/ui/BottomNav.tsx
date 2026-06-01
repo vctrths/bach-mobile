@@ -41,8 +41,13 @@ export default function BottomNav({
   unreadMessageCount = 0,
 }: BottomNavProps) {
   const { profile } = useAuth();
-  const isOwnerAccount = profile?.role?.toLowerCase() === UserRole.TUIN_EIGENAAR;
-  const effectiveShortcut = isOwnerAccount ? "createGarden" : shortcut;
+  const accountRole = profile?.role?.toLowerCase();
+  const effectiveShortcut =
+    accountRole === UserRole.TUIN_EIGENAAR
+      ? "createGarden"
+      : accountRole === UserRole.TUIN_ZOEKER_MET_TUIN
+        ? "todo"
+        : shortcut;
 
   const defaultHomePress = () => router.push("/");
   const defaultMapPress = () => router.push("/map" as any);
