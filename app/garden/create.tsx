@@ -11,7 +11,7 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { Platform } from "react-native";
-import { Card, Input, Spinner, Text, TextArea, XStack, YStack } from "tamagui";
+import { Input, Spinner, Text, TextArea, XStack, YStack } from "tamagui";
 import { useAlerts } from "@/context/AlertContext";
 
 async function geocodeLocation(location: string): Promise<{ latitude: number; longitude: number } | null> {
@@ -257,14 +257,18 @@ export default function GardenCreateScreen() {
             <Text color="$secondary" fontSize="$3" fontWeight="500">
               Tuinafbeelding
             </Text>
-            <Card
+            <XStack
+              backgroundColor="transparent"
               borderRadius="$6"
-              borderWidth={1}
-              borderColor="$borderColor"
+              borderWidth={2}
+              borderStyle="dotted"
+              borderColor="rgba(23, 51, 0, 0.35)"
               overflow="hidden"
-              height={200}
-              pressStyle={{ scale: 0.98, opacity: 0.9 }}
+              height={180}
+              justifyContent="center"
+              alignItems="center"
               onPress={pickImage}
+              pressStyle={{ scale: 0.98, opacity: 0.75 }}
             >
               {image ? (
                 <>
@@ -275,11 +279,15 @@ export default function GardenCreateScreen() {
                   />
                   <YStack
                     position="absolute"
-                    top={8}
-                    right={8}
+                    top={10}
+                    right={10}
+                    width={32}
+                    height={32}
                     backgroundColor="rgba(0,0,0,0.6)"
-                    borderRadius={20}
-                    padding={6}
+                    borderRadius={16}
+                    justifyContent="center"
+                    alignItems="center"
+                    zIndex={1}
                     onPress={(e) => {
                       e?.stopPropagation?.();
                       setImage(null);
@@ -289,19 +297,17 @@ export default function GardenCreateScreen() {
                   </YStack>
                 </>
               ) : (
-                <YStack
-                  flex={1}
-                  justifyContent="center"
-                  alignItems="center"
-                  gap="$2"
-                >
-                  <Ionicons name="camera" size={32} color="#57594D" />
-                  <Text color="text_light" fontSize="$3">
-                    Tik om een afbeelding te selecteren
+                <YStack alignItems="center" gap="$2">
+                  <Ionicons name="cloud-upload-outline" size={30} color="#173300" />
+                  <Text fontSize="$4" fontWeight="700" color="#173300">
+                    Upload image
+                  </Text>
+                  <Text fontSize="$2" color="rgba(23, 51, 0, 0.65)">
+                    JPG, PNG of WebP
                   </Text>
                 </YStack>
               )}
-            </Card>
+            </XStack>
           </YStack>
         </YStack>
 
