@@ -1,3 +1,5 @@
+begin;
+
 -- Repeatable mock data for local/demo Supabase projects.
 -- All mock accounts use password: MockPass123!
 
@@ -130,7 +132,7 @@ values
   ('00000000-0000-4000-8000-000000001003', '00000000-0000-4000-8000-000000000102', 'Moestuin achter de schuur', 'Antwerpen', 51.2194, 4.4025, 'https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?w=900', 'Ruime lap grond achter een rijhuis met volle zon en genoeg plaats voor aardappelen, pompoen en bonen.', array['water', 'tools', 'greenhouse'], now() - interval '17 days'),
   ('00000000-0000-4000-8000-000000001004', '00000000-0000-4000-8000-000000000102', 'Serre in Berchem', 'Berchem', 51.1919, 4.4322, 'https://images.unsplash.com/photo-1515150144380-bca9f1650ed9?w=900', 'Kleine serre met tomatenrekken, regenton en werktafel. Perfect voor iemand die graag zaait en opkweekt.', array['greenhouse', 'water', 'tools', 'electricity'], now() - interval '15 days'),
   ('00000000-0000-4000-8000-000000001005', '00000000-0000-4000-8000-000000000103', 'Pluktuin aan de Dijle', 'Mechelen', 51.0259, 4.4775, 'https://images.unsplash.com/photo-1495908333425-29a1e0918c5f?w=900', 'Bloemrijke tuin met vaste planten, bessenstruiken en vrije ruimte voor een plukhoek.', array['water', 'compost', 'tools'], now() - interval '13 days'),
-  ('00000000-0000-4000-8000-000000001006', '00000000-0000-4000-8000-000000000103', 'Rustige schaduwtuin', 'Hofstade', 50.9919, 4.4936, 'https://images.unsplash.com/photo-1589923188900-85dae523342b?w=900', 'Groene tuin met volwassen bomen, ideaal voor varens, hosta’s en onderhoud in de koelte.', array['shade', 'water', 'tools'], now() - interval '10 days')
+  ('00000000-0000-4000-8000-000000001006', '00000000-0000-4000-8000-000000000103', 'Rustige schaduwtuin', 'Hofstade', 50.9919, 4.4936, 'https://images.unsplash.com/photo-1589923188900-85dae523342b?w=900', 'Groene tuin met volwassen bomen, ideaal voor varens, hostas en onderhoud in de koelte.', array['shade', 'water', 'tools'], now() - interval '10 days')
 on conflict (id) do update set
   owner_id = excluded.owner_id,
   name = excluded.name,
@@ -245,3 +247,5 @@ on conflict (id) do update set
   read = excluded.read,
   related_id = excluded.related_id,
   created_at = excluded.created_at;
+
+commit;
