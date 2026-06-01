@@ -1,13 +1,8 @@
 import Button from "@/components/ui/Button";
-import Divider from "@/components/ui/Divider";
 import ThemedSafeArea from "@/components/ui/ThemedSafeArea";
 import { supabase } from "@/utils/supabase";
-import { Ionicons } from "@expo/vector-icons";
-import * as Linking from "expo-linking";
 import { router } from "expo-router";
-import * as WebBrowser from "expo-web-browser";
 import { useState } from "react";
-import { Platform } from "react-native";
 import { H1, Input, Text, YStack } from "tamagui";
 
 export default function Login() {
@@ -35,40 +30,6 @@ export default function Login() {
     setTimeout(() => {
       router.replace("/splash");
     }, 0);
-  };
-
-  const handleOAuth = async (provider: "google" | "facebook") => {
-    setLoading(true);
-    setError(null);
-
-    const redirectTo =
-      Platform.OS === "web" && typeof window !== "undefined"
-        ? `${window.location.origin}/auth/callback`
-        : Linking.createURL("auth/callback");
-
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: { redirectTo, skipBrowserRedirect: true },
-    });
-
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-      return;
-    }
-
-    if (data?.url) {
-      const result = await WebBrowser.openAuthSessionAsync(
-        data.url,
-        redirectTo,
-      );
-
-      if (result.type === "success") {
-        router.replace("/auth/callback");
-      }
-    }
-
-    setLoading(false);
   };
 
   return (
@@ -134,24 +95,6 @@ export default function Login() {
             </YStack>
           </YStack>
 
-          <Divider hasLabel label="of" />
-
-          <YStack gap="$2">
-            <Button
-              variant="secondary"
-              label="Ga door met Google"
-              icon={<Ionicons name="logo-google" size={20} />}
-              onPress={() => handleOAuth("google")}
-              disabled={loading}
-            />
-            <Button
-              variant="secondary"
-              label="Ga door met Facebook"
-              icon={<Ionicons name="logo-facebook" size={20} />}
-              onPress={() => handleOAuth("facebook")}
-              disabled={loading}
-            />
-          </YStack>
         </YStack>
       </YStack>
     </ThemedSafeArea>
