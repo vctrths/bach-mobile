@@ -337,6 +337,13 @@ DROP POLICY IF EXISTS "Users can update own notifications" ON public.notificatio
 CREATE POLICY "Users can update own notifications"
   ON public.notifications FOR UPDATE USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can create notifications for other users" ON public.notifications;
+CREATE POLICY "Users can create notifications for other users"
+  ON public.notifications
+  FOR INSERT
+  TO authenticated
+  WITH CHECK ((select auth.uid()) IS NOT NULL);
+
 DROP INDEX IF EXISTS idx_notifications_user_id;
 CREATE INDEX idx_notifications_user_id ON public.notifications(user_id);
 
