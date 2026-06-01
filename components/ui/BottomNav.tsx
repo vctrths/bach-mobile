@@ -7,14 +7,17 @@ import { Circle, XStack } from "tamagui";
 
 interface BottomNavProps {
   activeTab?: pages;
-  shortcut?: "map" | "todo";
+  shortcut?: BottomNavShortcut;
   onHomePress?: () => void;
   onMapPress?: () => void;
   onTodoPress?: () => void;
+  onCreateGardenPress?: () => void;
   onMessagePress?: () => void;
   onProfilePress?: () => void;
   unreadMessageCount?: number;
 }
+
+export type BottomNavShortcut = "map" | "todo" | "createGarden";
 
 type NavItem = {
   key: pages;
@@ -30,6 +33,7 @@ export default function BottomNav({
   onHomePress,
   onMapPress,
   onTodoPress,
+  onCreateGardenPress,
   onMessagePress,
   onProfilePress,
   unreadMessageCount = 0,
@@ -37,6 +41,7 @@ export default function BottomNav({
   const defaultHomePress = () => router.push("/");
   const defaultMapPress = () => router.push("/map" as any);
   const defaultTodoPress = () => router.push("/logbook/opvolgingen" as any);
+  const defaultCreateGardenPress = () => router.push("/garden/create" as any);
   const defaultMessagePress = () => router.push("/messages" as any);
   const defaultProfilePress = () => router.push("/profile");
 
@@ -48,6 +53,13 @@ export default function BottomNav({
           label: "Opvolgingen",
           onPress: onTodoPress || defaultTodoPress,
         }
+      : shortcut === "createGarden"
+        ? {
+            key: "createGarden",
+            icon: "plus",
+            label: "Tuin toevoegen",
+            onPress: onCreateGardenPress || defaultCreateGardenPress,
+          }
       : {
           key: "map",
           icon: "map-marker-outline",
