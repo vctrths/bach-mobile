@@ -7,39 +7,62 @@ import { Circle, XStack } from "tamagui";
 
 interface BottomNavProps {
   activeTab?: pages;
+  shortcut?: "map" | "todo";
   onHomePress?: () => void;
   onMapPress?: () => void;
+  onTodoPress?: () => void;
   onMessagePress?: () => void;
   onProfilePress?: () => void;
   unreadMessageCount?: number;
 }
 
+type NavItem = {
+  key: pages;
+  icon: keyof typeof MaterialCommunityIcons.glyphMap;
+  label: string;
+  onPress: () => void;
+  badge?: number;
+};
+
 export default function BottomNav({
   activeTab = "home",
+  shortcut = "map",
   onHomePress,
   onMapPress,
+  onTodoPress,
   onMessagePress,
   onProfilePress,
   unreadMessageCount = 0,
 }: BottomNavProps) {
   const defaultHomePress = () => router.push("/");
   const defaultMapPress = () => router.push("/map" as any);
+  const defaultTodoPress = () => router.push("/logbook/opvolgingen" as any);
   const defaultMessagePress = () => router.push("/messages" as any);
   const defaultProfilePress = () => router.push("/profile");
 
-  const navItems = [
+  const shortcutItem: NavItem =
+    shortcut === "todo"
+      ? {
+          key: "todo",
+          icon: "checkbox-marked-circle-outline",
+          label: "Opvolgingen",
+          onPress: onTodoPress || defaultTodoPress,
+        }
+      : {
+          key: "map",
+          icon: "map-marker-outline",
+          label: "Kaart",
+          onPress: onMapPress || defaultMapPress,
+        };
+
+  const navItems: NavItem[] = [
     {
       key: "home",
       icon: "home",
       label: "Home",
       onPress: onHomePress || defaultHomePress,
     },
-    {
-      key: "map",
-      icon: "map-marker-outline",
-      label: "Kaart",
-      onPress: onMapPress || defaultMapPress,
-    },
+    shortcutItem,
     {
       key: "message",
       icon: "message-text-outline",

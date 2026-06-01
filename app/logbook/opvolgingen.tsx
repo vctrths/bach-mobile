@@ -14,8 +14,8 @@ type FollowUpTodo = {
   logId: string;
   index: number;
   text: string;
-  logTitle: string;
   date: string;
+  dueDate: string | null;
   createdAt: string;
   completed: boolean;
   status: Record<string, unknown>;
@@ -26,14 +26,40 @@ type LogStatus = {
   completedFollowUps?: unknown;
 };
 
+type FollowUpValue = {
+  text: string;
+  dueDate: string | null;
+};
+
 function getFollowUps(status: LogStatus | null | undefined) {
   if (!Array.isArray(status?.followUps)) {
     return [];
   }
 
-  return status.followUps.filter(
-    (item): item is string => typeof item === "string" && item.trim().length > 0,
-  );
+  return status.followUps
+    .map((item): FollowUpValue | null => {
+      if (typeof item === "string") {
+        const text = item.trim();
+        return text ? { text, dueDate: null } : null;
+      }
+
+      if (!item || typeof item !== "object" || Array.isArray(item)) {
+        return null;
+      }
+
+      const followUp = item as Record<string, unknown>;
+      const text = typeof followUp.text === "string" ? followUp.text.trim() : "";
+      if (!text) return null;
+
+      return {
+        text,
+        dueDate:
+          typeof followUp.dueDate === "string" && followUp.dueDate
+            ? followUp.dueDate
+            : null,
+      };
+    })
+    .filter((item): item is FollowUpValue => item !== null);
 }
 
 function getCompletedFollowUps(status: LogStatus | null | undefined) {
@@ -54,8 +80,80 @@ function normalizeStatus(status: unknown): Record<string, unknown> {
   return status as Record<string, unknown>;
 }
 
-function formatOpenCount(count: number) {
-  return `${count} open opvolging${count === 1 ? "" : "en"}`;
+function parseDateOnly(date: string | null) {
+  if (!date) return null;
+  const [year, month, day] = date.split("-").map(Number);
+  if (!year || !month || !day) return null;
+  const parsed = new Date(year, month - 1, day);
+  parsed.setHours(0, 0, 0, 0);
+  return parsed;
+}
+
+function getStartOfWeek(date: Date) {
+  const nextDate = new Date(date);
+  const dayOfWeek = nextDate.getDay();
+  const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+  nextDate.setDate(nextDate.getDate() + mondayOffset);
+  nextDate.setHours(0, 0, 0, 0);
+  return nextDate;
+}
+
+function getWeekOffset(date: Date) {
+  const todayWeek = getStartOfWeek(new Date());
+  const targetWeek = getStartOfWeek(date);
+  const diffMs = targetWeek.getTime() - todayWeek.getTime();
+  return Math.round(diffMs / (7 * 24 * 60 * 60 * 1000));
+}
+
+function getOpenTodoGroups(todos: FollowUpTodo[]) {
+  const groups = [
+    { key: "this-week", title: "Deze week", todos: [] as FollowUpTodo[] },
+    { key: "next-week", title: "Volgende week", todos: [] as FollowUpTodo[] },
+    { key: "previous-week", title: "Vorige week", todos: [] as FollowUpTodo[] },
+    { key: "later", title: "Later", todos: [] as FollowUpTodo[] },
+    { key: "earlier", title: "Eerder", todos: [] as FollowUpTodo[] },
+    { key: "no-date", title: "Zonder datum", todos: [] as FollowUpTodo[] },
+  ];
+
+  todos.forEach((todo) => {
+    const dueDate = parseDateOnly(todo.dueDate);
+    if (!dueDate) {
+      groups[5].todos.push(todo);
+      return;
+    }
+
+    const weekOffset = getWeekOffset(dueDate);
+    if (weekOffset === 0) groups[0].todos.push(todo);
+    else if (weekOffset === 1) groups[1].todos.push(todo);
+    else if (weekOffset === -1) groups[2].todos.push(todo);
+    else if (weekOffset > 1) groups[3].todos.push(todo);
+    else groups[4].todos.push(todo);
+  });
+
+  return groups
+    .map((group) => ({
+      ...group,
+      todos: group.todos.sort((a, b) => {
+        const aDate =
+          parseDateOnly(a.dueDate)?.getTime() ?? Number.MAX_SAFE_INTEGER;
+        const bDate =
+          parseDateOnly(b.dueDate)?.getTime() ?? Number.MAX_SAFE_INTEGER;
+        return aDate - bDate;
+      }),
+    }))
+    .filter((group) => group.todos.length > 0);
+}
+
+function formatTodoDate(date: string | null) {
+  if (!date) return "Geen do-datum";
+  const parsedDate = parseDateOnly(date);
+  if (!parsedDate) return "Geen do-datum";
+
+  return parsedDate.toLocaleDateString("nl-BE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
 }
 
 export default function FollowUpsScreen() {
@@ -89,25 +187,27 @@ export default function FollowUpsScreen() {
           const followUps = getFollowUps(status);
           const completedFollowUps = getCompletedFollowUps(status);
 
-          return followUps.map((text, index) => ({
+          return followUps.map((followUp, index) => ({
             id: `${log.id}-${index}`,
             logId: log.id,
             index,
-            text,
-            logTitle: log.title || "Log",
-            date: new Date(log.createdAt).toLocaleDateString("nl-BE", {
-              day: "2-digit",
-              month: "short",
-            }),
+            text: followUp.text,
+            date: formatTodoDate(followUp.dueDate),
+            dueDate: followUp.dueDate,
             createdAt: log.createdAt,
             completed: completedFollowUps.includes(index),
             status,
           }));
         })
-        .sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-        );
+        .sort((a, b) => {
+          const aDate =
+            parseDateOnly(a.dueDate)?.getTime() ??
+            new Date(a.createdAt).getTime();
+          const bDate =
+            parseDateOnly(b.dueDate)?.getTime() ??
+            new Date(b.createdAt).getTime();
+          return aDate - bDate;
+        });
 
       setTodos(nextTodos);
     } catch (error) {
@@ -174,50 +274,19 @@ export default function FollowUpsScreen() {
 
   const openTodos = todos.filter((todo) => !todo.completed);
   const completedTodos = todos.filter((todo) => todo.completed);
+  const openTodoGroups = getOpenTodoGroups(openTodos);
 
   return (
     <PageContainer
-      topNavTitle="Opvolgingen"
-      activeTab="home"
+      topNavTitle="Takenlijst"
+      activeTab="todo"
+      bottomNavShortcut="todo"
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      <ScreenContent>
-        <YStack gap="$4">
-          <Card
-            backgroundColor="#F0F3EC"
-            borderColor="#E3ECD7"
-            borderWidth={1}
-            borderRadius={20}
-            padding={16}
-            boxShadow="0px 4px 20px rgba(23, 51, 0, 0.05)"
-          >
-            <XStack alignItems="center" gap="$4">
-              <Circle
-                size={52}
-                backgroundColor="#173300"
-                justifyContent="center"
-                alignItems="center"
-              >
-                <Ionicons name="list" size={24} color="white" />
-              </Circle>
-              <YStack flex={1} gap="$1">
-                <Text
-                  fontSize={20}
-                  fontWeight="900"
-                  color="#172211"
-                  fontFamily="$Satoshi"
-                >
-                  {formatOpenCount(openTodos.length)}
-                </Text>
-                <Text fontSize={14} color="#57594D" fontFamily="$Satoshi">
-                  taken uit je logboek, verzameld op een plek
-                </Text>
-              </YStack>
-            </XStack>
-          </Card>
-
+      <ScreenContent paddingTop="$4" gap="$0">
+        <YStack gap={32}>
           {loading ? (
             <YStack padding="$10" justifyContent="center" alignItems="center">
               <Spinner size="large" color="$primary" />
@@ -233,21 +302,22 @@ export default function FollowUpsScreen() {
               <Ionicons
                 name="checkmark-done-outline"
                 size={48}
-                color="#57594D"
+                color="#172211"
               />
-              <Text color="$secondary" fontSize="$3" textAlign="center">
+              <Text color="#172211" fontSize={16} textAlign="center">
                 geen open opvolgingen gevonden
               </Text>
             </YStack>
           ) : (
-            <YStack gap="$5">
-              {openTodos.length > 0 && (
+            <>
+              {openTodoGroups.map((group) => (
                 <TodoListSection
-                  title="Open"
-                  todos={openTodos}
+                  key={group.key}
+                  title={group.title}
+                  todos={group.todos}
                   onToggleCompleted={toggleCompleted}
                 />
-              )}
+              ))}
 
               {completedTodos.length > 0 && (
                 <TodoListSection
@@ -256,7 +326,7 @@ export default function FollowUpsScreen() {
                   onToggleCompleted={toggleCompleted}
                 />
               )}
-            </YStack>
+            </>
           )}
         </YStack>
       </ScreenContent>
@@ -274,11 +344,11 @@ function TodoListSection({
   onToggleCompleted: (todo: FollowUpTodo) => void;
 }) {
   return (
-    <YStack gap="$3">
+    <YStack gap={8}>
       <Text
-        fontSize={18}
-        fontWeight="900"
-        color="#172211"
+        fontSize={16}
+        fontWeight="700"
+        color="#000000"
         fontFamily="$Satoshi"
       >
         {title}
@@ -287,25 +357,21 @@ function TodoListSection({
       {todos.map((todo) => (
         <Card
           key={todo.id}
-          backgroundColor="white"
-          borderColor="rgba(23, 51, 0, 0.1)"
-          borderWidth={1}
+          backgroundColor="#F9F9F9"
           borderRadius={16}
-          padding={10}
+          padding={16}
           opacity={todo.completed ? 0.68 : 1}
-          boxShadow="0px 4px 20px rgba(23, 51, 0, 0.05)"
           onPress={() => router.push(`/logbook/${todo.logId}` as any)}
           pressStyle={{ scale: 0.98, opacity: 0.9 }}
         >
-          <XStack gap="$3" alignItems="flex-start">
+          <XStack gap={16} alignItems="center">
             <Circle
-              size={24}
-              borderWidth={2}
-              borderColor={todo.completed ? "#173300" : "#A9A99E"}
+              size={20}
+              borderWidth={3}
+              borderColor="#172211"
               backgroundColor={todo.completed ? "#173300" : "white"}
               justifyContent="center"
               alignItems="center"
-              marginTop={1}
               onPress={(event) => {
                 event?.stopPropagation?.();
                 onToggleCompleted(todo);
@@ -313,38 +379,30 @@ function TodoListSection({
               pressStyle={{ scale: 0.9, opacity: 0.8 }}
             >
               {todo.completed && (
-                <Ionicons name="checkmark" size={14} color="white" />
+                <Ionicons name="checkmark" size={12} color="white" />
               )}
             </Circle>
-            <YStack flex={1} gap="$2" minWidth={0}>
+            <YStack flex={1} gap={5} minWidth={0}>
               <Text
                 fontSize={16}
-                lineHeight={22}
-                color={todo.completed ? "#57594D" : "#172211"}
+                lineHeight={20}
+                color="#172211"
+                fontWeight="400"
+                fontFamily="$Satoshi"
+              >
+                {todo.date}
+              </Text>
+              <Text
+                fontSize={16}
+                lineHeight={20}
+                color="#000000"
                 fontWeight="700"
                 fontFamily="$Satoshi"
                 textDecorationLine={todo.completed ? "line-through" : "none"}
               >
                 {todo.text}
               </Text>
-              <XStack alignItems="center" gap="$2" flexWrap="wrap">
-                <Text fontSize={13} color="#57594D" fontFamily="$Satoshi">
-                  {todo.date}
-                </Text>
-                <Text fontSize={13} color="#A9A99E" fontFamily="$Satoshi">
-                  -
-                </Text>
-                <Text
-                  fontSize={13}
-                  color="#57594D"
-                  fontFamily="$Satoshi"
-                  numberOfLines={1}
-                >
-                  {todo.logTitle}
-                </Text>
-              </XStack>
             </YStack>
-            <Ionicons name="chevron-forward" size={18} color="#A9A99E" />
           </XStack>
         </Card>
       ))}

@@ -237,6 +237,9 @@ export default function Dashboard() {
         </XStack>
       }
       hideBack
+      bottomNavShortcut={
+        role === UserRole.TUIN_ZOEKER_MET_TUIN ? "todo" : "map"
+      }
       topNavChildren={
         isSeekerDashboard ? (
           <SearchBar
