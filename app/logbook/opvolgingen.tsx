@@ -1,5 +1,6 @@
 import PageContainer from "@/components/ui/PageContainer";
 import ScreenContent from "@/components/ui/ScreenContent";
+import { useAlerts } from "@/context/AlertContext";
 import { useAuth } from "@/context/AuthContext";
 import { supabase, toCamelCase } from "@/utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
@@ -11,14 +12,18 @@ import { Card, Circle, Spinner, Text, XStack, YStack } from "tamagui";
 type FollowUpTodo = {
   id: string;
   logId: string;
+  index: number;
   text: string;
   logTitle: string;
   date: string;
   createdAt: string;
+  completed: boolean;
+  status: Record<string, unknown>;
 };
 
 type LogStatus = {
   followUps?: unknown;
+  completedFollowUps?: unknown;
 };
 
 function getFollowUps(status: LogStatus | null | undefined) {
@@ -31,11 +36,30 @@ function getFollowUps(status: LogStatus | null | undefined) {
   );
 }
 
+function getCompletedFollowUps(status: LogStatus | null | undefined) {
+  if (!Array.isArray(status?.completedFollowUps)) {
+    return [];
+  }
+
+  return status.completedFollowUps.filter(
+    (item): item is number => typeof item === "number",
+  );
+}
+
+function normalizeStatus(status: unknown): Record<string, unknown> {
+  if (!status || Array.isArray(status) || typeof status !== "object") {
+    return {};
+  }
+
+  return status as Record<string, unknown>;
+}
+
 function formatOpenCount(count: number) {
   return `${count} open opvolging${count === 1 ? "" : "en"}`;
 }
 
 export default function FollowUpsScreen() {
+  const { alert } = useAlerts();
   const { user } = useAuth();
   const [todos, setTodos] = useState<FollowUpTodo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,10 +85,14 @@ export default function FollowUpsScreen() {
 
       const nextTodos = ((data || []).map((log) => toCamelCase<any>(log)) || [])
         .flatMap((log) => {
-          const followUps = getFollowUps(log.status);
+          const status = normalizeStatus(log.status);
+          const followUps = getFollowUps(status);
+          const completedFollowUps = getCompletedFollowUps(status);
+
           return followUps.map((text, index) => ({
             id: `${log.id}-${index}`,
             logId: log.id,
+            index,
             text,
             logTitle: log.title || "Log",
             date: new Date(log.createdAt).toLocaleDateString("nl-BE", {
@@ -72,6 +100,8 @@ export default function FollowUpsScreen() {
               month: "short",
             }),
             createdAt: log.createdAt,
+            completed: completedFollowUps.includes(index),
+            status,
           }));
         })
         .sort(
@@ -96,6 +126,54 @@ export default function FollowUpsScreen() {
     setRefreshing(true);
     fetchFollowUps();
   };
+
+  const toggleCompleted = async (todo: FollowUpTodo) => {
+    const nextCompleted = !todo.completed;
+    const previousTodos = todos;
+
+    const logTodos = todos.filter((item) => item.logId === todo.logId);
+    const completedFollowUps = logTodos
+      .filter((item) =>
+        item.id === todo.id ? nextCompleted : item.completed,
+      )
+      .map((item) => item.index);
+    const nextStatus = {
+      ...todo.status,
+      completedFollowUps,
+    };
+
+    setTodos((currentTodos) =>
+      currentTodos.map((item) =>
+        item.id === todo.id
+          ? { ...item, completed: nextCompleted, status: nextStatus }
+          : item.logId === todo.logId
+            ? { ...item, status: nextStatus }
+            : item,
+      ),
+    );
+
+    let query = supabase
+      .from("garden_logs")
+      .update({ status: nextStatus })
+      .eq("id", todo.logId);
+
+    if (user?.id) {
+      query = query.eq("user_id", user.id);
+    }
+
+    const { error } = await query;
+
+    if (error) {
+      setTodos(previousTodos);
+      alert(
+        "Niet opgeslagen",
+        "We konden deze opvolging niet bijwerken. Probeer het opnieuw.",
+      );
+    }
+  };
+
+  const openTodos = todos.filter((todo) => !todo.completed);
+  const completedTodos = todos.filter((todo) => todo.completed);
 
   return (
     <PageContainer
@@ -131,7 +209,7 @@ export default function FollowUpsScreen() {
                   color="#172211"
                   fontFamily="$Satoshi"
                 >
-                  {formatOpenCount(todos.length)}
+                  {formatOpenCount(openTodos.length)}
                 </Text>
                 <Text fontSize={14} color="#57594D" fontFamily="$Satoshi">
                   taken uit je logboek, verzameld op een plek
@@ -162,62 +240,114 @@ export default function FollowUpsScreen() {
               </Text>
             </YStack>
           ) : (
-            <YStack gap="$3">
-              {todos.map((todo) => (
-                <Card
-                  key={todo.id}
-                  backgroundColor="white"
-                  borderColor="rgba(23, 51, 0, 0.1)"
-                  borderWidth={1}
-                  borderRadius={16}
-                  padding={14}
-                  boxShadow="0px 4px 20px rgba(23, 51, 0, 0.05)"
-                  onPress={() => router.push(`/logbook/${todo.logId}` as any)}
-                  pressStyle={{ scale: 0.98, opacity: 0.9 }}
-                >
-                  <XStack gap="$3" alignItems="flex-start">
-                    <Circle
-                      size={24}
-                      borderWidth={2}
-                      borderColor="#173300"
-                      backgroundColor="white"
-                      marginTop={1}
-                    />
-                    <YStack flex={1} gap="$2" minWidth={0}>
-                      <Text
-                        fontSize={16}
-                        lineHeight={22}
-                        color="#172211"
-                        fontWeight="700"
-                        fontFamily="$Satoshi"
-                      >
-                        {todo.text}
-                      </Text>
-                      <XStack alignItems="center" gap="$2" flexWrap="wrap">
-                        <Text fontSize={13} color="#57594D" fontFamily="$Satoshi">
-                          {todo.date}
-                        </Text>
-                        <Text fontSize={13} color="#A9A99E" fontFamily="$Satoshi">
-                          -
-                        </Text>
-                        <Text
-                          fontSize={13}
-                          color="#57594D"
-                          fontFamily="$Satoshi"
-                          numberOfLines={1}
-                        >
-                          {todo.logTitle}
-                        </Text>
-                      </XStack>
-                    </YStack>
-                    <Ionicons name="chevron-forward" size={18} color="#A9A99E" />
-                  </XStack>
-                </Card>
-              ))}
+            <YStack gap="$5">
+              {openTodos.length > 0 && (
+                <TodoListSection
+                  title="Open"
+                  todos={openTodos}
+                  onToggleCompleted={toggleCompleted}
+                />
+              )}
+
+              {completedTodos.length > 0 && (
+                <TodoListSection
+                  title="Afgewerkt"
+                  todos={completedTodos}
+                  onToggleCompleted={toggleCompleted}
+                />
+              )}
             </YStack>
           )}
         </YStack>
       </ScreenContent>
     </PageContainer>
+  );
+}
+
+function TodoListSection({
+  title,
+  todos,
+  onToggleCompleted,
+}: {
+  title: string;
+  todos: FollowUpTodo[];
+  onToggleCompleted: (todo: FollowUpTodo) => void;
+}) {
+  return (
+    <YStack gap="$3">
+      <Text
+        fontSize={18}
+        fontWeight="900"
+        color="#172211"
+        fontFamily="$Satoshi"
+      >
+        {title}
+      </Text>
+
+      {todos.map((todo) => (
+        <Card
+          key={todo.id}
+          backgroundColor="white"
+          borderColor="rgba(23, 51, 0, 0.1)"
+          borderWidth={1}
+          borderRadius={16}
+          padding={14}
+          opacity={todo.completed ? 0.68 : 1}
+          boxShadow="0px 4px 20px rgba(23, 51, 0, 0.05)"
+          onPress={() => router.push(`/logbook/${todo.logId}` as any)}
+          pressStyle={{ scale: 0.98, opacity: 0.9 }}
+        >
+          <XStack gap="$3" alignItems="flex-start">
+            <Circle
+              size={24}
+              borderWidth={2}
+              borderColor={todo.completed ? "#173300" : "#A9A99E"}
+              backgroundColor={todo.completed ? "#173300" : "white"}
+              justifyContent="center"
+              alignItems="center"
+              marginTop={1}
+              onPress={(event) => {
+                event?.stopPropagation?.();
+                onToggleCompleted(todo);
+              }}
+              pressStyle={{ scale: 0.9, opacity: 0.8 }}
+            >
+              {todo.completed && (
+                <Ionicons name="checkmark" size={14} color="white" />
+              )}
+            </Circle>
+            <YStack flex={1} gap="$2" minWidth={0}>
+              <Text
+                fontSize={16}
+                lineHeight={22}
+                color={todo.completed ? "#57594D" : "#172211"}
+                fontWeight="700"
+                fontFamily="$Satoshi"
+                textDecorationLine={todo.completed ? "line-through" : "none"}
+              >
+                {todo.text}
+              </Text>
+              <XStack alignItems="center" gap="$2" flexWrap="wrap">
+                <Text fontSize={13} color="#57594D" fontFamily="$Satoshi">
+                  {todo.date}
+                </Text>
+                <Text fontSize={13} color="#A9A99E" fontFamily="$Satoshi">
+                  -
+                </Text>
+                <Text
+                  fontSize={13}
+                  color="#57594D"
+                  fontFamily="$Satoshi"
+                  numberOfLines={1}
+                >
+                  {todo.logTitle}
+                </Text>
+              </XStack>
+            </YStack>
+            <Ionicons name="chevron-forward" size={18} color="#A9A99E" />
+          </XStack>
+        </Card>
+      ))}
+    </YStack>
   );
 }
