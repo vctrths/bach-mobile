@@ -291,7 +291,7 @@ function TodoListSection({
           borderColor="rgba(23, 51, 0, 0.1)"
           borderWidth={1}
           borderRadius={16}
-          padding={14}
+          padding={10}
           opacity={todo.completed ? 0.68 : 1}
           boxShadow="0px 4px 20px rgba(23, 51, 0, 0.05)"
           onPress={() => router.push(`/logbook/${todo.logId}` as any)}
