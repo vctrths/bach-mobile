@@ -14,7 +14,6 @@ type FollowUpTodo = {
   logId: string;
   index: number;
   text: string;
-  logTitle: string;
   date: string;
   createdAt: string;
   completed: boolean;
@@ -54,8 +53,12 @@ function normalizeStatus(status: unknown): Record<string, unknown> {
   return status as Record<string, unknown>;
 }
 
-function formatOpenCount(count: number) {
-  return `${count} open opvolging${count === 1 ? "" : "en"}`;
+function formatTodoDate(date: string) {
+  return new Date(date).toLocaleDateString("nl-BE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
 }
 
 export default function FollowUpsScreen() {
@@ -94,11 +97,7 @@ export default function FollowUpsScreen() {
             logId: log.id,
             index,
             text,
-            logTitle: log.title || "Log",
-            date: new Date(log.createdAt).toLocaleDateString("nl-BE", {
-              day: "2-digit",
-              month: "short",
-            }),
+            date: formatTodoDate(log.createdAt),
             createdAt: log.createdAt,
             completed: completedFollowUps.includes(index),
             status,
@@ -177,48 +176,15 @@ export default function FollowUpsScreen() {
 
   return (
     <PageContainer
-      topNavTitle="Opvolgingen"
+      topNavTitle="Takenlijst"
       activeTab="todo"
       bottomNavShortcut="todo"
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      <ScreenContent>
-        <YStack gap="$4">
-          <Card
-            backgroundColor="#F0F3EC"
-            borderColor="#E3ECD7"
-            borderWidth={1}
-            borderRadius={20}
-            padding={16}
-            boxShadow="0px 4px 20px rgba(23, 51, 0, 0.05)"
-          >
-            <XStack alignItems="center" gap="$4">
-              <Circle
-                size={52}
-                backgroundColor="#173300"
-                justifyContent="center"
-                alignItems="center"
-              >
-                <Ionicons name="list" size={24} color="white" />
-              </Circle>
-              <YStack flex={1} gap="$1">
-                <Text
-                  fontSize={20}
-                  fontWeight="900"
-                  color="#172211"
-                  fontFamily="$Satoshi"
-                >
-                  {formatOpenCount(openTodos.length)}
-                </Text>
-                <Text fontSize={14} color="#57594D" fontFamily="$Satoshi">
-                  taken uit je logboek, verzameld op een plek
-                </Text>
-              </YStack>
-            </XStack>
-          </Card>
-
+      <ScreenContent paddingTop="$4" gap="$0">
+        <YStack gap={32}>
           {loading ? (
             <YStack padding="$10" justifyContent="center" alignItems="center">
               <Spinner size="large" color="$primary" />
@@ -234,17 +200,17 @@ export default function FollowUpsScreen() {
               <Ionicons
                 name="checkmark-done-outline"
                 size={48}
-                color="#57594D"
+                color="#172211"
               />
-              <Text color="$secondary" fontSize="$3" textAlign="center">
+              <Text color="#172211" fontSize={16} textAlign="center">
                 geen open opvolgingen gevonden
               </Text>
             </YStack>
           ) : (
-            <YStack gap="$5">
+            <>
               {openTodos.length > 0 && (
                 <TodoListSection
-                  title="Open"
+                  title="Deze week"
                   todos={openTodos}
                   onToggleCompleted={toggleCompleted}
                 />
@@ -257,7 +223,7 @@ export default function FollowUpsScreen() {
                   onToggleCompleted={toggleCompleted}
                 />
               )}
-            </YStack>
+            </>
           )}
         </YStack>
       </ScreenContent>
@@ -275,11 +241,11 @@ function TodoListSection({
   onToggleCompleted: (todo: FollowUpTodo) => void;
 }) {
   return (
-    <YStack gap="$3">
+    <YStack gap={8}>
       <Text
-        fontSize={18}
-        fontWeight="900"
-        color="#172211"
+        fontSize={16}
+        fontWeight="700"
+        color="#000000"
         fontFamily="$Satoshi"
       >
         {title}
@@ -288,25 +254,21 @@ function TodoListSection({
       {todos.map((todo) => (
         <Card
           key={todo.id}
-          backgroundColor="white"
-          borderColor="rgba(23, 51, 0, 0.1)"
-          borderWidth={1}
+          backgroundColor="#F9F9F9"
           borderRadius={16}
-          padding={10}
+          padding={16}
           opacity={todo.completed ? 0.68 : 1}
-          boxShadow="0px 4px 20px rgba(23, 51, 0, 0.05)"
           onPress={() => router.push(`/logbook/${todo.logId}` as any)}
           pressStyle={{ scale: 0.98, opacity: 0.9 }}
         >
-          <XStack gap="$3" alignItems="flex-start">
+          <XStack gap={16} alignItems="center">
             <Circle
-              size={24}
-              borderWidth={2}
-              borderColor={todo.completed ? "#173300" : "#A9A99E"}
+              size={20}
+              borderWidth={3}
+              borderColor="#172211"
               backgroundColor={todo.completed ? "#173300" : "white"}
               justifyContent="center"
               alignItems="center"
-              marginTop={1}
               onPress={(event) => {
                 event?.stopPropagation?.();
                 onToggleCompleted(todo);
@@ -314,38 +276,30 @@ function TodoListSection({
               pressStyle={{ scale: 0.9, opacity: 0.8 }}
             >
               {todo.completed && (
-                <Ionicons name="checkmark" size={14} color="white" />
+                <Ionicons name="checkmark" size={12} color="white" />
               )}
             </Circle>
-            <YStack flex={1} gap="$2" minWidth={0}>
+            <YStack flex={1} gap={5} minWidth={0}>
               <Text
                 fontSize={16}
-                lineHeight={22}
-                color={todo.completed ? "#57594D" : "#172211"}
+                lineHeight={20}
+                color="#172211"
+                fontWeight="400"
+                fontFamily="$Satoshi"
+              >
+                {todo.date}
+              </Text>
+              <Text
+                fontSize={16}
+                lineHeight={20}
+                color="#000000"
                 fontWeight="700"
                 fontFamily="$Satoshi"
                 textDecorationLine={todo.completed ? "line-through" : "none"}
               >
                 {todo.text}
               </Text>
-              <XStack alignItems="center" gap="$2" flexWrap="wrap">
-                <Text fontSize={13} color="#57594D" fontFamily="$Satoshi">
-                  {todo.date}
-                </Text>
-                <Text fontSize={13} color="#A9A99E" fontFamily="$Satoshi">
-                  -
-                </Text>
-                <Text
-                  fontSize={13}
-                  color="#57594D"
-                  fontFamily="$Satoshi"
-                  numberOfLines={1}
-                >
-                  {todo.logTitle}
-                </Text>
-              </XStack>
             </YStack>
-            <Ionicons name="chevron-forward" size={18} color="#A9A99E" />
           </XStack>
         </Card>
       ))}
