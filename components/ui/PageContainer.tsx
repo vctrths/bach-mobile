@@ -2,7 +2,7 @@ import { pages } from "@/types/app";
 import { ReactNode } from "react";
 import { RefreshControlProps } from "react-native";
 import { ScrollView, YStack } from "tamagui";
-import BottomNav from "./BottomNav";
+import BottomNav, { type BottomNavShortcut } from "./BottomNav";
 import ThemedSafeArea from "./ThemedSafeArea";
 import TopNavPill from "./TopNavPill";
 
@@ -16,7 +16,7 @@ interface PageContainerProps {
   topNavChildren?: ReactNode;
   activeTab?: pages;
   showBottomNav?: boolean;
-  bottomNavShortcut?: "map" | "todo";
+  bottomNavShortcut?: BottomNavShortcut;
   topNavHeight?: number;
   bottomNavExtraMargin?: number;
   contentPaddingBottom?: number;

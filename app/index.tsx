@@ -238,7 +238,11 @@ export default function Dashboard() {
       }
       hideBack
       bottomNavShortcut={
-        role === UserRole.TUIN_ZOEKER_MET_TUIN ? "todo" : "map"
+        role === UserRole.TUIN_EIGENAAR
+          ? "createGarden"
+          : role === UserRole.TUIN_ZOEKER_MET_TUIN
+            ? "todo"
+            : "map"
       }
       topNavChildren={
         isSeekerDashboard ? (

@@ -8,6 +8,7 @@ import { Image as ExpoImage } from "@/lib/image";
 import { OnboardingContext } from "@/context/OnboardingContext";
 import { Profile } from "@/context/AuthContext";
 import { Garden, Review } from "@/types/garden";
+import { UserRole } from "@/utils/role";
 
 export default function ProfileScreen() {
   const { data } = useContext(OnboardingContext);
@@ -72,6 +73,7 @@ export default function ProfileScreen() {
     : ctxName || "Victor Thys";
 
   const displayRole = profile?.role || "Tuinzoeker";
+  const isOwnerProfile = profile?.role?.toLowerCase() === UserRole.TUIN_EIGENAAR;
 
   const bioText =
     profile?.description ||
@@ -102,6 +104,7 @@ export default function ProfileScreen() {
         </Circle>
       }
       activeTab="profile"
+      bottomNavShortcut={isOwnerProfile ? "createGarden" : "map"}
     >
       {/* Header Section with Hero Image */}
       <YStack position="relative" height={190} overflow="hidden">
