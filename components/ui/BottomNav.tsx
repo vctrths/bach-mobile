@@ -1,4 +1,6 @@
+import { useAuth } from "@/context/AuthContext";
 import { pages } from "@/types/app";
+import { UserRole } from "@/utils/role";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { router } from "expo-router";
@@ -38,6 +40,15 @@ export default function BottomNav({
   onProfilePress,
   unreadMessageCount = 0,
 }: BottomNavProps) {
+  const { profile } = useAuth();
+  const accountRole = profile?.role?.toLowerCase();
+  const effectiveShortcut =
+    accountRole === UserRole.TUIN_EIGENAAR
+      ? "createGarden"
+      : accountRole === UserRole.TUIN_ZOEKER_MET_TUIN
+        ? "todo"
+        : shortcut;
+
   const defaultHomePress = () => router.push("/");
   const defaultMapPress = () => router.push("/map" as any);
   const defaultTodoPress = () => router.push("/logbook/opvolgingen" as any);
@@ -46,14 +57,14 @@ export default function BottomNav({
   const defaultProfilePress = () => router.push("/profile");
 
   const shortcutItem: NavItem =
-    shortcut === "todo"
+    effectiveShortcut === "todo"
       ? {
           key: "todo",
           icon: "checkbox-marked-circle-outline",
           label: "Opvolgingen",
           onPress: onTodoPress || defaultTodoPress,
         }
-      : shortcut === "createGarden"
+      : effectiveShortcut === "createGarden"
         ? {
             key: "createGarden",
             icon: "plus",
