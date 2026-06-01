@@ -16,6 +16,7 @@ interface PageContainerProps {
   topNavChildren?: ReactNode;
   activeTab?: pages;
   showBottomNav?: boolean;
+  bottomNavShortcut?: "map" | "todo";
   topNavHeight?: number;
   bottomNavExtraMargin?: number;
   contentPaddingBottom?: number;
@@ -37,6 +38,7 @@ export default function PageContainer({
   topNavChildren,
   activeTab = "home",
   showBottomNav = true,
+  bottomNavShortcut = "map",
   topNavHeight = DEFAULT_TOP_NAV_HEIGHT,
   bottomNavExtraMargin = 20,
   contentPaddingBottom,
@@ -89,7 +91,9 @@ export default function PageContainer({
         </YStack>
       )}
 
-      {showBottomNav && <BottomNav activeTab={activeTab} />}
+      {showBottomNav && (
+        <BottomNav activeTab={activeTab} shortcut={bottomNavShortcut} />
+      )}
     </ThemedSafeArea>
   );
 }

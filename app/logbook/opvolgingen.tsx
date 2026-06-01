@@ -178,7 +178,8 @@ export default function FollowUpsScreen() {
   return (
     <PageContainer
       topNavTitle="Opvolgingen"
-      activeTab="home"
+      activeTab="todo"
+      bottomNavShortcut="todo"
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }

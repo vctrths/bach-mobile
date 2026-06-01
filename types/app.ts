@@ -1,1 +1,1 @@
-export type pages = "home" | "map" | "message" | "profile";
+export type pages = "home" | "map" | "todo" | "message" | "profile";
