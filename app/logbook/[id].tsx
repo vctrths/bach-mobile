@@ -27,6 +27,58 @@ const DEFAULT_FALLBACK = {
   ],
 };
 
+type FollowUpDetail = {
+  text: string;
+  dueDate: string | null;
+};
+
+function normalizeFollowUps(followUps: unknown): FollowUpDetail[] {
+  if (!Array.isArray(followUps)) {
+    return DEFAULT_FALLBACK.followUps.map((text) => ({
+      text,
+      dueDate: null,
+    }));
+  }
+
+  return followUps
+    .map((item): FollowUpDetail | null => {
+      if (typeof item === "string") {
+        const text = item.trim();
+        return text ? { text, dueDate: null } : null;
+      }
+
+      if (!item || typeof item !== "object" || Array.isArray(item)) {
+        return null;
+      }
+
+      const followUp = item as Record<string, unknown>;
+      const text = typeof followUp.text === "string" ? followUp.text.trim() : "";
+      if (!text) return null;
+
+      return {
+        text,
+        dueDate:
+          typeof followUp.dueDate === "string" && followUp.dueDate
+            ? followUp.dueDate
+            : null,
+      };
+    })
+    .filter((item): item is FollowUpDetail => item !== null);
+}
+
+function formatDueDate(date: string | null) {
+  if (!date) return null;
+  const [year, month, day] = date.split("-").map(Number);
+  if (!year || !month || !day) return null;
+  const parsedDate = new Date(year, month - 1, day);
+
+  return parsedDate.toLocaleDateString("nl-BE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
 export default function LogDetailScreen() {
   const { id } = useLocalSearchParams();
   const [log, setLog] = useState<{
@@ -35,7 +87,7 @@ export default function LogDetailScreen() {
     imageUrl: string | null;
     tasks: string[];
     observations: string;
-    followUps: string[];
+    followUps: FollowUpDetail[];
   } | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -61,7 +113,7 @@ export default function LogDetailScreen() {
           date: new Date(camelData.createdAt).toLocaleDateString("nl-BE"),
           tasks: status.tasks || DEFAULT_FALLBACK.tasks,
           observations: status.observations || DEFAULT_FALLBACK.observations,
-          followUps: status.followUps || DEFAULT_FALLBACK.followUps,
+          followUps: normalizeFollowUps(status.followUps),
         });
       } catch (error) {
         console.error("Error:", error);
@@ -77,7 +129,9 @@ export default function LogDetailScreen() {
         title: `Log van dag ${id}`,
         imageUrl: null,
         date: `${id}/01/2025`,
-        ...DEFAULT_FALLBACK,
+        tasks: DEFAULT_FALLBACK.tasks,
+        observations: DEFAULT_FALLBACK.observations,
+        followUps: normalizeFollowUps(DEFAULT_FALLBACK.followUps),
       });
       setLoading(false);
     }
@@ -227,14 +281,20 @@ export default function LogDetailScreen() {
                           color="#ef4444"
                         />
                       </XStack>
-                      <Text
-                        fontSize="$4"
-                        color="$text_dark"
-                        flex={1}
-                        lineHeight={22}
-                      >
-                        {item}
-                      </Text>
+                      <YStack flex={1} gap="$1">
+                        <Text
+                          fontSize="$4"
+                          color="$text_dark"
+                          lineHeight={22}
+                        >
+                          {item.text}
+                        </Text>
+                        {formatDueDate(item.dueDate) && (
+                          <Text fontSize="$2" color="$secondary">
+                            Do-datum: {formatDueDate(item.dueDate)}
+                          </Text>
+                        )}
+                      </YStack>
                     </XStack>
                   </Card>
                 ))}

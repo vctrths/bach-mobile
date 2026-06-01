@@ -6,17 +6,61 @@ import * as ImagePicker from "expo-image-picker";
 import type { ImagePickerAsset } from "expo-image-picker";
 import { Image as ExpoImage } from "@/lib/image";
 import { Ionicons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { safeBack } from "@/utils/navigation";
 import React, { useState } from "react";
 import { Platform } from "react-native";
 import { Spinner, Text, TextArea, XStack, YStack } from "tamagui";
 import { useAlerts } from "@/context/AlertContext";
 
+type FollowUpDraft = {
+  id: string;
+  text: string;
+  dueDate: Date | null;
+};
+
+function createFollowUpDraft(): FollowUpDraft {
+  return {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    text: "",
+    dueDate: null,
+  };
+}
+
+function formatDateForInput(date: Date | null) {
+  if (!date) return "";
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
+    date.getDate(),
+  ).padStart(2, "0")}`;
+}
+
+function parseInputDate(value: string) {
+  const [year, month, day] = value.split("-").map(Number);
+  if (!year || !month || !day) return null;
+  const date = new Date(year, month - 1, day);
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+function formatDateLabel(date: Date | null) {
+  if (!date) return "Geen do-datum";
+  return date.toLocaleDateString("nl-BE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
 export default function NewLogScreen() {
   const { alert } = useAlerts();
   const [tasks, setTasks] = useState("");
   const [observations, setObservations] = useState("");
-  const [followUps, setFollowUps] = useState("");
+  const [followUps, setFollowUps] = useState<FollowUpDraft[]>([
+    createFollowUpDraft(),
+  ]);
+  const [activeDatePickerId, setActiveDatePickerId] = useState<string | null>(
+    null,
+  );
   const [image, setImage] = useState<ImagePickerAsset | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -73,6 +117,14 @@ export default function NewLogScreen() {
         .split("\n")
         .map((t) => t.trim())
         .filter(Boolean);
+      const followUpList = followUps
+        .map((followUp) => ({
+          text: followUp.text.trim(),
+          ...(followUp.dueDate && {
+            dueDate: formatDateForInput(followUp.dueDate),
+          }),
+        }))
+        .filter((followUp) => followUp.text.length > 0);
 
       let imageUrl: string | null = null;
       if (image) {
@@ -91,10 +143,7 @@ export default function NewLogScreen() {
         status: {
           tasks: taskList,
           observations: observations.trim(),
-          followUps: followUps
-            .split("\n")
-            .map((f) => f.trim())
-            .filter(Boolean),
+          followUps: followUpList,
         },
       });
 
@@ -115,6 +164,34 @@ export default function NewLogScreen() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const updateFollowUpText = (id: string, text: string) => {
+    setFollowUps((current) =>
+      current.map((followUp) =>
+        followUp.id === id ? { ...followUp, text } : followUp,
+      ),
+    );
+  };
+
+  const updateFollowUpDueDate = (id: string, dueDate: Date | null) => {
+    setFollowUps((current) =>
+      current.map((followUp) =>
+        followUp.id === id ? { ...followUp, dueDate } : followUp,
+      ),
+    );
+  };
+
+  const removeFollowUp = (id: string) => {
+    setFollowUps((current) =>
+      current.length === 1
+        ? current.map((followUp) =>
+            followUp.id === id
+              ? { ...followUp, text: "", dueDate: null }
+              : followUp,
+          )
+        : current.filter((followUp) => followUp.id !== id),
+    );
   };
 
   return (
@@ -169,19 +246,135 @@ export default function NewLogScreen() {
             <Text color="$text_dark" fontSize="$4" fontWeight="600">
               Opvolgingen toevoegen:
             </Text>
-            <TextArea
-              placeholder="Typ hier je opvolgingen..."
-              value={followUps}
-              onChangeText={setFollowUps}
-              minHeight={80}
-              backgroundColor="white"
-              borderColor="rgba(23, 51, 0, 0.1)"
-              borderWidth={1}
-              borderRadius="$6"
-              padding="$4"
-              fontSize="$4"
-              color="$text_dark"
-            />
+            <YStack gap="$3">
+              {followUps.map((followUp) => (
+                <YStack
+                  key={followUp.id}
+                  backgroundColor="white"
+                  borderColor="rgba(23, 51, 0, 0.1)"
+                  borderWidth={1}
+                  borderRadius="$6"
+                  padding="$3"
+                  gap="$3"
+                >
+                  <TextArea
+                    placeholder="Typ hier je opvolging..."
+                    value={followUp.text}
+                    onChangeText={(text) =>
+                      updateFollowUpText(followUp.id, text)
+                    }
+                    minHeight={54}
+                    backgroundColor="transparent"
+                    borderWidth={0}
+                    padding={0}
+                    fontSize="$4"
+                    color="$text_dark"
+                  />
+
+                  <XStack alignItems="center" justifyContent="space-between">
+                    <XStack
+                      alignItems="center"
+                      gap="$2"
+                      onPress={() =>
+                        setActiveDatePickerId((current) =>
+                          current === followUp.id ? null : followUp.id,
+                        )
+                      }
+                      pressStyle={{ scale: 0.98, opacity: 0.8 }}
+                    >
+                      <Ionicons
+                        name="calendar-outline"
+                        size={18}
+                        color="#173300"
+                      />
+                      <Text color="#173300" fontSize="$3" fontWeight="600">
+                        {formatDateLabel(followUp.dueDate)}
+                      </Text>
+                    </XStack>
+
+                    <XStack
+                      width={32}
+                      height={32}
+                      borderRadius={16}
+                      justifyContent="center"
+                      alignItems="center"
+                      onPress={() => removeFollowUp(followUp.id)}
+                      pressStyle={{ scale: 0.92, opacity: 0.75 }}
+                    >
+                      <Ionicons name="trash-outline" size={18} color="#57594D" />
+                    </XStack>
+                  </XStack>
+
+                  {Platform.OS === "web" &&
+                    activeDatePickerId === followUp.id && (
+                      <input
+                        type="date"
+                        value={formatDateForInput(followUp.dueDate)}
+                        onChange={(e) => {
+                          if (!e.target.value) {
+                            updateFollowUpDueDate(followUp.id, null);
+                            return;
+                          }
+
+                          const date = parseInputDate(e.target.value);
+                          if (date) {
+                            updateFollowUpDueDate(followUp.id, date);
+                          }
+                        }}
+                        style={{
+                          width: "100%",
+                          boxSizing: "border-box",
+                          minHeight: 44,
+                          padding: "10px 12px",
+                          borderRadius: "8px",
+                          border: "1px solid #E3E3E3",
+                          outline: "none",
+                          fontSize: "16px",
+                          backgroundColor: "#fff",
+                          color: "#000",
+                        }}
+                      />
+                    )}
+
+                  {Platform.OS !== "web" &&
+                    activeDatePickerId === followUp.id && (
+                      <DateTimePicker
+                        value={followUp.dueDate || new Date()}
+                        mode="date"
+                        display={Platform.OS === "ios" ? "spinner" : "default"}
+                        onChange={(_, selectedDate) => {
+                          if (Platform.OS !== "ios") {
+                            setActiveDatePickerId(null);
+                          }
+                          if (selectedDate) {
+                            updateFollowUpDueDate(followUp.id, selectedDate);
+                          }
+                        }}
+                      />
+                    )}
+                </YStack>
+              ))}
+
+              <XStack
+                borderRadius="$10"
+                borderWidth={1}
+                borderColor="rgba(23, 51, 0, 0.18)"
+                paddingVertical="$3"
+                paddingHorizontal="$4"
+                justifyContent="center"
+                alignItems="center"
+                gap="$2"
+                onPress={() =>
+                  setFollowUps((current) => [...current, createFollowUpDraft()])
+                }
+                pressStyle={{ scale: 0.96, opacity: 0.85 }}
+              >
+                <Ionicons name="add" size={18} color="#173300" />
+                <Text color="#173300" fontSize="$3" fontWeight="700">
+                  Opvolging toevoegen
+                </Text>
+              </XStack>
+            </YStack>
           </YStack>
 
           {/* Upload image */}

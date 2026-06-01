@@ -15,6 +15,7 @@ type FollowUpTodo = {
   index: number;
   text: string;
   date: string;
+  dueDate: string | null;
   createdAt: string;
   completed: boolean;
   status: Record<string, unknown>;
@@ -25,14 +26,40 @@ type LogStatus = {
   completedFollowUps?: unknown;
 };
 
+type FollowUpValue = {
+  text: string;
+  dueDate: string | null;
+};
+
 function getFollowUps(status: LogStatus | null | undefined) {
   if (!Array.isArray(status?.followUps)) {
     return [];
   }
 
-  return status.followUps.filter(
-    (item): item is string => typeof item === "string" && item.trim().length > 0,
-  );
+  return status.followUps
+    .map((item): FollowUpValue | null => {
+      if (typeof item === "string") {
+        const text = item.trim();
+        return text ? { text, dueDate: null } : null;
+      }
+
+      if (!item || typeof item !== "object" || Array.isArray(item)) {
+        return null;
+      }
+
+      const followUp = item as Record<string, unknown>;
+      const text = typeof followUp.text === "string" ? followUp.text.trim() : "";
+      if (!text) return null;
+
+      return {
+        text,
+        dueDate:
+          typeof followUp.dueDate === "string" && followUp.dueDate
+            ? followUp.dueDate
+            : null,
+      };
+    })
+    .filter((item): item is FollowUpValue => item !== null);
 }
 
 function getCompletedFollowUps(status: LogStatus | null | undefined) {
@@ -53,8 +80,76 @@ function normalizeStatus(status: unknown): Record<string, unknown> {
   return status as Record<string, unknown>;
 }
 
-function formatTodoDate(date: string) {
-  return new Date(date).toLocaleDateString("nl-BE", {
+function parseDateOnly(date: string | null) {
+  if (!date) return null;
+  const [year, month, day] = date.split("-").map(Number);
+  if (!year || !month || !day) return null;
+  const parsed = new Date(year, month - 1, day);
+  parsed.setHours(0, 0, 0, 0);
+  return parsed;
+}
+
+function getStartOfWeek(date: Date) {
+  const nextDate = new Date(date);
+  const dayOfWeek = nextDate.getDay();
+  const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+  nextDate.setDate(nextDate.getDate() + mondayOffset);
+  nextDate.setHours(0, 0, 0, 0);
+  return nextDate;
+}
+
+function getWeekOffset(date: Date) {
+  const todayWeek = getStartOfWeek(new Date());
+  const targetWeek = getStartOfWeek(date);
+  const diffMs = targetWeek.getTime() - todayWeek.getTime();
+  return Math.round(diffMs / (7 * 24 * 60 * 60 * 1000));
+}
+
+function getOpenTodoGroups(todos: FollowUpTodo[]) {
+  const groups = [
+    { key: "this-week", title: "Deze week", todos: [] as FollowUpTodo[] },
+    { key: "next-week", title: "Volgende week", todos: [] as FollowUpTodo[] },
+    { key: "previous-week", title: "Vorige week", todos: [] as FollowUpTodo[] },
+    { key: "later", title: "Later", todos: [] as FollowUpTodo[] },
+    { key: "earlier", title: "Eerder", todos: [] as FollowUpTodo[] },
+    { key: "no-date", title: "Zonder datum", todos: [] as FollowUpTodo[] },
+  ];
+
+  todos.forEach((todo) => {
+    const dueDate = parseDateOnly(todo.dueDate);
+    if (!dueDate) {
+      groups[5].todos.push(todo);
+      return;
+    }
+
+    const weekOffset = getWeekOffset(dueDate);
+    if (weekOffset === 0) groups[0].todos.push(todo);
+    else if (weekOffset === 1) groups[1].todos.push(todo);
+    else if (weekOffset === -1) groups[2].todos.push(todo);
+    else if (weekOffset > 1) groups[3].todos.push(todo);
+    else groups[4].todos.push(todo);
+  });
+
+  return groups
+    .map((group) => ({
+      ...group,
+      todos: group.todos.sort((a, b) => {
+        const aDate =
+          parseDateOnly(a.dueDate)?.getTime() ?? Number.MAX_SAFE_INTEGER;
+        const bDate =
+          parseDateOnly(b.dueDate)?.getTime() ?? Number.MAX_SAFE_INTEGER;
+        return aDate - bDate;
+      }),
+    }))
+    .filter((group) => group.todos.length > 0);
+}
+
+function formatTodoDate(date: string | null) {
+  if (!date) return "Geen do-datum";
+  const parsedDate = parseDateOnly(date);
+  if (!parsedDate) return "Geen do-datum";
+
+  return parsedDate.toLocaleDateString("nl-BE", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -92,21 +187,27 @@ export default function FollowUpsScreen() {
           const followUps = getFollowUps(status);
           const completedFollowUps = getCompletedFollowUps(status);
 
-          return followUps.map((text, index) => ({
+          return followUps.map((followUp, index) => ({
             id: `${log.id}-${index}`,
             logId: log.id,
             index,
-            text,
-            date: formatTodoDate(log.createdAt),
+            text: followUp.text,
+            date: formatTodoDate(followUp.dueDate),
+            dueDate: followUp.dueDate,
             createdAt: log.createdAt,
             completed: completedFollowUps.includes(index),
             status,
           }));
         })
-        .sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-        );
+        .sort((a, b) => {
+          const aDate =
+            parseDateOnly(a.dueDate)?.getTime() ??
+            new Date(a.createdAt).getTime();
+          const bDate =
+            parseDateOnly(b.dueDate)?.getTime() ??
+            new Date(b.createdAt).getTime();
+          return aDate - bDate;
+        });
 
       setTodos(nextTodos);
     } catch (error) {
@@ -173,6 +274,7 @@ export default function FollowUpsScreen() {
 
   const openTodos = todos.filter((todo) => !todo.completed);
   const completedTodos = todos.filter((todo) => todo.completed);
+  const openTodoGroups = getOpenTodoGroups(openTodos);
 
   return (
     <PageContainer
@@ -208,13 +310,14 @@ export default function FollowUpsScreen() {
             </YStack>
           ) : (
             <>
-              {openTodos.length > 0 && (
+              {openTodoGroups.map((group) => (
                 <TodoListSection
-                  title="Deze week"
-                  todos={openTodos}
+                  key={group.key}
+                  title={group.title}
+                  todos={group.todos}
                   onToggleCompleted={toggleCompleted}
                 />
-              )}
+              ))}
 
               {completedTodos.length > 0 && (
                 <TodoListSection
