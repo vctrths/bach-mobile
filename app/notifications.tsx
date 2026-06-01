@@ -25,6 +25,7 @@ type NotificationItem = {
   type: string;
   read: boolean;
   createdAt: string;
+  relatedId?: string | null;
   senderName?: string;
   senderImage?: string | null;
 };
@@ -119,6 +120,15 @@ export default function NotificationsScreen() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const openNotification = (notif: NotificationItem) => {
+    if (notif.type === "message" && notif.relatedId) {
+      router.push(`/messages/${notif.relatedId}` as any);
+      return;
+    }
+
+    router.push("/messages" as any);
+  };
+
   useEffect(() => {
     const fetchNotifications = async () => {
       const {
@@ -202,16 +212,12 @@ export default function NotificationsScreen() {
                       >
                         <NotificationRow
                           notif={notif}
-                          onPress={() =>
-                            router.push("/messages" as any)
-                          }
+                          onPress={() => openNotification(notif)}
                         />
                         <Button
                           label="Ga de tuin bekijken"
                           variant="secondary"
-                          onPress={() =>
-                            router.push("/messages" as any)
-                          }
+                          onPress={() => openNotification(notif)}
                         />
                       </Card>
                     )}
@@ -236,9 +242,7 @@ export default function NotificationsScreen() {
                             label="Chat openen"
                             variant="secondary"
                             flex={1}
-                            onPress={() =>
-                              router.push("/messages" as any)
-                            }
+                            onPress={() => openNotification(notif)}
                           />
                         </XStack>
                         <XStack gap="$2">
@@ -265,9 +269,7 @@ export default function NotificationsScreen() {
                       notif.type !== "request_received" && (
                         <NotificationRow
                           notif={notif}
-                          onPress={() =>
-                            router.push("/messages" as any)
-                          }
+                          onPress={() => openNotification(notif)}
                         />
                       )}
                   </React.Fragment>
@@ -286,9 +288,7 @@ export default function NotificationsScreen() {
                   <NotificationRow
                     key={notif.id}
                     notif={notif}
-                    onPress={() =>
-                      router.push("/messages" as any)
-                    }
+                    onPress={() => openNotification(notif)}
                   />
                 ))}
               </YStack>
@@ -306,9 +306,7 @@ export default function NotificationsScreen() {
                   <NotificationRow
                     key={notif.id}
                     notif={notif}
-                    onPress={() =>
-                      router.push("/messages" as any)
-                    }
+                    onPress={() => openNotification(notif)}
                   />
                 ))}
               </YStack>
