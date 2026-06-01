@@ -14,7 +14,7 @@ Expo 54 React Native app (iOS, Android, web) using expo-router file-based routin
 | Run on web | `npm run web` |
 | Lint | `npm run lint` (runs `expo lint`) |
 | Reset project scaffold | `npm run reset-project` |
-| Web static export | `bash scripts/download-fonts.sh && npx expo export --platform web` |
+| Web static export | `bash scripts/pre-build.sh && CI=1 npx expo export --platform web` |
 
 There is no dedicated test or typecheck script. TypeScript is enforced via `tsconfig.json` (`strict: true`). Run `npx tsc --noEmit` to typecheck manually.
 
@@ -22,7 +22,7 @@ There is no dedicated test or typecheck script. TypeScript is enforced via `tsco
 
 ### Build command
 ```bash
-bash scripts/download-fonts.sh && npx expo export --platform web
+bash scripts/pre-build.sh && CI=1 npx expo export --platform web
 ```
 
 ### Prerequisites
@@ -40,7 +40,7 @@ bash scripts/download-fonts.sh && npx expo export --platform web
 | Requirement | Status | Notes |
 |---|---|---|
 | `@tamagui/babel-plugin` in deps + babel config | Required | CSS extraction for web |
-| Fonts downloaded to `assets/fonts/` | Required | Run `scripts/download-fonts.sh` first |
+| Fonts downloaded to `assets/fonts/` | Required | Run `scripts/pre-build.sh` first |
 | Coolify env vars: `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_KEY` | Required | Set in Coolify dashboard → Service → Environment Variables |
 | Node.js >=22 | Required | No version file exists, must match VPS |
 | All registered `<Stack.Screen>` routes have matching files | Required | Missing files = unresolved module errors |
