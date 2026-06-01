@@ -145,10 +145,10 @@ on conflict (id) do update set
 
 insert into public.garden_logs (id, garden_id, user_id, title, status, image_url, created_at)
 values
-  ('00000000-0000-4000-8000-000000002001', '00000000-0000-4000-8000-000000001001', 'Munt en basilicum verpot', '00000000-0000-4000-8000-000000000201', '["completed", "completed", "pending"]', 'https://images.unsplash.com/photo-1615671524827-c1fe3973b648?w=700', now() - interval '9 days'),
-  ('00000000-0000-4000-8000-000000002002', '00000000-0000-4000-8000-000000001003', 'Bonenstaken geplaatst', '00000000-0000-4000-8000-000000000202', '["completed", "pending"]', 'https://images.unsplash.com/photo-1592419044706-39796d40f98c?w=700', now() - interval '7 days'),
-  ('00000000-0000-4000-8000-000000002003', '00000000-0000-4000-8000-000000001005', 'Dahlia bed voorbereid', '00000000-0000-4000-8000-000000000203', '["completed", "completed"]', 'https://images.unsplash.com/photo-1533038590840-1cde6e668a91?w=700', now() - interval '5 days'),
-  ('00000000-0000-4000-8000-000000002004', '00000000-0000-4000-8000-000000001004', 'Tomaten opgebonden', '00000000-0000-4000-8000-000000000202', '["pending", "pending"]', 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=700', now() - interval '3 days')
+  ('00000000-0000-4000-8000-000000002001', '00000000-0000-4000-8000-000000001001', '00000000-0000-4000-8000-000000000201', 'Munt en basilicum verpot', '["completed", "completed", "pending"]', 'https://images.unsplash.com/photo-1615671524827-c1fe3973b648?w=700', now() - interval '9 days'),
+  ('00000000-0000-4000-8000-000000002002', '00000000-0000-4000-8000-000000001003', '00000000-0000-4000-8000-000000000202', 'Bonenstaken geplaatst', '["completed", "pending"]', 'https://images.unsplash.com/photo-1592419044706-39796d40f98c?w=700', now() - interval '7 days'),
+  ('00000000-0000-4000-8000-000000002003', '00000000-0000-4000-8000-000000001005', '00000000-0000-4000-8000-000000000203', 'Dahlia bed voorbereid', '["completed", "completed"]', 'https://images.unsplash.com/photo-1533038590840-1cde6e668a91?w=700', now() - interval '5 days'),
+  ('00000000-0000-4000-8000-000000002004', '00000000-0000-4000-8000-000000001004', '00000000-0000-4000-8000-000000000202', 'Tomaten opgebonden', '["pending", "pending"]', 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=700', now() - interval '3 days')
 on conflict (id) do update set
   garden_id = excluded.garden_id,
   user_id = excluded.user_id,
