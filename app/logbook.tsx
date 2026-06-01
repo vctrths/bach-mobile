@@ -247,6 +247,8 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
           justifyContent="center"
           alignItems="center"
           boxShadow="0px 4px 20px rgba(0, 0, 0, 0.05)"
+          onPress={() => router.push("/logbook/opvolgingen" as any)}
+          pressStyle={{ scale: 0.96, opacity: 0.8 }}
         >
           <Text
             fontSize={14}
@@ -254,7 +256,7 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
             fontFamily="$Satoshi"
             textAlign="center"
           >
-            Logboek
+            Opvolgingen
           </Text>
         </XStack>
         <XStack
