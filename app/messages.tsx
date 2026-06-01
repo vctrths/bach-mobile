@@ -21,69 +21,16 @@ export default function Messages() {
 
   useEffect(() => {
     let active = true;
-    let messagesChannel: ReturnType<typeof supabase.channel> | null = null;
-    let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
-    let isReconnecting = false;
-
-    const clearReconnectTimeout = () => {
-      if (reconnectTimeout) {
-        clearTimeout(reconnectTimeout);
-        reconnectTimeout = null;
-      }
-    };
-
-    const removeMessagesChannel = () => {
-      if (!messagesChannel) return;
-      const channel = messagesChannel;
-      messagesChannel = null;
-      supabase.removeChannel(channel);
-    };
-
-    const initRealtime = () => {
-      removeMessagesChannel();
-      const channel = supabase
-        .channel("messages-changes")
-        .on(
-          "postgres_changes",
-          { event: "INSERT", schema: "public", table: "messages" },
-          () => {
-            fetchConversations();
-          }
-        )
-        .subscribe((status) => {
-          if (messagesChannel !== channel) return;
-
-          if (status === "SUBSCRIBED") {
-            isReconnecting = false;
-            return;
-          }
-
-          if (
-            status === "CLOSED" ||
-            status === "CHANNEL_ERROR" ||
-            status === "TIMED_OUT"
-          ) {
-            scheduleReconnect(status);
-          }
-        });
-      messagesChannel = channel;
-    };
-
-    const scheduleReconnect = (status: string) => {
-      if (!active || isReconnecting) return;
-
-      console.warn("[Messages] realtime disconnected; reconnecting soon", {
-        status,
-      });
-      isReconnecting = true;
-      clearReconnectTimeout();
-
-      reconnectTimeout = setTimeout(() => {
-        if (!active) return;
-        initRealtime();
-        fetchConversations();
-      }, 5000);
-    };
+    const messagesChannel = supabase
+      .channel("messages-changes")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages" },
+        () => {
+          if (active) fetchConversations();
+        }
+      )
+      .subscribe();
 
     const handleResume = () => {
       if (
@@ -94,14 +41,10 @@ export default function Messages() {
         return;
       }
 
-      clearReconnectTimeout();
-      isReconnecting = false;
-      initRealtime();
       fetchConversations();
     };
 
     fetchConversations();
-    initRealtime();
     if (Platform.OS === "web" && typeof document !== "undefined") {
       document.addEventListener("visibilitychange", handleResume);
     }
@@ -111,8 +54,7 @@ export default function Messages() {
 
     return () => {
       active = false;
-      clearReconnectTimeout();
-      removeMessagesChannel();
+      supabase.removeChannel(messagesChannel);
       if (Platform.OS === "web" && typeof document !== "undefined") {
         document.removeEventListener("visibilitychange", handleResume);
       }
