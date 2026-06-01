@@ -5,6 +5,8 @@ import { router } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { Circle, Text, XStack } from "tamagui";
 
+let nextNotificationChannelId = 0;
+
 export default function NotificationBell({ unreadCount }: { unreadCount?: number }) {
   const { user } = useAuth();
   const [fetchedUnreadCount, setFetchedUnreadCount] = useState(0);
@@ -38,19 +40,24 @@ export default function NotificationBell({ unreadCount }: { unreadCount?: number
 
     fetchUnreadCount();
 
-    const channel = supabase
-      .channel(`notification-count:${user.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "notifications",
-          filter: `user_id=eq.${user.id}`,
-        },
-        fetchUnreadCount,
-      )
-      .subscribe();
+    const channel = supabase.channel(
+      `notification-count:${user.id}:${nextNotificationChannelId++}`,
+    );
+
+    channel.on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "notifications",
+        filter: `user_id=eq.${user.id}`,
+      },
+      () => {
+        fetchUnreadCount();
+      },
+    );
+
+    channel.subscribe();
 
     return () => {
       supabase.removeChannel(channel);
