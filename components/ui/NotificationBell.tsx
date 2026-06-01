@@ -1,9 +1,65 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/utils/supabase";
 import { router } from "expo-router";
-import React from "react";
-import { Circle, XStack } from "tamagui";
+import React, { useCallback, useEffect, useState } from "react";
+import { Circle, Text, XStack } from "tamagui";
 
-export default function NotificationBell({ unreadCount = 0 }: { unreadCount?: number }) {
+export default function NotificationBell({ unreadCount }: { unreadCount?: number }) {
+  const { user } = useAuth();
+  const [fetchedUnreadCount, setFetchedUnreadCount] = useState(0);
+  const shouldFetchUnreadCount = unreadCount === undefined;
+
+  const fetchUnreadCount = useCallback(async () => {
+    if (!user?.id || !shouldFetchUnreadCount) {
+      setFetchedUnreadCount(0);
+      return;
+    }
+
+    const { count, error } = await supabase
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("read", false);
+
+    if (error) {
+      console.error("Error fetching notification count:", error.message);
+      return;
+    }
+
+    setFetchedUnreadCount(count ?? 0);
+  }, [shouldFetchUnreadCount, user?.id]);
+
+  useEffect(() => {
+    if (!user?.id || !shouldFetchUnreadCount) {
+      setFetchedUnreadCount(0);
+      return;
+    }
+
+    fetchUnreadCount();
+
+    const channel = supabase
+      .channel(`notification-count:${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${user.id}`,
+        },
+        fetchUnreadCount,
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchUnreadCount, shouldFetchUnreadCount, user?.id]);
+
+  const visibleUnreadCount = unreadCount ?? fetchedUnreadCount;
+  const badgeLabel = visibleUnreadCount > 99 ? "99+" : String(visibleUnreadCount);
+
   return (
     <XStack position="relative" justifyContent="center" alignItems="center">
       <Circle
@@ -19,18 +75,30 @@ export default function NotificationBell({ unreadCount = 0 }: { unreadCount?: nu
       >
         <Ionicons name="notifications-outline" size={24} color="#172211" />
       </Circle>
-      {unreadCount > 0 && (
-        <Circle
-          size={18}
+      {visibleUnreadCount > 0 && (
+        <XStack
+          minWidth={18}
+          height={18}
+          paddingHorizontal={4}
+          borderRadius={9}
           backgroundColor="#E74C3C"
           position="absolute"
-          top={-2}
-          right={-2}
+          top={-4}
+          right={-4}
           justifyContent="center"
           alignItems="center"
+          borderWidth={1}
+          borderColor="white"
         >
-          <Circle size={8} backgroundColor="white" />
-        </Circle>
+          <Text
+            color="white"
+            fontSize={10}
+            lineHeight={12}
+            fontWeight="700"
+          >
+            {badgeLabel}
+          </Text>
+        </XStack>
       )}
     </XStack>
   );
