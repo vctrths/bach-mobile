@@ -71,6 +71,7 @@ CREATE POLICY "Users can create own gardens" ON public.gardens FOR INSERT WITH C
 
 CREATE POLICY "Garden logs are viewable by everyone" ON public.garden_logs FOR SELECT USING (true);
 CREATE POLICY "Users can create own logs" ON public.garden_logs FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own logs" ON public.garden_logs FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- 4. Garden Requests Table
 CREATE TABLE IF NOT EXISTS public.garden_requests (

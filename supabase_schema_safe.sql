@@ -91,6 +91,9 @@ CREATE POLICY "Garden logs are viewable by everyone" ON public.garden_logs FOR S
 DROP POLICY IF EXISTS "Users can create own logs" ON public.garden_logs;
 CREATE POLICY "Users can create own logs" ON public.garden_logs FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own logs" ON public.garden_logs;
+CREATE POLICY "Users can update own logs" ON public.garden_logs FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
 -- ============================================================
 -- 4. GARDEN REQUESTS
 -- ============================================================
