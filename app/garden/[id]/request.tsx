@@ -4,6 +4,7 @@ import WeekdayPicker from "@/components/ui/WeekdayPicker";
 import { useAlerts } from "@/context/AlertContext";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/utils/supabase";
+import { getGardenLookupId } from "@/utils/demoGardens";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { router, useLocalSearchParams } from "expo-router";
@@ -70,7 +71,8 @@ function withTimeout<T>(
 
 export default function GardenRequestScreen() {
   const { id } = useLocalSearchParams();
-  const gardenId = Array.isArray(id) ? id[0] : id;
+  const routeGardenId = Array.isArray(id) ? id[0] : id;
+  const gardenId = getGardenLookupId(routeGardenId);
   const isWeb = Platform.OS === "web";
   const { alert } = useAlerts();
   const { loading: authLoading, profile } = useAuth();

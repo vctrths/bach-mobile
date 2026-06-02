@@ -5,6 +5,20 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { H1, Input, Text, YStack } from "tamagui";
 
+function getLoginErrorMessage(message: string) {
+  const normalized = message.toLowerCase();
+
+  if (normalized.includes("invalid login credentials")) {
+    return "E-mailadres of wachtwoord is onjuist.";
+  }
+
+  if (normalized.includes("missing email") || normalized.includes("email")) {
+    return "Vul een geldig e-mailadres in.";
+  }
+
+  return "Inloggen is niet gelukt. Probeer het opnieuw.";
+}
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -12,16 +26,23 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async () => {
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail || !password) {
+      setError("Vul je e-mailadres en wachtwoord in.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: trimmedEmail,
       password,
     });
 
     if (error) {
-      setError(error.message);
+      setError(getLoginErrorMessage(error.message));
       setLoading(false);
       return;
     }
@@ -53,6 +74,7 @@ export default function Login() {
               <Input
                 value={email}
                 onChangeText={setEmail}
+                placeholder="jij@example.com"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 backgroundColor="$canvas"
@@ -68,6 +90,7 @@ export default function Login() {
               <Input
                 value={password}
                 onChangeText={setPassword}
+                placeholder="Je wachtwoord"
                 secureTextEntry
                 type="password"
                 backgroundColor="$canvas"

@@ -8,9 +8,12 @@ import { H1, Input, Text, TextArea, XStack, YStack } from "tamagui";
 import { z } from "zod";
 
 const infoSchema = z.object({
-  firstName: z.string().min(1, { message: "error" }),
-  lastName: z.string().min(1, { message: "error" }),
-  email: z.string().email({ message: "Dit e-mailadres is ongeldig" }),
+  firstName: z.string().min(1, { message: "Vul je voornaam in" }),
+  lastName: z.string().min(1, { message: "Vul je achternaam in" }),
+  email: z
+    .string()
+    .min(1, { message: "Vul je e-mailadres in" })
+    .email({ message: "Dit e-mailadres is ongeldig" }),
   description: z
     .string()
     .min(1, { message: "Vul een beschrijving in" })
@@ -41,14 +44,14 @@ export default function InfoSelection() {
     } else {
       const formattedErrors: Record<string, string> = {};
       result.error.issues.forEach((issue) => {
-        formattedErrors[issue.path[0] as string] = issue.message;
+        const field = issue.path[0] as string;
+        if (!formattedErrors[field]) {
+          formattedErrors[field] = issue.message;
+        }
       });
       setErrors(formattedErrors);
     }
   };
-
-  const isComplete = firstName && lastName && email && description;
-
   return (
     <ThemedSafeArea>
       <YStack flex={1} paddingHorizontal="$6" justifyContent="space-between">
@@ -181,7 +184,6 @@ export default function InfoSelection() {
           <Button
             label="Volgende stap"
             onPress={handleNext}
-            disabled={!isComplete}
           />
         </YStack>
       </YStack>
