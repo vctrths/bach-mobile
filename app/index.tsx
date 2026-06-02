@@ -15,16 +15,10 @@ import { router } from "expo-router";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Circle, Spinner, Text, XStack, YStack } from "tamagui";
 
-const DASHBOARD_CHECK_TIMEOUT_MS = 2500;
-
 export default function Dashboard() {
-  const { profile, loading, session } = useAuth();
+  const { profile, loading, session, hasActiveGardenerConnection } = useAuth();
   const { data: onboardingData } = useContext(OnboardingContext);
-  const userId = session?.user?.id ?? null;
-  const [hasActiveGardenerConnection, setHasActiveGardenerConnection] =
-    useState(false);
-  const [checkingGardenerConnection, setCheckingGardenerConnection] =
-    useState(true);
+
   useEffect(() => {
     if (!loading && !session) {
       router.replace("/splash");
@@ -35,88 +29,6 @@ export default function Dashboard() {
   const [searchResults, setSearchResults] = useState<Garden[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-    let queryTimeoutId: ReturnType<typeof setTimeout> | null = null;
-
-    const checkGardenerConnection = async () => {
-      if (loading) return;
-
-      if (!userId) {
-        setHasActiveGardenerConnection(false);
-        setCheckingGardenerConnection(false);
-        return;
-      }
-
-      const profileRole = profile?.role?.toLowerCase() ?? null;
-
-      if (profileRole === UserRole.TUIN_EIGENAAR) {
-        setHasActiveGardenerConnection(false);
-        setCheckingGardenerConnection(false);
-        return;
-      }
-
-      if (profileRole === UserRole.TUIN_ZOEKER_MET_TUIN) {
-        setHasActiveGardenerConnection(true);
-        setCheckingGardenerConnection(false);
-        return;
-      }
-
-      setCheckingGardenerConnection(true);
-      let timedOut = false;
-      queryTimeoutId = setTimeout(() => {
-        timedOut = true;
-        if (!active) return;
-
-        console.warn(
-          "[Dashboard] active gardener connection check timed out; showing fallback dashboard",
-          { userId },
-        );
-        setHasActiveGardenerConnection(false);
-        setCheckingGardenerConnection(false);
-      }, DASHBOARD_CHECK_TIMEOUT_MS);
-
-      const { data, error } = await supabase
-        .from("collaborations")
-        .select("id")
-        .eq("gardener_id", userId)
-        .eq("status", "active")
-        .limit(1);
-
-      if (!active) return;
-
-      if (queryTimeoutId) {
-        clearTimeout(queryTimeoutId);
-        queryTimeoutId = null;
-      }
-
-      if (timedOut) {
-        console.warn(
-          "[Dashboard] active gardener connection check completed after timeout",
-          { userId },
-        );
-      }
-
-      if (error) {
-        console.error("Error checking active gardener connection:", error);
-        setHasActiveGardenerConnection(false);
-      } else {
-        setHasActiveGardenerConnection((data?.length ?? 0) > 0);
-      }
-
-      setCheckingGardenerConnection(false);
-    };
-
-    checkGardenerConnection();
-
-    return () => {
-      active = false;
-      if (queryTimeoutId) {
-        clearTimeout(queryTimeoutId);
-      }
-    };
-  }, [loading, profile?.role, userId]);
 
   const handleSearch = useCallback(async (query: string) => {
     if (!query.trim()) {
@@ -149,7 +61,7 @@ export default function Dashboard() {
     handleSearch(text);
   };
 
-  if (loading || checkingGardenerConnection) {
+  if (loading) {
     return (
       <PageContainer showTopNav={false}>
         <YStack flex={1} justifyContent="center" alignItems="center" gap="$4">
