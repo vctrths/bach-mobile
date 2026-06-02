@@ -203,7 +203,6 @@ export default function Dashboard() {
       showTopNav={true}
       topNavTitle={
         <XStack alignItems="center" gap="$2">
-          <Ionicons name="location" size={20} color="$primary" />
           <Text color="$text_dark" fontWeight="600">
             Groene Vingers
           </Text>
