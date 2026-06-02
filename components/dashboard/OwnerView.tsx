@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { RefreshControl, ScrollView } from "react-native";
+import { ScrollView } from "react-native";
 import { Card, Circle, Spinner, Text, XStack, YStack } from "tamagui";
 
 type ApprovedGardener = {
@@ -73,7 +73,6 @@ export default function OwnerView() {
   const [gardeners, setGardeners] = useState<ApprovedGardener[]>([]);
   const [requests, setRequests] = useState<GardenRequest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
 
   const todayIndex = new Date().getDay();
   const adjustedTodayIndex = todayIndex === 0 ? 6 : todayIndex - 1;
@@ -156,18 +155,12 @@ export default function OwnerView() {
       console.error("Error fetching owner dashboard data:", error);
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  const onRefresh = () => {
-    setRefreshing(true);
-    fetchData();
-  };
 
   const findOrCreateConversation = async (
     ownerId: string,

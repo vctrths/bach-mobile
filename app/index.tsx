@@ -13,7 +13,6 @@ import { supabase, toCamelCase } from "@/utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { Platform } from "react-native";
 import { Circle, Spinner, Text, XStack, YStack } from "tamagui";
 
 const DASHBOARD_CHECK_TIMEOUT_MS = 2500;
@@ -26,11 +25,6 @@ export default function Dashboard() {
     useState(false);
   const [checkingGardenerConnection, setCheckingGardenerConnection] =
     useState(true);
-  const showLoadingDebug =
-    Platform.OS === "web" &&
-    typeof window !== "undefined" &&
-    new URLSearchParams(window.location.search).has("debugLoading");
-
   useEffect(() => {
     if (!loading && !session) {
       router.replace("/splash");
@@ -156,8 +150,6 @@ export default function Dashboard() {
   };
 
   if (loading || checkingGardenerConnection) {
-    const loadingSource = loading ? "auth.loading" : "checkingGardenerConnection";
-
     return (
       <PageContainer showTopNav={false}>
         <YStack flex={1} justifyContent="center" alignItems="center" gap="$4">
@@ -165,11 +157,6 @@ export default function Dashboard() {
           <Text color="$secondary" fontSize="$4">
             Laden...
           </Text>
-          {showLoadingDebug && (
-            <Text color="$secondary" fontSize="$2">
-              Debug: {loadingSource}
-            </Text>
-          )}
         </YStack>
       </PageContainer>
     );

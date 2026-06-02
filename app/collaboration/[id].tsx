@@ -4,10 +4,10 @@ import Button from "@/components/ui/Button";
 import RatingPicker from "@/components/ui/RatingPicker";
 import { supabase, toCamelCase } from "@/utils/supabase";
 import { useAuth } from "@/context/AuthContext";
-import { Collaboration, Garden } from "@/types/garden";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Collaboration } from "@/types/garden";
+import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { BlurView } from "expo-blur";
 import { Card, H2, Spinner, Text, XStack, YStack, TextArea, Circle } from "tamagui";
 import { Image as ExpoImage } from "@/lib/image";
@@ -22,9 +22,11 @@ export default function CollaborationDetailScreen() {
   const [comment, setComment] = useState("");
   const [hasReviewed, setHasReviewed] = useState(false);
 
-  const fetchCollaboration = async () => {
+  const fetchCollaboration = useCallback(async () => {
+    if (!id || !user) return;
+
     try {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("collaborations")
         .select(`
           *,
@@ -41,7 +43,7 @@ export default function CollaborationDetailScreen() {
           .from("reviews")
           .select("id")
           .eq("collaboration_id", id as string)
-          .eq("reviewer_id", user!.id)
+          .eq("reviewer_id", user.id)
           .maybeSingle();
         
         if (reviewData) setHasReviewed(true);
@@ -51,11 +53,11 @@ export default function CollaborationDetailScreen() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, user]);
 
   useEffect(() => {
-    if (id && user) fetchCollaboration();
-  }, [id, user]);
+    fetchCollaboration();
+  }, [fetchCollaboration]);
 
   const handleEndCollaboration = async () => {
     if (!collaboration) return;
