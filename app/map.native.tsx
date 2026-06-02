@@ -6,13 +6,11 @@ import TopNavPill from "@/components/ui/TopNavPill";
 import BottomNav from "@/components/ui/BottomNav";
 import { YStack, Text, Image, Spinner } from "tamagui";
 import { StyleSheet, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Garden } from "@/types/garden";
 
 export default function MapScreen() {
   const [gardens, setGardens] = useState<Garden[]>([]);
   const [loading, setLoading] = useState(true);
-  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     fetchGardens();
@@ -87,5 +85,4 @@ export default function MapScreen() {
     </View>
   );
 }
-
 

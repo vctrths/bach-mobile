@@ -1,7 +1,6 @@
 import Button from "@/components/ui/Button";
 import GardenCard from "@/components/ui/GardenCard";
 import GardenListCard from "@/components/ui/GardenListCard";
-import { type GardenLog } from "@/components/ui/LogCard";
 import { type Garden } from "@/types/garden";
 import { supabase, toCamelCase } from "@/utils/supabase";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -18,7 +17,7 @@ interface SeekerViewProps {
 }
 
 const fetchWithTimeout = async <T,>(
-  promise: Promise<T>,
+  promise: PromiseLike<T>,
   ms: number = 8000,
 ): Promise<T> => {
   return Promise.race([
@@ -36,42 +35,30 @@ export default function SeekerView({
   showingSearch = false,
 }: SeekerViewProps) {
   const [gardens, setGardens] = useState<Garden[]>([]);
-  const [logs, setLogs] = useState<GardenLog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
-      const [gardensRes, logsRes] = await fetchWithTimeout(
-        Promise.all([
-          supabase
-            .from("gardens")
-            .select(
-              "id, name, location, description, image_url, appliances, owner:profiles!owner_id(rating)",
-            )
-            .limit(5),
-          supabase.from("garden_logs").select("id, title, status").limit(5),
-        ]),
+      const gardensRes = await fetchWithTimeout(
+        supabase
+          .from("gardens")
+          .select(
+            "id, name, location, description, image_url, appliances, owner:profiles!owner_id(rating)",
+          )
+          .limit(5),
       );
 
       if (gardensRes.data) setGardens(toCamelCase<Garden[]>(gardensRes.data));
-      if (logsRes.data) setLogs(toCamelCase<GardenLog[]>(logsRes.data));
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
   }, []);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  const onRefresh = () => {
-    setRefreshing(true);
-    fetchData();
-  };
 
   return (
     <YStack paddingHorizontal="$4" paddingBottom="$4">

@@ -3,7 +3,7 @@ import { supabase, toCamelCase } from "@/utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useContext, useEffect, useState } from "react";
-import { Card, Circle, H1, ScrollView, Spinner, Text, XStack, YStack } from "tamagui";
+import { Card, Circle, H1, ScrollView, Text, XStack, YStack } from "tamagui";
 import { Image as ExpoImage } from "@/lib/image";
 import { OnboardingContext } from "@/context/OnboardingContext";
 import { Profile } from "@/context/AuthContext";
@@ -15,7 +15,6 @@ export default function ProfileScreen() {
   const [profile, setProfile] = useState<Profile & { rating?: number | null } | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [savedGardens, setSavedGardens] = useState<Garden[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -23,7 +22,6 @@ export default function ProfileScreen() {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) {
-        setLoading(false);
         return;
       }
 
@@ -59,7 +57,6 @@ export default function ProfileScreen() {
         })) ?? [];
 
       setSavedGardens(mapped);
-      setLoading(false);
     };
 
     fetchProfile();

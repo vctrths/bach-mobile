@@ -2,11 +2,8 @@ import TopNavPill from "@/components/ui/TopNavPill";
 import { Ionicons } from "@expo/vector-icons";
 import { Text, YStack } from "tamagui";
 import { StyleSheet, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function MapScreen() {
-  const insets = useSafeAreaInsets();
-
   return (
     <View style={StyleSheet.absoluteFillObject}>
       <YStack
