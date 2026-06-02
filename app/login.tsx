@@ -12,6 +12,13 @@ function getLoginErrorMessage(message: string) {
     return "E-mailadres of wachtwoord is onjuist.";
   }
 
+  if (
+    normalized.includes("email not confirmed") ||
+    normalized.includes("confirm")
+  ) {
+    return "Bevestig eerst je e-mailadres voordat je inlogt.";
+  }
+
   if (normalized.includes("missing email") || normalized.includes("email")) {
     return "Vul een geldig e-mailadres in.";
   }
