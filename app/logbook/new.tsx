@@ -201,7 +201,6 @@ export default function NewLogScreen() {
     >
       <ScreenContent>
         <YStack gap="$5">
-          {/* Taken die je hebt uitgevoerd */}
           <YStack gap="$2">
             <Text color="$text_dark" fontSize="$4" fontWeight="600">
               Taken die je hebt uitgevoerd:
@@ -221,7 +220,6 @@ export default function NewLogScreen() {
             />
           </YStack>
 
-          {/* Observaties */}
           <YStack gap="$2">
             <Text color="$text_dark" fontSize="$4" fontWeight="600">
               Observaties
@@ -241,7 +239,6 @@ export default function NewLogScreen() {
             />
           </YStack>
 
-          {/* Opvolgingen toevoegen */}
           <YStack gap="$2">
             <Text color="$text_dark" fontSize="$4" fontWeight="600">
               Opvolgingen toevoegen:
@@ -377,7 +374,6 @@ export default function NewLogScreen() {
             </YStack>
           </YStack>
 
-          {/* Upload image */}
           <XStack
             backgroundColor="transparent"
             borderRadius="$6"
@@ -430,7 +426,6 @@ export default function NewLogScreen() {
             )}
           </XStack>
 
-          {/* Log opslaan */}
           <XStack
             backgroundColor="#173300"
             borderRadius="$10"

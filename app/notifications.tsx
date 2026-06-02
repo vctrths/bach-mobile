@@ -107,7 +107,6 @@ function NotificationRow({
             />
           )}
         </Circle>
-        {/* Online status dot */}
         <YStack
           position="absolute"
           bottom={2}
@@ -215,7 +214,6 @@ export default function NotificationsScreen() {
         </YStack>
       ) : (
         <YStack gap={32} paddingHorizontal={24}>
-          {/* Last 7 days */}
           {last7Days.length > 0 && (
             <YStack gap={16}>
               <Text fontSize={16} fontWeight="900" color="$text_dark">
@@ -224,7 +222,6 @@ export default function NotificationsScreen() {
               <YStack gap={16}>
                 {last7Days.map((notif) => (
                   <React.Fragment key={notif.id}>
-                    {/* Actionable notification with CTA card */}
                     {notif.type === "request_accepted" && (
                       <YStack
                         backgroundColor="#F0F3EC"
@@ -303,7 +300,6 @@ export default function NotificationsScreen() {
               </YStack>
             </YStack>
           )}
-          {/* Last 30 days */}
           {last30Days.length > 0 && (
             <YStack gap={16}>
               <Text fontSize={16} fontWeight="900" color="$text_dark">
@@ -359,7 +355,6 @@ export default function NotificationsScreen() {
             </YStack>
           )}
 
-          {/* Older */}
           {older.length > 0 && (
             <YStack gap={16}>
               <Text fontSize={16} fontWeight="900" color="$text_dark">

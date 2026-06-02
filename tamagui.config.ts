@@ -52,7 +52,6 @@ export const config = createTamagui({
   fonts: {
     heading: satoshiFont,
     body: satoshiFont,
-    // Add Aliases
     Inter: satoshiFont,
     Satoshi: satoshiFont,
   },

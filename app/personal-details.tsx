@@ -196,7 +196,6 @@ export default function PersonalDetailsScreen() {
           </YStack>
         </YStack>
 
-        {/* Save Button */}
         <XStack gap="$2" alignItems="center" justifyContent="center">
           {saving && <Spinner size="small" color="$primary" />}
           <Button

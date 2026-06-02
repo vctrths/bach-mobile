@@ -37,7 +37,6 @@ export default function CollaborationDetailScreen() {
       if (data) {
         setCollaboration(toCamelCase<Collaboration>(data));
         
-        // Check if user already reviewed
         const { data: reviewData } = await supabase
           .from("reviews")
           .select("id")
@@ -72,7 +71,6 @@ export default function CollaborationDetailScreen() {
         .eq("id", id as string);
 
       if (!error) {
-        // Create notification for the other party
         const otherPartyId = user?.id === collaboration.ownerId 
           ? collaboration.gardenerId 
           : collaboration.ownerId;
@@ -149,7 +147,6 @@ export default function CollaborationDetailScreen() {
     >
       <ScreenContent>
         <YStack gap="$6">
-          {/* Garden Info Card */}
           <Card
             elevation={2}
             backgroundColor="white"
@@ -191,7 +188,6 @@ export default function CollaborationDetailScreen() {
             </YStack>
           </Card>
 
-          {/* Partner Info */}
           <XStack alignItems="center" gap="$4">
             <Circle size={60} overflow="hidden" backgroundColor="$background_secondary">
               {collaboration.profiles?.profileImage ? (
@@ -226,7 +222,6 @@ export default function CollaborationDetailScreen() {
             </XStack>
           </XStack>
 
-          {/* Details Section */}
           <YStack gap="$3">
             <H2 fontSize="$5" color="$text_dark" fontWeight="bold">Afspraken</H2>
             <Card padding="$4" backgroundColor="white" borderRadius="$4" borderWidth={1} borderColor="$borderColor">
@@ -247,7 +242,6 @@ export default function CollaborationDetailScreen() {
             </Card>
           </YStack>
 
-          {/* Review Card */}
           {isEnded && !hasReviewed && (
             <Card
               position="relative"
@@ -309,7 +303,6 @@ export default function CollaborationDetailScreen() {
              </XStack>
           )}
 
-          {/* Actions */}
           {!isEnded && (
             <Button
               label={submitting ? "Verwerken..." : "Samenwerking beëindigen"}

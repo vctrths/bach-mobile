@@ -168,14 +168,12 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
 
       setLogs(formattedLogs);
 
-      // Build active dates set
       const actives = new Set<string>();
       camelData.forEach((log) => {
         actives.add(formatDateKey(new Date(log.createdAt)));
       });
       setActiveDates(actives);
 
-      // Count this week's logs
       const now = new Date();
       const dayOfWeek = now.getDay();
       const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
@@ -208,7 +206,6 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
 
   const content = (
     <YStack gap="$4" paddingBottom="$4" paddingHorizontal="$5">
-      {/* Weekly Progress Card */}
       <Card
         backgroundColor="#F0F3EC"
         borderColor="#E3ECD7"
@@ -235,7 +232,6 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
         </XStack>
       </Card>
 
-      {/* Action Buttons */}
       <XStack gap="$4">
         <XStack
           flex={1}
@@ -283,7 +279,6 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
         </XStack>
       </XStack>
 
-      {/* Mini Calendar */}
       <Card
         backgroundColor="#F0F3EC"
         borderColor="#E3ECD7"
@@ -364,7 +359,6 @@ export default function LogbookScreen({ standalone = true }: LogbookScreenProps)
         </XStack>
       </Card>
 
-      {/* Recent Logs */}
       <YStack gap="$4">
         <Text
           fontSize={20}

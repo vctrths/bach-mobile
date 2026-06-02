@@ -105,7 +105,6 @@ export default function GardenCreateScreen() {
 
       let imageUrl: string | null = null;
 
-      // Upload garden image if provided
       if (image) {
         const upload = await uploadImageAsset({
           asset: image,
@@ -252,7 +251,6 @@ export default function GardenCreateScreen() {
             </XStack>
           </YStack>
 
-          {/* Garden Image Upload */}
           <YStack gap="$1.5">
             <Text color="$secondary" fontSize="$3" fontWeight="500">
               Tuinafbeelding

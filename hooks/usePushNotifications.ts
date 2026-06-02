@@ -72,7 +72,6 @@ export const usePushNotifications = (userId?: string) => {
     registerForPushNotificationsAsync().then(token => {
       if (token) {
         setExpoPushToken(token);
-        // Save token to Supabase profile
         supabase
           .from('profiles')
           .update({ expo_push_token: token } as any)
@@ -85,12 +84,9 @@ export const usePushNotifications = (userId?: string) => {
     
     if (!Notifications || Platform.OS === 'web') return;
     
-    // Handle notifications while app is in foreground
-    notificationListener.current = Notifications.addNotificationReceivedListener((notification: any) => {
-      // You could handle custom UI here if needed
+    notificationListener.current = Notifications.addNotificationReceivedListener(() => {
     });
 
-    // Handle notification clicks
     responseListener.current = Notifications.addNotificationResponseReceivedListener((response: any) => {
       const { data } = response.notification.request.content;
       console.log('Notification clicked with data:', data);
@@ -98,7 +94,6 @@ export const usePushNotifications = (userId?: string) => {
       if (data?.type === 'message' && data?.relatedId) {
         router.push(`/messages/${data.relatedId}` as any);
       } else {
-        // Fallback for all other notification types (requests, system, etc.)
         router.push('/notifications' as any);
       }
     });
