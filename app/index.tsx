@@ -70,11 +70,6 @@ export default function Dashboard() {
       }
 
       setCheckingGardenerConnection(true);
-      console.log("[Dashboard] checking active gardener connection:", {
-        userId,
-        profileRole,
-      });
-
       let timedOut = false;
       queryTimeoutId = setTimeout(() => {
         timedOut = true;
@@ -188,15 +183,6 @@ export default function Dashboard() {
 
   const showingSearch = !!(searchQuery.trim() || isSearchFocused);
   const isSeekerDashboard = role === UserRole.TUIN_ZOEKER || !role;
-
-  console.log("[Dashboard] render:", {
-    loading,
-    hasProfile: !!profile,
-    dbRole: profile?.role,
-    ctxRole: onboardingData.role,
-    hasActiveGardenerConnection,
-    resolvedRole: role,
-  });
 
   return (
     <PageContainer

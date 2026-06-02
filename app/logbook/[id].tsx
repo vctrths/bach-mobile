@@ -159,7 +159,6 @@ export default function LogDetailScreen() {
           </YStack>
         ) : (
           <>
-            {/* Hero Image */}
             <Card
               elevation={2}
               borderRadius="$6"
@@ -177,14 +176,12 @@ export default function LogDetailScreen() {
               />
             </Card>
 
-            {/* Date Label */}
             {log && (
               <Text fontSize="$4" color="$secondary" fontWeight="500">
                 {log.date}
               </Text>
             )}
 
-            {/* Uitgevoerde taken */}
             <YStack gap="$3">
               <H2 color="$text_dark" fontWeight="bold" fontSize="$5">
                 Uitgevoerde taken:
@@ -230,7 +227,6 @@ export default function LogDetailScreen() {
               </Card>
             </YStack>
 
-            {/* Observaties */}
             <YStack gap="$3">
               <H2 color="$text_dark" fontWeight="bold" fontSize="$5">
                 Observaties:
@@ -249,7 +245,6 @@ export default function LogDetailScreen() {
               </Card>
             </YStack>
 
-            {/* Opvolgingen */}
             <YStack gap="$3">
               <H2 color="$text_dark" fontWeight="bold" fontSize="$5">
                 Opvolgingen

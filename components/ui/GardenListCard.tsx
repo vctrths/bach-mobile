@@ -26,7 +26,6 @@ export default function GardenListCard({
   const visibleAppliances = (
     garden.appliances?.length ? garden.appliances : FALLBACK_APPLIANCES
   ).filter((appliance) => APPLIANCE_MAP[appliance]);
-  // .slice(0, 2);
 
   return (
     <Card

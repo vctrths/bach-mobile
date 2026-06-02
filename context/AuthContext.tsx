@@ -62,14 +62,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .select("*")
         .eq("id", userId)
         .single();
-      
-      console.log("[AuthContext] fetchProfile:", {
-        userId,
-        hasData: !!data,
-        error: error?.message,
-        fullData: JSON.stringify(data),
-      });
-
       if (data) {
         const nextProfile = toCamelCase<Profile>(data);
         const normalizedProfile = {
@@ -132,12 +124,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log("[AuthContext] onAuthStateChange:", {
-        event: _event,
-        hasSession: !!session,
-        userId: session?.user?.id,
-      });
-      
       if (!active) return;
 
       setAuthError(null);

@@ -58,7 +58,6 @@ export default function Photo() {
     setError(null);
 
     try {
-      // 1. Create user with Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: onboardingData.email,
         password: onboardingData.password,
@@ -79,7 +78,6 @@ export default function Photo() {
       const userId = authData.user.id;
       let profileImageUrl = null;
 
-      // 2. Upload profile image if provided
       if (image) {
         if (!authData.session) {
           setError(
@@ -97,7 +95,6 @@ export default function Photo() {
         profileImageUrl = upload.publicUrl;
       }
 
-      // 3. Save user profile to Supabase
       const { error: profileError } = await supabase.from("profiles").insert({
         id: userId,
         first_name: onboardingData.firstName,
@@ -114,7 +111,6 @@ export default function Photo() {
         return;
       }
 
-      // 4. Clear onboarding context and navigate to dashboard
       reset();
       router.replace("/");
     } catch (err) {

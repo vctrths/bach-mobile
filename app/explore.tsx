@@ -54,7 +54,6 @@ export default function ExploreScreen() {
       }
     >
       <YStack paddingHorizontal="$5" gap="$5">
-        {/* Explorer Hero Card */}
         <Card
           backgroundColor="$background_secondary"
           borderColor="$borderColor"
@@ -72,7 +71,6 @@ export default function ExploreScreen() {
           </Text>
         </Card>
 
-        {/* Results Section */}
         <YStack gap="$3" marginTop="$2">
           <XStack gap="$3" alignItems="center">
             <Ionicons name="compass-outline" size={24} color="#172211" />

@@ -319,7 +319,6 @@ export default function OwnerView() {
         </XStack>
       ) : (
         <>
-          {/* Tuinen Section */}
           <YStack gap="$2">
             <Text fontSize={24} fontWeight="900" color="$text_dark">
               Tuinen
@@ -354,7 +353,6 @@ export default function OwnerView() {
             </ScrollView>
           </YStack>
 
-          {/* Jouw Planning Section */}
           <YStack gap="$2">
             <Text fontSize={24} fontWeight="900" color="$text_dark">
               Jouw planning
@@ -362,7 +360,6 @@ export default function OwnerView() {
 
             {gardeners.length > 0 ? (
               <YStack gap="$3" padding="$2">
-                {/* Day header row */}
                 <XStack alignItems="center" gap="$1">
                   <Text
                     width={56}
@@ -398,7 +395,6 @@ export default function OwnerView() {
                   ))}
                 </XStack>
 
-                {/* Gardener rows */}
                 {gardeners.map((gardener) => (
                   <XStack
                     key={gardener.id}
@@ -456,7 +452,6 @@ export default function OwnerView() {
             )}
           </YStack>
 
-          {/* Actieve samenwerkingen Section */}
           <YStack gap="$2">
             <Text fontSize={24} fontWeight="900" color="$text_dark">
               Actieve samenwerkingen
@@ -538,7 +533,6 @@ export default function OwnerView() {
             )}
           </YStack>
 
-          {/* Openstaande aanvragen */}
           <YStack gap="$2">
             <Text fontSize={24} fontWeight="900" color="$text_dark">
               Openstaande aanvragen {requests.length > 0 ? `(${requests.length})` : ""}
@@ -555,7 +549,6 @@ export default function OwnerView() {
                   marginBottom="$2"
                 >
                   <YStack gap="$3">
-                    {/* Requester info */}
                     <XStack gap="$3" alignItems="center">
                       <Circle
                         size={48}
@@ -599,14 +592,12 @@ export default function OwnerView() {
                       </YStack>
                     </XStack>
 
-                    {/* Motivation */}
                     {request.motivation && (
                       <Text fontSize="$3" color="#56594D" numberOfLines={3}>
                         &ldquo;{request.motivation}&rdquo;
                       </Text>
                     )}
 
-                    {/* Days and type info */}
                     <XStack gap="$2" flexWrap="wrap">
                       {request.collaborationType && (
                         <YStack
@@ -634,13 +625,11 @@ export default function OwnerView() {
                       )}
                     </XStack>
 
-                    {/* Chat button */}
                     <Button
                       label="Chatten"
                       onPress={() => handleChat(request)}
                     />
 
-                    {/* Action buttons */}
                     <XStack gap="$2">
                       <Button
                         label="Afwijzen"

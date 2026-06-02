@@ -65,7 +65,6 @@ function PlanCard({
       paddingBottom={24}
       gap={16}
     >
-      {/* Plan Header Badge */}
       <YStack alignItems="flex-start">
         <YStack
           backgroundColor="#FFFFFF"
@@ -86,14 +85,12 @@ function PlanCard({
         </YStack>
       </YStack>
 
-      {/* Features List */}
       <YStack gap={8}>
         {features.map((feature, index) => (
           <PlanFeature key={index}>{feature}</PlanFeature>
         ))}
       </YStack>
 
-      {/* Action Button */}
       <YStack marginTop="auto">
         <Button
           label={buttonLabel}
@@ -146,7 +143,6 @@ export default function ProScreen() {
       showBottomNav={false}
     >
       <YStack gap={10} paddingHorizontal={16} paddingTop={16}>
-        {/* Pro Plan Card */}
         <PlanCard
           title="Pro plan"
           features={[
@@ -165,7 +161,6 @@ export default function ProScreen() {
           onButtonPress={openPaymentLink}
         />
 
-        {/* Free Plan Card */}
         <PlanCard
           title="Gratis plan"
           features={["  - Tuinen bekijken & zoeken", ""]}
