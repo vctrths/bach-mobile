@@ -22,7 +22,6 @@ Deno.serve(async (req) => {
   try {
     const { userId, title, body, data }: PushPayload = await req.json();
 
-    // 1. Fetch the user's push token
     const { data: profile, error } = await supabase
       .from("profiles")
       .select("expo_push_token")
@@ -38,7 +37,6 @@ Deno.serve(async (req) => {
 
     const token = profile.expo_push_token;
 
-    // 2. Send to Expo Push API
     const response = await fetch("https://exp.host/--/api/v2/push/send", {
       method: "POST",
       headers: {

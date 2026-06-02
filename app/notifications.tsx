@@ -5,7 +5,7 @@ import { Image as ExpoImage } from "@/lib/image";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Card, Circle, Spinner, Text, XStack, YStack } from "tamagui";
+import { Circle, Spinner, Text, XStack, YStack } from "tamagui";
 
 const NOTIF_ICONS: Record<string, string> = {
   request_accepted: "check-circle-outline",
@@ -25,6 +25,7 @@ type NotificationItem = {
   type: string;
   read: boolean;
   createdAt: string;
+  relatedId?: string | null;
   senderName?: string;
   senderImage?: string | null;
 };
@@ -34,14 +35,35 @@ function isWithinDays(dateStr: string, days: number) {
   return diff < days * 24 * 60 * 60 * 1000;
 }
 
-function formatTime(dateStr: string) {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 60) return `${mins}m geleden`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}u geleden`;
-  const days = Math.floor(hours / 24);
-  return `${days}d geleden`;
+function splitNotificationText(notif: NotificationItem) {
+  if (notif.senderName) {
+    return {
+      actor: notif.senderName,
+      action: ` ${notif.body || notif.title}`,
+    };
+  }
+
+  if (notif.type === "message" && notif.title.startsWith("Nieuw bericht van ")) {
+    return {
+      actor: notif.title.replace("Nieuw bericht van ", ""),
+      action: notif.body ? ` stuurde: ${notif.body}` : " stuurde je een bericht.",
+    };
+  }
+
+  const copy = notif.body || notif.title;
+  const separator = [" heeft ", " wil ", " kan ", " stuurde "].find((part) =>
+    copy.includes(part)
+  );
+
+  if (!separator) {
+    return { actor: "", action: copy };
+  }
+
+  const [actor, ...rest] = copy.split(separator);
+  return {
+    actor,
+    action: `${separator}${rest.join(separator)}`,
+  };
 }
 
 function NotificationRow({
@@ -51,17 +73,19 @@ function NotificationRow({
   notif: NotificationItem;
   onPress: () => void;
 }) {
+  const { actor, action } = splitNotificationText(notif);
+
   return (
     <XStack
-      gap="$3"
+      gap={8}
       alignItems="flex-start"
-      paddingVertical="$2"
+      width="100%"
       onPress={onPress}
       pressStyle={{ scale: 0.98, opacity: 0.9 }}
     >
       <YStack position="relative">
         <Circle
-          size={48}
+          size={50}
           backgroundColor="rgba(23, 51, 0, 0.08)"
           overflow="hidden"
         >
@@ -71,7 +95,7 @@ function NotificationRow({
               style={{
                 width: "100%",
                 height: "100%",
-                borderRadius: 24,
+                borderRadius: 25,
               }}
               contentFit="cover"
             />
@@ -83,32 +107,33 @@ function NotificationRow({
             />
           )}
         </Circle>
-        {/* Online status dot */}
         <YStack
           position="absolute"
-          bottom={0}
-          right={0}
-          width={14}
-          height={14}
-          borderRadius={7}
+          bottom={2}
+          right={2}
+          width={10}
+          height={10}
+          borderRadius={5}
           backgroundColor="white"
           justifyContent="center"
           alignItems="center"
         >
           <YStack
-            width={10}
-            height={10}
-            borderRadius={5}
-            backgroundColor="#22c55e"
+            width={6}
+            height={6}
+            borderRadius={3}
+            backgroundColor="#A6C774"
           />
         </YStack>
       </YStack>
-      <YStack flex={1} gap="$1" paddingTop="$1">
-        <Text fontSize="$3" fontWeight="500" color="$text_dark">
-          {notif.body || notif.title}
-        </Text>
-        <Text fontSize="$2" color="$secondary">
-          {formatTime(notif.createdAt)}
+      <YStack flex={1} minHeight={50} justifyContent="center">
+        <Text fontSize={16} lineHeight={20} color="$text_dark">
+          {actor ? (
+            <Text fontSize={16} lineHeight={20} fontWeight="800" color="$text_dark">
+              {actor}
+            </Text>
+          ) : null}
+          {action}
         </Text>
       </YStack>
     </XStack>
@@ -118,6 +143,15 @@ function NotificationRow({
 export default function NotificationsScreen() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const openNotification = (notif: NotificationItem) => {
+    if (notif.type === "message" && notif.relatedId) {
+      router.push(`/messages/${notif.relatedId}` as any);
+      return;
+    }
+
+    router.push("/messages" as any);
+  };
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -179,51 +213,46 @@ export default function NotificationsScreen() {
           </Text>
         </YStack>
       ) : (
-        <YStack gap="$6" paddingHorizontal="$5">
-          {/* Last 7 days */}
+        <YStack gap={32} paddingHorizontal={24}>
           {last7Days.length > 0 && (
-            <YStack gap="$3">
-              <Text fontSize="$4" fontWeight="bold" color="$text_dark">
-                Laatste 7 dagen:
+            <YStack gap={16}>
+              <Text fontSize={16} fontWeight="900" color="$text_dark">
+                Afgelopen 7 dagen:
               </Text>
-              <YStack gap="$2">
+              <YStack gap={16}>
                 {last7Days.map((notif) => (
                   <React.Fragment key={notif.id}>
-                    {/* Actionable notification with CTA card */}
                     {notif.type === "request_accepted" && (
-                      <Card
-                        elevation={2}
-                        backgroundColor="white"
-                        borderColor="rgba(23, 51, 0, 0.1)"
+                      <YStack
+                        backgroundColor="#F0F3EC"
+                        borderColor="#E3ECD7"
                         borderWidth={1}
-                        borderRadius="$6"
-                        padding="$4"
-                        gap="$3"
+                        borderRadius={16}
+                        padding={12}
+                        gap={16}
+                        width="100%"
                       >
                         <NotificationRow
                           notif={notif}
-                          onPress={() =>
-                            router.push("/messages" as any)
-                          }
+                          onPress={() => openNotification(notif)}
                         />
                         <Button
                           label="Ga de tuin bekijken"
-                          variant="secondary"
-                          onPress={() =>
-                            router.push("/messages" as any)
-                          }
+                          variant="primary"
+                          width="100%"
+                          onPress={() => openNotification(notif)}
                         />
-                      </Card>
+                      </YStack>
                     )}
                     {notif.type === "request_received" && (
-                      <Card
-                        elevation={2}
-                        backgroundColor="white"
-                        borderColor="rgba(23, 51, 0, 0.1)"
+                      <YStack
+                        backgroundColor="#F0F3EC"
+                        borderColor="#E3ECD7"
                         borderWidth={1}
-                        borderRadius="$6"
-                        padding="$4"
-                        gap="$3"
+                        borderRadius={16}
+                        padding={12}
+                        gap={16}
+                        width="100%"
                       >
                         <NotificationRow
                           notif={notif}
@@ -234,14 +263,12 @@ export default function NotificationsScreen() {
                         <XStack gap="$2">
                           <Button
                             label="Chat openen"
-                            variant="secondary"
+                            variant="primary"
                             flex={1}
-                            onPress={() =>
-                              router.push("/messages" as any)
-                            }
+                            onPress={() => openNotification(notif)}
                           />
                         </XStack>
-                        <XStack gap="$2">
+                        <XStack gap={8}>
                           <Button
                             label="Afwijzen"
                             variant="decline"
@@ -259,15 +286,13 @@ export default function NotificationsScreen() {
                             }
                           />
                         </XStack>
-                      </Card>
+                      </YStack>
                     )}
                     {notif.type !== "request_accepted" &&
                       notif.type !== "request_received" && (
                         <NotificationRow
                           notif={notif}
-                          onPress={() =>
-                            router.push("/messages" as any)
-                          }
+                          onPress={() => openNotification(notif)}
                         />
                       )}
                   </React.Fragment>
@@ -275,40 +300,72 @@ export default function NotificationsScreen() {
               </YStack>
             </YStack>
           )}
-          {/* Last 30 days */}
           {last30Days.length > 0 && (
-            <YStack gap="$3">
-              <Text fontSize="$4" fontWeight="bold" color="$text_dark">
-                Laatste 30 dagen:
+            <YStack gap={16}>
+              <Text fontSize={16} fontWeight="900" color="$text_dark">
+                Afgelopen 30 dagen:
               </Text>
-              <YStack gap="$2">
+              <YStack gap={16}>
                 {last30Days.map((notif) => (
-                  <NotificationRow
-                    key={notif.id}
-                    notif={notif}
-                    onPress={() =>
-                      router.push("/messages" as any)
-                    }
-                  />
+                  <React.Fragment key={notif.id}>
+                    {notif.type === "request_received" ? (
+                      <YStack
+                        backgroundColor="#F0F3EC"
+                        borderColor="#E3ECD7"
+                        borderWidth={1}
+                        borderRadius={16}
+                        padding={12}
+                        gap={16}
+                        width="100%"
+                      >
+                        <NotificationRow
+                          notif={notif}
+                          onPress={() => openNotification(notif)}
+                        />
+                        <Button
+                          label="Chat openen"
+                          variant="primary"
+                          width="100%"
+                          onPress={() => openNotification(notif)}
+                        />
+                        <XStack gap={8}>
+                          <Button
+                            label="Afwijzen"
+                            variant="decline"
+                            flex={1}
+                            onPress={() => router.push("/" as any)}
+                          />
+                          <Button
+                            label="Accepteren"
+                            variant="accept"
+                            flex={1}
+                            onPress={() => router.push("/" as any)}
+                          />
+                        </XStack>
+                      </YStack>
+                    ) : (
+                      <NotificationRow
+                        notif={notif}
+                        onPress={() => openNotification(notif)}
+                      />
+                    )}
+                  </React.Fragment>
                 ))}
               </YStack>
             </YStack>
           )}
 
-          {/* Older */}
           {older.length > 0 && (
-            <YStack gap="$3">
-              <Text fontSize="$4" fontWeight="bold" color="$text_dark">
+            <YStack gap={16}>
+              <Text fontSize={16} fontWeight="900" color="$text_dark">
                 Ouder:
               </Text>
-              <YStack gap="$2">
+              <YStack gap={16}>
                 {older.map((notif) => (
                   <NotificationRow
                     key={notif.id}
                     notif={notif}
-                    onPress={() =>
-                      router.push("/messages" as any)
-                    }
+                    onPress={() => openNotification(notif)}
                   />
                 ))}
               </YStack>

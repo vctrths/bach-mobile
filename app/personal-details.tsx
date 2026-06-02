@@ -2,7 +2,6 @@ import Button from "@/components/ui/Button";
 import PageContainer from "@/components/ui/PageContainer";
 import { supabase } from "@/utils/supabase";
 import { OnboardingContext } from "@/context/OnboardingContext";
-import { router } from "expo-router";
 import { safeBack } from "@/utils/navigation";
 import React, { useContext, useEffect, useState } from "react";
 import { Input, Spinner, Text, TextArea, XStack, YStack } from "tamagui";
@@ -196,7 +195,6 @@ export default function PersonalDetailsScreen() {
           </YStack>
         </YStack>
 
-        {/* Save Button */}
         <XStack gap="$2" alignItems="center" justifyContent="center">
           {saving && <Spinner size="small" color="$primary" />}
           <Button

@@ -63,7 +63,6 @@ const triggerHaptics = async (
 };
 
 export function AlertProvider({ children }: { children: React.ReactNode }) {
-  // Toast State
   const [toastState, setToastState] = useState<{
     show: boolean;
     message: string;
@@ -74,7 +73,6 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
     type: "info",
   });
 
-  // Modal State
   const [modalState, setModalState] = useState<{
     show: boolean;
     title: string;
@@ -91,12 +89,10 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isHandlingButtonPressRef = useRef(false);
 
-  // Animations
   const toastAnim = useRef(new Animated.Value(0)).current;
   const modalScaleAnim = useRef(new Animated.Value(0.95)).current;
   const modalOpacityAnim = useRef(new Animated.Value(0)).current;
 
-  // Toast Anim triggers
   useEffect(() => {
     if (toastState.show) {
       Animated.spring(toastAnim, {
@@ -114,7 +110,6 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
     }
   }, [toastState.show, toastAnim]);
 
-  // Modal Anim triggers
   useEffect(() => {
     if (modalState.show) {
       Animated.parallel([
@@ -146,7 +141,6 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
     }
   }, [modalState.show, modalScaleAnim, modalOpacityAnim]);
 
-  // Toast show helper
   const showToast = (
     message: string,
     type: ToastType = "info",
@@ -169,7 +163,6 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
     }, duration);
   };
 
-  // Modal show helper
   const showAlert = (
     title: string,
     message: string,
@@ -215,32 +208,31 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Colors & Icons for Toast
   const getToastConfig = (type: ToastType) => {
     switch (type) {
       case "success":
         return {
           icon: "checkmark-circle" as const,
-          color: "#698D14", // custom theme green
+          color: "#698D14",
           bgIndicator: "#698D14",
         };
       case "error":
         return {
           icon: "alert-circle" as const,
-          color: "#D32F2F", // theme error red
+          color: "#D32F2F",
           bgIndicator: "#D32F2F",
         };
       case "warning":
         return {
           icon: "warning" as const,
-          color: "#FF9800", // warning amber
+          color: "#FF9800",
           bgIndicator: "#FF9800",
         };
       case "info":
       default:
         return {
           icon: "information-circle" as const,
-          color: "#2196F3", // info blue
+          color: "#2196F3",
           bgIndicator: "#2196F3",
         };
     }
@@ -256,7 +248,6 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
     <AlertContext.Provider value={{ alert: showAlert, toast: showToast }}>
       {children}
 
-      {/* Floating Toast Rendering */}
       {toastState.show && (
         <Animated.View
           style={[
@@ -283,7 +274,6 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
               flexDirection="row"
               padding={1}
             >
-              {/* BlurView layer for glassmorphism */}
               <BlurView
                 intensity={60}
                 tint="light"
@@ -291,7 +281,6 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
                 style={StyleSheet.absoluteFill}
               />
 
-              {/* Status color left bar */}
               <YStack
                 width={6}
                 backgroundColor={toastConfig.bgIndicator}
@@ -333,7 +322,6 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
         </Animated.View>
       )}
 
-      {/* Modal Dialog Rendering */}
       {modalState.show && (
         <Animated.View
           style={[styles.modalOverlay, { opacity: modalOpacityAnim }]}
@@ -348,7 +336,6 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
               alignItems="center"
               pointerEvents="box-none"
             >
-              {/* Backdrop Blur */}
               <BlurView
                 intensity={35}
                 tint="dark"
@@ -365,7 +352,6 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
                     },
                   ]}
                 >
-                  {/* Modal Container with inner blur */}
                   <YStack
                     borderRadius={24}
                     borderWidth={1}
@@ -383,7 +369,6 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
                       style={StyleSheet.absoluteFill}
                     />
 
-                    {/* Header Title */}
                     <Text
                       color="$text_dark"
                       fontSize="$6"
@@ -394,7 +379,6 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
                       {modalState.title}
                     </Text>
 
-                    {/* Message Body */}
                     <Text
                       color="$secondary"
                       fontSize="$3"
@@ -406,7 +390,6 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
                       {modalState.message}
                     </Text>
 
-                    {/* Action Buttons */}
                     <XStack
                       gap="$3"
                       flexDirection={
@@ -415,7 +398,6 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
                       marginTop="$2"
                     >
                       {modalState.buttons.map((btn, index) => {
-                        // Map native style to custom Button variants
                         let variant: "primary" | "secondary" | "decline" =
                           "primary";
                         if (btn.style === "cancel") {
@@ -466,7 +448,7 @@ const styles = StyleSheet.create({
         maxWidth: 500,
         alignSelf: "center",
         left: "50%",
-        marginLeft: -250, // center on web/widescreen
+        marginLeft: -250,
         width: 500,
       },
     }),

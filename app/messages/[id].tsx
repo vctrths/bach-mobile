@@ -19,6 +19,8 @@ type UserProfile = {
   profile_image: string | null;
 };
 
+let nextConversationChannelId = 0;
+
 export default function ChatDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -37,28 +39,31 @@ export default function ChatDetail() {
   useEffect(() => {
     if (!id) return;
     let active = true;
-    const messagesChannel = supabase
-      .channel(`conversation-${id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-          filter: `conversation_id=eq.${id}`,
-        },
-        (payload) => {
-          if (!active) return;
+    const messagesChannel = supabase.channel(
+      `conversation-${id}:${nextConversationChannelId++}`,
+    );
 
-          const newMessage = payload.new as Message;
-          if (!messagesSetRef.current.has(newMessage.id)) {
-            messagesSetRef.current.add(newMessage.id);
-            setMessages((prev) => [...prev, newMessage]);
-            scrollToBottom();
-          }
-        },
-      )
-      .subscribe();
+    messagesChannel.on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "messages",
+        filter: `conversation_id=eq.${id}`,
+      },
+      (payload) => {
+        if (!active) return;
+
+        const newMessage = payload.new as Message;
+        if (!messagesSetRef.current.has(newMessage.id)) {
+          messagesSetRef.current.add(newMessage.id);
+          setMessages((prev) => [...prev, newMessage]);
+          scrollToBottom();
+        }
+      },
+    );
+
+    messagesChannel.subscribe();
 
     const init = async () => {
       try {

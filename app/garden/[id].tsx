@@ -5,8 +5,8 @@ import { Image as ExpoImage } from "@/lib/image";
 import { router, useLocalSearchParams } from "expo-router";
 import { safeBack } from "@/utils/navigation";
 import React, { useEffect, useState } from "react";
-import { H1, H2, Spinner, Text, XStack, YStack, Circle, ScrollView } from "tamagui";
-import { Platform, StyleSheet } from "react-native";
+import { Spinner, Text, XStack, YStack, Circle, ScrollView } from "tamagui";
+import { Platform } from "react-native";
 import { supabase, toCamelCase } from "@/utils/supabase";
 import { type Garden } from "@/types/garden";
 import MiniMap from "../../components/ui/MiniMap";
@@ -80,7 +80,6 @@ export default function GardenDetailsScreen() {
       topNavHeight={76}
     >
       <YStack paddingHorizontal="$4" gap="$8">
-        {/* Horizontal Image Gallery */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -112,7 +111,6 @@ export default function GardenDetailsScreen() {
           ))}
         </ScrollView>
 
-        {/* Beschrijving Section */}
         <YStack gap="$4">
           <Text fontFamily="$Satoshi" fontWeight="900" fontSize={20} color="$text_dark">
             Beschrijving
@@ -128,7 +126,6 @@ export default function GardenDetailsScreen() {
           </Text>
         </YStack>
 
-        {/* Locatie Section */}
         <YStack gap="$4">
           <Text fontFamily="$Satoshi" fontWeight="900" fontSize={20} color="$text_dark">
             Locatie
@@ -146,7 +143,6 @@ export default function GardenDetailsScreen() {
           </YStack>
         </YStack>
 
-        {/* Aanwezig Section */}
         <YStack gap="$4">
           <Text fontFamily="$Satoshi" fontWeight="900" fontSize={20} color="$text_dark">
             Aanwezig
@@ -224,9 +220,6 @@ export default function GardenDetailsScreen() {
           })()}
         </YStack>
 
-        {/* Owner Profile Section */}
-
-        {/* Owner Profile Section */}
         <YStack
           padding="$5"
           backgroundColor="#F1F3EC"

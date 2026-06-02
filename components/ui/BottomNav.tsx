@@ -1,10 +1,11 @@
 import { useAuth } from "@/context/AuthContext";
 import { pages } from "@/types/app";
 import { UserRole } from "@/utils/role";
+import { supabase } from "@/utils/supabase";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { router } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Circle, XStack } from "tamagui";
 
 interface BottomNavProps {
@@ -40,12 +41,44 @@ export default function BottomNav({
   onProfilePress,
   unreadMessageCount = 0,
 }: BottomNavProps) {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const accountRole = profile?.role?.toLowerCase();
+  const [hasActiveGardenerConnection, setHasActiveGardenerConnection] =
+    useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    const checkActiveGardenerConnection = async () => {
+      if (!user?.id || accountRole !== UserRole.TUIN_ZOEKER) {
+        setHasActiveGardenerConnection(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("collaborations")
+        .select("id")
+        .eq("gardener_id", user.id)
+        .eq("status", "active")
+        .limit(1);
+
+      if (!active) return;
+
+      setHasActiveGardenerConnection(!error && (data?.length ?? 0) > 0);
+    };
+
+    checkActiveGardenerConnection();
+
+    return () => {
+      active = false;
+    };
+  }, [accountRole, user?.id]);
+
   const effectiveShortcut =
     accountRole === UserRole.TUIN_EIGENAAR
       ? "createGarden"
-      : accountRole === UserRole.TUIN_ZOEKER_MET_TUIN
+      : accountRole === UserRole.TUIN_ZOEKER_MET_TUIN ||
+          hasActiveGardenerConnection
         ? "todo"
         : shortcut;
 

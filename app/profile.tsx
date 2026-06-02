@@ -3,7 +3,7 @@ import { supabase, toCamelCase } from "@/utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useContext, useEffect, useState } from "react";
-import { Card, Circle, H1, ScrollView, Spinner, Text, XStack, YStack } from "tamagui";
+import { Card, Circle, H1, ScrollView, Text, XStack, YStack } from "tamagui";
 import { Image as ExpoImage } from "@/lib/image";
 import { OnboardingContext } from "@/context/OnboardingContext";
 import { Profile } from "@/context/AuthContext";
@@ -15,7 +15,6 @@ export default function ProfileScreen() {
   const [profile, setProfile] = useState<Profile & { rating?: number | null } | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [savedGardens, setSavedGardens] = useState<Garden[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -23,7 +22,6 @@ export default function ProfileScreen() {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) {
-        setLoading(false);
         return;
       }
 
@@ -35,7 +33,6 @@ export default function ProfileScreen() {
 
       if (profileData) setProfile(toCamelCase<Profile & { rating?: number | null }>(profileData));
 
-      // Fetch reviews for this user
       const { data: reviewData } = await supabase
         .from("reviews")
         .select("*, profiles:reviewer_id(first_name, last_name, profile_image)")
@@ -45,7 +42,6 @@ export default function ProfileScreen() {
       
       if (reviewData) setReviews(toCamelCase<Review[]>(reviewData));
 
-      // Fetch real saved gardens
       const { data: savedData } = await supabase
         .from("saved_gardens")
         .select("garden_id, gardens(id, name, location, image_url, owner:profiles!owner_id(rating))")
@@ -61,7 +57,6 @@ export default function ProfileScreen() {
         })) ?? [];
 
       setSavedGardens(mapped);
-      setLoading(false);
     };
 
     fetchProfile();
@@ -106,7 +101,6 @@ export default function ProfileScreen() {
       activeTab="profile"
       bottomNavShortcut={isOwnerProfile ? "createGarden" : "map"}
     >
-      {/* Header Section with Hero Image */}
       <YStack position="relative" height={190} overflow="hidden">
         <ExpoImage
           source={require("@/assets/images/hero.png")}
@@ -115,9 +109,7 @@ export default function ProfileScreen() {
         />
       </YStack>
 
-      {/* Profile Details (overlapped) */}
       <YStack paddingHorizontal="$5" marginTop={-55} gap="$4">
-        {/* Avatar Circle with active status dot */}
         <YStack position="relative" width={110} height={110}>
           <Circle
             size={110}
@@ -137,7 +129,6 @@ export default function ProfileScreen() {
               contentFit="cover"
             />
           </Circle>
-          {/* Online status indicator */}
           <Circle
             size={22}
             backgroundColor="#C5E8A9"
@@ -149,13 +140,11 @@ export default function ProfileScreen() {
           />
         </YStack>
 
-        {/* Profile Identity */}
         <XStack
           justifyContent="space-between"
           alignItems="flex-end"
           width="100%"
         >
-          {/* Left Column */}
           <YStack gap="$1">
             <XStack alignItems="center" gap="$2">
               <H1 color="$text_dark" fontSize="$6" fontWeight="bold">
@@ -172,7 +161,6 @@ export default function ProfileScreen() {
             </Text>
           </YStack>
 
-          {/* Right Column */}
           <YStack gap="$1.5" alignItems="flex-end">
             <XStack gap="$1" alignItems="center" backgroundColor="rgba(255, 184, 0, 0.1)" paddingHorizontal="$3" paddingVertical="$1" borderRadius="$10" marginBottom="$2">
                <Ionicons name="star" size={16} color="#FFB800" />
@@ -194,7 +182,6 @@ export default function ProfileScreen() {
           </YStack>
         </XStack>
 
-        {/* Bio text from Figma */}
         <Text
           color="$text_dark"
           fontSize="$3"
@@ -205,7 +192,6 @@ export default function ProfileScreen() {
           {bioText}
         </Text>
 
-        {/* Saved Plots Section ("Jouw opgeslagen percelen") */}
         <YStack gap="$3" marginTop="$2">
           <H1 color="$text_dark" fontSize="$5" fontWeight="bold">
             Jouw opgeslagen percelen
@@ -295,7 +281,6 @@ export default function ProfileScreen() {
           )}
         </YStack>
 
-        {/* Reviews Section */}
         <YStack gap="$3" marginTop="$2" paddingBottom="$10">
           <H1 color="$text_dark" fontSize="$5" fontWeight="bold">
             Beoordelingen ({reviews.length})

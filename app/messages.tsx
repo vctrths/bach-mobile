@@ -15,22 +15,27 @@ type ConversationWithPartner = {
   is_online: boolean;
 };
 
+let nextMessagesChannelId = 0;
+
 export default function Messages() {
   const [conversations, setConversations] = useState<ConversationWithPartner[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
-    const messagesChannel = supabase
-      .channel("messages-changes")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "messages" },
-        () => {
-          if (active) fetchConversations();
-        }
-      )
-      .subscribe();
+    const messagesChannel = supabase.channel(
+      `messages-changes:${nextMessagesChannelId++}`,
+    );
+
+    messagesChannel.on(
+      "postgres_changes",
+      { event: "INSERT", schema: "public", table: "messages" },
+      () => {
+        if (active) fetchConversations();
+      },
+    );
+
+    messagesChannel.subscribe();
 
     const handleResume = () => {
       if (
