@@ -1,6 +1,7 @@
-const CACHE_NAME = "groen-v5";
+const CACHE_NAME = "groen-v6";
 const APP_SHELL_ASSETS = [
   "/manifest.json",
+  "/apple-touch-icon.png",
   "/icons/icon-192x192.png",
   "/icons/icon-512x512.png",
 ];
@@ -15,6 +16,7 @@ function isStaticAsset(url) {
     (url.pathname.startsWith("/_expo/static/") ||
       url.pathname.startsWith("/fonts/") ||
       url.pathname.startsWith("/icons/") ||
+      url.pathname === "/apple-touch-icon.png" ||
       url.pathname === "/favicon.ico" ||
       url.pathname === "/manifest.json")
   );
