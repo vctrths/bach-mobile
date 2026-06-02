@@ -4,10 +4,11 @@ import WeekdayPicker from "@/components/ui/WeekdayPicker";
 import { useAlerts } from "@/context/AlertContext";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/utils/supabase";
+import { getGardenLookupId } from "@/utils/demoGardens";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Platform } from "react-native";
 import { Select, Text, TextArea, XStack, YStack } from "tamagui";
 import { z } from "zod";
@@ -36,10 +37,18 @@ const requestSchema = z.object({
       return val >= today;
     },
     {
-      message: "Startdatum kan niet in het verleden liggen",
+      message: "Kies een startdatum vandaag of later",
     },
   ),
 });
+
+function parseInputDate(value: string) {
+  const [year, month, day] = value.split("-").map(Number);
+  if (!year || !month || !day) return null;
+  const date = new Date(year, month - 1, day);
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
 
 function formatDateForSupabase(date: Date) {
   return `${date.getFullYear()}-${(date.getMonth() + 1)
@@ -70,7 +79,8 @@ function withTimeout<T>(
 
 export default function GardenRequestScreen() {
   const { id } = useLocalSearchParams();
-  const gardenId = Array.isArray(id) ? id[0] : id;
+  const routeGardenId = Array.isArray(id) ? id[0] : id;
+  const gardenId = getGardenLookupId(routeGardenId);
   const isWeb = Platform.OS === "web";
   const { alert } = useAlerts();
   const { loading: authLoading, profile } = useAuth();
@@ -86,6 +96,7 @@ export default function GardenRequestScreen() {
   const [hasExistingRequest, setHasExistingRequest] = useState(false);
   const [checkingRequest, setCheckingRequest] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const webDateInputRef = useRef<HTMLInputElement | null>(null);
 
   const minDate = new Date();
   minDate.setHours(0, 0, 0, 0);
@@ -224,11 +235,15 @@ export default function GardenRequestScreen() {
       return;
     }
 
+    const submittedStartDate =
+      startDate ??
+      (isWeb ? parseInputDate(webDateInputRef.current?.value ?? "") : null);
+
     const result = requestSchema.safeParse({
       motivation,
       collaborationType: collabType,
       days: selectedDays,
-      startDate: startDate || undefined,
+      startDate: submittedStartDate || undefined,
     });
 
     if (!result.success) {
@@ -265,7 +280,9 @@ export default function GardenRequestScreen() {
           motivation,
           collaboration_type: collabType,
           days: selectedDays,
-          start_date: startDate ? formatDateForSupabase(startDate) : null,
+          start_date: submittedStartDate
+            ? formatDateForSupabase(submittedStartDate)
+            : null,
         }),
       );
 
@@ -523,6 +540,7 @@ export default function GardenRequestScreen() {
                 gap={10}
               >
                 <input
+                  ref={webDateInputRef}
                   type="date"
                   min={minDateValue}
                   value={startDateValue}
@@ -536,8 +554,8 @@ export default function GardenRequestScreen() {
                       return;
                     }
 
-                    const date = new Date(e.target.value);
-                    if (isNaN(date.getTime())) {
+                    const date = parseInputDate(e.target.value);
+                    if (!date) {
                       return;
                     }
 

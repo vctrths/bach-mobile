@@ -15,7 +15,7 @@ export default function SearchScreen() {
   const { profile } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Garden[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const fetchGardens = useCallback(async (query: string) => {
     setLoading(true);

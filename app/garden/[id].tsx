@@ -11,9 +11,11 @@ import { supabase, toCamelCase } from "@/utils/supabase";
 import { type Garden } from "@/types/garden";
 import MiniMap from "../../components/ui/MiniMap";
 import { APPLIANCE_MAP } from "@/components/ui/ApplianceBadges";
+import { getDemoGarden, getGardenLookupId } from "@/utils/demoGardens";
 
 export default function GardenDetailsScreen() {
   const { id } = useLocalSearchParams();
+  const gardenId = Array.isArray(id) ? id[0] : id;
   const [garden, setGarden] = useState<Garden | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedAppliance, setSelectedAppliance] = useState<string | null>(null);
@@ -24,28 +26,36 @@ export default function GardenDetailsScreen() {
 
   useEffect(() => {
     async function fetchData() {
+      const lookupId = getGardenLookupId(gardenId);
+      if (!lookupId) return;
+
       try {
         const [gardenRes] = await Promise.all([
           supabase
             .from("gardens")
             .select("*, owner:profiles!owner_id(first_name, last_name, profile_image, description, rating)")
-            .eq("id", id as string)
+            .eq("id", lookupId)
             .single()
         ]);
 
         if (gardenRes.data) {
           const gardenData = toCamelCase<Garden>(gardenRes.data);
           setGarden(gardenData);
+          return;
         }
       } catch (err) {
         console.error("Error fetching data:", err);
       } finally {
+        const demoGarden = getDemoGarden(gardenId);
+        if (demoGarden) {
+          setGarden(demoGarden);
+        }
         setLoading(false);
       }
     }
 
-    if (id) fetchData();
-  }, [id]);
+    if (gardenId) fetchData();
+  }, [gardenId]);
 
   if (loading) {
     return (
@@ -266,7 +276,7 @@ export default function GardenDetailsScreen() {
         <Button
           label="Verstuur aanvraag"
           variant="primary"
-          onPress={() => router.push(`/garden/${id}/request`)}
+          onPress={() => router.push(`/garden/${garden.id}/request`)}
         />
       </YStack>
     </PageContainer>
