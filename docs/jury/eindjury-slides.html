@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Groene Vingers - Eindjury kapstok</title>
+    <style>
+      :root {
+        --green-50: #f5fff3;
+        --green-100: #eaf0d8;
+        --green-200: #d4e1ae;
+        --green-500: #698d14;
+        --green-600: #173300;
+        --green-700: #172211;
+        --yellow-300: #ffedb3;
+        --yellow-600: #c9a52e;
+        --surface: #ffffff;
+        --ink: #172211;
+        --muted: #61705b;
+        --line: #d4e1ae;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Inter, Arial, sans-serif;
+        background: #edf3e6;
+        color: var(--ink);
+      }
+
+      main {
+        display: grid;
+        gap: 28px;
+        padding: 32px;
+      }
+
+      section {
+        width: min(1280px, calc(100vw - 64px));
+        min-height: 720px;
+        margin: 0 auto;
+        padding: 58px 64px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        overflow: hidden;
+        position: relative;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        max-width: 900px;
+        font-size: 64px;
+        line-height: 1.02;
+        font-weight: 900;
+        letter-spacing: 0;
+      }
+
+      h2 {
+        max-width: 920px;
+        font-size: 44px;
+        line-height: 1.08;
+        font-weight: 900;
+        letter-spacing: 0;
+      }
+
+      h3 {
+        font-size: 24px;
+        line-height: 1.2;
+        font-weight: 800;
+      }
+
+      p,
+      li {
+        font-size: 24px;
+        line-height: 1.35;
+      }
+
+      ul {
+        margin: 24px 0 0;
+        padding-left: 26px;
+      }
+
+      li + li {
+        margin-top: 12px;
+      }
+
+      .kicker {
+        color: var(--green-500);
+        font-size: 18px;
+        font-weight: 800;
+        text-transform: uppercase;
+        margin-bottom: 18px;
+      }
+
+      .subtitle {
+        max-width: 760px;
+        margin-top: 24px;
+        color: var(--muted);
+        font-size: 28px;
+      }
+
+      .footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: var(--muted);
+        font-size: 16px;
+        padding-top: 24px;
+      }
+
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 42px;
+        align-items: center;
+      }
+
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+      }
+
+      .card {
+        min-height: 150px;
+        padding: 24px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--green-50);
+      }
+
+      .card p {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 20px;
+      }
+
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 14px;
+        margin-top: 38px;
+      }
+
+      .step {
+        min-height: 190px;
+        padding: 20px;
+        background: var(--green-100);
+        border: 1px solid var(--green-200);
+        border-radius: 8px;
+      }
+
+      .step strong {
+        display: block;
+        margin-bottom: 18px;
+        color: var(--green-600);
+        font-size: 38px;
+      }
+
+      .step span {
+        display: block;
+        font-size: 21px;
+        line-height: 1.25;
+        font-weight: 700;
+      }
+
+      .swatches {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 14px;
+        margin-top: 38px;
+      }
+
+      .swatch {
+        min-height: 160px;
+        border-radius: 8px;
+        border: 1px solid rgba(23, 34, 17, 0.14);
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        font-weight: 800;
+      }
+
+      .swatch small {
+        display: block;
+        margin-top: 6px;
+        font-size: 15px;
+        font-weight: 600;
+      }
+
+      .overview {
+        width: 100%;
+        max-height: 500px;
+        object-fit: contain;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #f8faf5;
+      }
+
+      .phone-list {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+      }
+
+      .phone {
+        min-height: 430px;
+        border-radius: 32px;
+        background: linear-gradient(180deg, #ffffff 0%, #f5fff3 100%);
+        border: 8px solid var(--green-700);
+        padding: 28px 18px;
+        box-shadow: 0 18px 40px rgba(23, 34, 17, 0.08);
+      }
+
+      .phone .bar {
+        width: 96px;
+        height: 8px;
+        border-radius: 100px;
+        background: var(--green-200);
+        margin: 0 auto 32px;
+      }
+
+      .phone h3 {
+        font-size: 22px;
+      }
+
+      .phone p {
+        margin-top: 12px;
+        font-size: 18px;
+        color: var(--muted);
+      }
+
+      .quote {
+        max-width: 980px;
+        font-size: 44px;
+        line-height: 1.12;
+        font-weight: 900;
+      }
+
+      .note {
+        margin-top: 28px;
+        padding: 22px 24px;
+        background: var(--yellow-300);
+        border-left: 8px solid var(--yellow-600);
+        border-radius: 8px;
+        color: var(--ink);
+      }
+
+      @media print {
+        body {
+          background: white;
+        }
+
+        main {
+          display: block;
+          padding: 0;
+        }
+
+        section {
+          width: 100vw;
+          min-height: 100vh;
+          border: 0;
+          border-radius: 0;
+          page-break-after: always;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section>
+        <div>
+          <div class="kicker">Eindjury juni - design demo</div>
+          <h1>Groene Vingers</h1>
+          <p class="subtitle">Van ongebruikte tuin naar gedeelde groene ruimte, met een MVP dat focust op vertrouwen, duidelijke afspraken en opvolging.</p>
+        </div>
+        <div></div>
+        <div class="footer">
+          <span>Bachelorproef individueel</span>
+          <span>Leerdoelen 5 en 9</span>
+        </div>
+      </section>
+
+      <section>
+        <div>
+          <div class="kicker">Probleemruimte</div>
+          <h2>Twee doelgroepen, twee soorten onzekerheid.</h2>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <h3>Tuinzoeker</h3>
+            <p>Wil tuinieren, maar mist ruimte, toegang en zekerheid over afspraken.</p>
+          </div>
+          <div class="card">
+            <h3>Tuineigenaar</h3>
+            <p>Heeft ruimte, maar wil controle, betrouwbaarheid en overzicht.</p>
+          </div>
+        </div>
+        <div class="footer">
+          <span>Kapstok: benoem de menselijke spanning achter de interface</span>
+          <span>02</span>
+        </div>
+      </section>
+
+      <section>
+        <div>
+          <div class="kicker">MVP-keuze</div>
+          <h2>De kernwaarde zit in de eerste betrouwbare samenwerking.</h2>
+        </div>
+        <div class="flow">
+          <div class="step"><strong>1</strong><span>Tuin ontdekken</span></div>
+          <div class="step"><strong>2</strong><span>Details beoordelen</span></div>
+          <div class="step"><strong>3</strong><span>Aanvraag sturen</span></div>
+          <div class="step"><strong>4</strong><span>Eigenaar beslist</span></div>
+          <div class="step"><strong>5</strong><span>Chat en opvolging</span></div>
+        </div>
+        <div class="footer">
+          <span>Leerdoel 5: user stories, journey en interactiemodel</span>
+          <span>03</span>
+        </div>
+      </section>
+
+      <section>
+        <div>
+          <div class="kicker">Figma prototype</div>
+          <h2>High-fidelity prototype met rolgebaseerde flows.</h2>
+        </div>
+        <div class="two-col">
+          <img class="overview" src="assets/high-fidelity-overview.png" alt="Figma high fidelity overview" />
+          <ul>
+            <li>Tuineigenaar: dashboard, planning, meldingen, profiel en instellingen.</li>
+            <li>Tuinzoeker: ontdekken, zoeken, detail, aanvraag en chat.</li>
+            <li>Componenten: topnav, botnav, perceelcards, buttons en status indicators.</li>
+            <li>Design tokens houden kleur en states consistent.</li>
+          </ul>
+        </div>
+        <div class="footer">
+          <span>Demo cue: open Figma preview vanaf de core journey</span>
+          <span>04</span>
+        </div>
+      </section>
+
+      <section>
+        <div>
+          <div class="kicker">Design system</div>
+          <h2>Een rustig palet dat vertrouwen en actie onderscheidt.</h2>
+        </div>
+        <div class="swatches">
+          <div class="swatch" style="background:#f5fff3">green-50<small>#F5FFF3</small></div>
+          <div class="swatch" style="background:#eaf0d8">green-100<small>#EAF0D8</small></div>
+          <div class="swatch" style="background:#d4e1ae">green-200<small>#D4E1AE</small></div>
+          <div class="swatch" style="background:#698d14;color:white">green-500<small>#698D14</small></div>
+          <div class="swatch" style="background:#173300;color:white">green-600<small>#173300</small></div>
+          <div class="swatch" style="background:#172211;color:white">green-700<small>#172211</small></div>
+        </div>
+        <div class="note">
+          Spreeklijn: zachte groenen ondersteunen rust en scanbaarheid; donker groen markeert primaire acties; geel en rood blijven semantisch.
+        </div>
+        <div class="footer">
+          <span>Leerdoel 5: design patterns en consistente componenten</span>
+          <span>05</span>
+        </div>
+      </section>
+
+      <section>
+        <div>
+          <div class="kicker">Interacties</div>
+          <h2>Het prototype simuleert beslissingen, niet alleen schermwissels.</h2>
+        </div>
+        <div class="phone-list">
+          <div class="phone"><div class="bar"></div><h3>Ontdekken</h3><p>Cards maken tuinen visueel vergelijkbaar via foto, locatie, rating en voorzieningen.</p></div>
+          <div class="phone"><div class="bar"></div><h3>Beoordelen</h3><p>Detailpagina bundelt praktische info, beschrijving, locatie en vertrouwen.</p></div>
+          <div class="phone"><div class="bar"></div><h3>Aanvragen</h3><p>Motivatie, dagen en startdatum zetten interesse om in duidelijke afspraken.</p></div>
+          <div class="phone"><div class="bar"></div><h3>Opvolgen</h3><p>Owner dashboard, notificaties en chat maken de samenwerking beheersbaar.</p></div>
+        </div>
+        <div class="footer">
+          <span>Gebruik deze slide vlak voor of na je live demo</span>
+          <span>06</span>
+        </div>
+      </section>
+
+      <section>
+        <div>
+          <div class="kicker">Sinds maart</div>
+          <h2>Licht aangescherpt, met behoud van de oorspronkelijke Figma.</h2>
+        </div>
+        <div class="cards">
+          <div class="card"><h3>Componentconsistentie</h3><p>Herbruikbare navigatie, buttons, cards en profiel/statuscomponenten.</p></div>
+          <div class="card"><h3>Rolflows</h3><p>Duidelijker onderscheid tussen tuinzoeker, tuineigenaar en actieve samenwerking.</p></div>
+          <div class="card"><h3>Aanvraagstructuur</h3><p>Het formulier stuurt aan op concrete verwachtingen en minder losse communicatie.</p></div>
+          <div class="card"><h3>Opvolging</h3><p>Meldingen, planning en chat ondersteunen de samenwerking na de aanvraag.</p></div>
+        </div>
+        <div class="footer">
+          <span>Pas deze slide aan met jouw exacte wijzigingen</span>
+          <span>07</span>
+        </div>
+      </section>
+
+      <section>
+        <div>
+          <div class="kicker">Live demo</div>
+          <h2>Toon alleen de kernjourney.</h2>
+        </div>
+        <div>
+          <p class="quote">"Ik toon hoe een tuinzoeker van interesse naar een concrete aanvraag gaat, en hoe de eigenaar daarna controle en overzicht behoudt."</p>
+          <ul>
+            <li>Dashboard: ontdek tuinen in de buurt.</li>
+            <li>Detail: bouw vertrouwen op.</li>
+            <li>Aanvraag: maak verwachtingen expliciet.</li>
+            <li>Owner view: beslis en volg op.</li>
+          </ul>
+        </div>
+        <div class="footer">
+          <span>Oefen dit op 4 minuten</span>
+          <span>08</span>
+        </div>
+      </section>
+
+      <section>
+        <div>
+          <div class="kicker">Development jury brug</div>
+          <h2>Dezelfde journey bestaat ook technisch in de app.</h2>
+        </div>
+        <div class="cards">
+          <div class="card"><h3>Expo Router</h3><p>Dynamische routes zoals garden detail, aanvraag en chat.</p></div>
+          <div class="card"><h3>Supabase</h3><p>Auth, gardens, requests, conversations en messages.</p></div>
+          <div class="card"><h3>Zod</h3><p>Validatie voor motivatie, samenwerkingstype, dagen en startdatum.</p></div>
+          <div class="card"><h3>Tamagui</h3><p>Design system vertaald naar herbruikbare UI-componenten.</p></div>
+        </div>
+        <div class="footer">
+          <span>Gebruik dit als brug tussen design en development verhaal</span>
+          <span>09</span>
+        </div>
+      </section>
+
+      <section>
+        <div>
+          <div class="kicker">Afsluiter</div>
+          <h2>Groene Vingers bewijst het kleinste waardevolle moment.</h2>
+        </div>
+        <div>
+          <p class="quote">Niet zoveel mogelijk features, maar een betrouwbare eerste samenwerking.</p>
+          <p class="subtitle">Dat is de reden waarom het MVP focust op ontdekken, aanvragen, beslissen en opvolgen.</p>
+        </div>
+        <div class="footer">
+          <span>Leerdoel 9: helder, afgestemd en overtuigend presenteren</span>
+          <span>10</span>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
